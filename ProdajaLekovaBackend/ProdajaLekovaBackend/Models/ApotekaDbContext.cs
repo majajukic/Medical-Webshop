@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ProdajaLekovaBackend.Models
 {
@@ -26,6 +25,7 @@ namespace ProdajaLekovaBackend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<Apoteka>(entity =>
             {
                 entity.ToTable("Apoteka");

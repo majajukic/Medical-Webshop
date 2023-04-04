@@ -2,12 +2,15 @@
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using ProdajaLekovaBackend.Configurations;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Implementations;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using ProdajaLekovaBackend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,13 +20,32 @@ builder.Services.AddDbContext<ApotekaDbContext>(options =>
         builder.Configuration
             .GetConnectionString("DefaultConnection")));
 
+// JWT token authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSection = builder.Configuration.GetSection("Jwt");
+        var issuer = jwtSection.GetValue<string>("Issuer");
+        var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+        };
+    });
+
 //AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperInitializer));
 
 //Interfeces
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthManager, AuthManager>();
 
-//Controllers i ValidationContext
+//Controllers and ValidationContext
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
     .AddXmlDataContractSerializerFormatters()
@@ -65,6 +87,8 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
     });
 
 builder.Services.AddEndpointsApiExplorer();
+
+//Swagger
 builder.Services.AddSwaggerGen(setupAction =>
 {
     setupAction.SwaggerDoc("ProdajaLekovaOpenApiSpecification",
@@ -100,6 +124,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

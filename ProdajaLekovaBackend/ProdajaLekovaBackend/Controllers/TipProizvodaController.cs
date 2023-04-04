@@ -83,9 +83,6 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine(ex.Message);
-
                 return StatusCode(500, ex.Message);
             }
         }
@@ -113,9 +110,6 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine(ex.Message);
-
                 return StatusCode(500, ex.Message);
             }
         }
@@ -140,9 +134,6 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception ex)
             {
-
-                Console.WriteLine(ex.Message);
-
                 return StatusCode(500, ex.Message);
             }
         }

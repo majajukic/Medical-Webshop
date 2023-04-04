@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProdajaLekovaBackend.Models
 {
-    public partial class Korisnik
+    public partial class Korisnik 
     {
         public Korisnik()
         {
