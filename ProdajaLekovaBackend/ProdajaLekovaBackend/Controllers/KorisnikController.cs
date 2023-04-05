@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
-using System.Data;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -92,7 +91,7 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Azurira korisnika na osnovu id-ja.
+        /// Azuriranje korisnickih naloga.
         /// </summary>
         [Authorize(Roles = "Admin, Kupac")]
         [HttpPut]
@@ -120,7 +119,7 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Brise korisnika na osnovu id-ja.
+        /// Brisanje korisnickih naloga.
         /// </summary>
         [Authorize(Roles = "Admin, Kupac")]
         [HttpDelete("{id:int}")]

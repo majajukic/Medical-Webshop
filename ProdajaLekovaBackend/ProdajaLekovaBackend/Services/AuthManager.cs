@@ -35,7 +35,7 @@ namespace ProdajaLekovaBackend.Services
                 issuer: jwtSettings.GetSection("Issuer").Value,
                 audience: jwtSettings.GetSection("Audience").Value,
                 claims: claims,
-                expires: DateTime.UtcNow.AddSeconds(50),
+                expires: DateTime.UtcNow.AddMinutes(10),
                 signingCredentials: signingCredentials
                 );
 
@@ -50,7 +50,11 @@ namespace ProdajaLekovaBackend.Services
 
             var role = korisnik.TipKorisnika;
 
+            var korisnikId = korisnik.KorisnikId;
+
             claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, korisnikId.ToString()));
 
             return claims;
         }
