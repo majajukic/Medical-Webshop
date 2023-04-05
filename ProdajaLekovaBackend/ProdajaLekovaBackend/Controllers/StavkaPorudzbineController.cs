@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.StavkaPorudzbineDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
+using System.Data;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -23,6 +25,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve stavke porudzbine jedne porudzbine.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpGet("stavkeInPorudzbina")]
         public async Task<IActionResult> GetStavkeByPorudzbina([FromQuery] RequestParams requestParams, [FromQuery] int porudzbinaId)
         {
@@ -45,8 +48,9 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Vraća jednu stavku porudzbine na sonovu id-ja.
+        /// Vraća jednu stavku porudzbine na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpGet("{id:int}", Name = "GetStavkaPorudzbine")]
         public async Task<IActionResult> GetStavkaPorudzbine(int id)
         {
@@ -69,6 +73,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Dodaje novu stavku u postojecu porudzbinu. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")] //ovaj i slicni endpointi ce se mozda menjati ako bude implementirano da i neulogovan korisnik moze da barata korpom.
         [HttpPost]
         public async Task<IActionResult> AddStavkaToPorudzbina([FromBody] StavkaCreateDto stavkaDTO)
         {
@@ -92,6 +97,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira stavku porudzbine. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpPut]
         public async Task<IActionResult> UpdateStavkaPorudzbine([FromBody] StavkaUpdateDto stavkaDTO)
         {
@@ -119,6 +125,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise stavku porudzbine na osnovu id-ja. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStavkaPorudzbine(int id)
         {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.TipProizvodaDTOs;
@@ -23,6 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve tipove proizvoda.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetTipoviProizvoda()
         {
@@ -45,6 +47,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jedan tip proizvoda na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id:int}", Name = "GetTipProizvoda")]
         public async Task<IActionResult> GetTipProizvoda(int id)
         {
@@ -67,6 +70,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Kreira tip proizvoda.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateTipProizvoda([FromBody] TipProizvodaCreateDto tipProizvodaDTO)
         {
@@ -90,6 +94,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira tip proizvoda na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateTipProizvoda([FromBody] TipProizvodaUpdateDto tipProizvodaDTO)
         {
@@ -117,6 +122,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise tip proizvoda na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteTipProizvoda(int id)
         {

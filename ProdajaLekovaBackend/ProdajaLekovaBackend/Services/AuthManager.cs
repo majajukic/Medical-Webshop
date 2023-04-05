@@ -33,8 +33,9 @@ namespace ProdajaLekovaBackend.Services
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings.GetSection("Issuer").Value,
+                audience: jwtSettings.GetSection("Audience").Value,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
+                expires: DateTime.UtcNow.AddSeconds(50),
                 signingCredentials: signingCredentials
                 );
 
@@ -54,7 +55,7 @@ namespace ProdajaLekovaBackend.Services
             return claims;
         }
 
-        private SigningCredentials GetSigningCredentials()
+        private static SigningCredentials GetSigningCredentials()
         {
             var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
 

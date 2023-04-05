@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.PorudzbinaDTOs;
@@ -24,6 +25,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve porudzbine.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetPorudzbine([FromQuery] RequestParams requestParams)
         {
@@ -47,6 +49,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća placene porudzbine.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet("placene")]
         public async Task<IActionResult> GetPayedPorudzbine([FromQuery] RequestParams requestParams)
         {
@@ -71,6 +74,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća neplacene porudzbine.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet("neplacene")]
         public async Task<IActionResult> GetNonPayedPorudzbine([FromQuery] RequestParams requestParams)
         {
@@ -95,6 +99,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve porudzbine jednog kupca.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpGet("porudzbineByKupac")]
         public async Task<IActionResult> GetPorudzbineByKupac([FromQuery] RequestParams requestParams, [FromQuery] int kupacId)
         {
@@ -119,6 +124,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jednu porudzbinu na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpGet("{id:int}", Name = "GetPorudzbina")]
         public async Task<IActionResult> GetPorudzbina(int id)
         {
@@ -142,6 +148,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Kreira porudzbinu zajedno sa prvom stavkom koja se dodaje u korpu.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpPost]
         public async Task<IActionResult> CreatePorudzbinaWithStavka([FromBody] JoinedCreateDto joinedDataDTO)
         {
@@ -201,6 +208,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira porudzbinu nakon uplate. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")] //proveri ovo!
         [HttpPut]
         public async Task<IActionResult> UpdatePorudzbina([FromBody] PorudzbinaUpdateDto porudzbinaDTO)
         {
@@ -230,6 +238,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise porudzbinu i sve njene stavke na osnovu id-ja porudzbine.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeletePorudzbina(int id)
         {

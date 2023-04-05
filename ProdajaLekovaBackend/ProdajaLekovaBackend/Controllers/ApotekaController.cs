@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ApotekaDTOs;
@@ -23,6 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetApoteke()
         {
@@ -45,6 +47,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jednu apoteku na sonovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id:int}", Name ="GetApoteka")]
         public async Task<IActionResult> GetApoteka(int id)
         {
@@ -67,6 +70,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Kreira apoteku.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateApoteka([FromBody] ApotekaCreateDto apotekaDTO)
         {
@@ -90,6 +94,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira apoteku na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateApoteka([FromBody] ApotekaUpdateDto apotekaDTO)
         {
@@ -117,6 +122,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise apoteku na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteApoteka(int id)
         {

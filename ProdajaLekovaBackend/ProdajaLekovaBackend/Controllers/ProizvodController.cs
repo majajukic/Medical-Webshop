@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ProizvodDTOs;
@@ -23,6 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve proizvode (naziv i proizvodjaca).
         /// </summary>
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProizvodi()
         {
@@ -46,6 +48,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jedan proizvod na osnovu id-ja (naziv i proizvodjaca).
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("{id:int}", Name = "GetProizvod")]
         public async Task<IActionResult> GetProizvod(int id)
         {
@@ -68,6 +71,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Kreiranje proizvoda koji ce nakon toga biti dodat u konkretnu apoteku. 
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProizvod([FromBody] ProizvodCreateDto proizvodDTO)
         {
@@ -92,6 +96,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azuriranje naziva proizvod, tipa i proizvodjaca za sve apoteke na osnovu id-ja. 
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateProizvod([FromBody] ProizvodUpdateDto proizvodDTO)
         {
@@ -119,6 +124,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise proizvod iz svih apoteka u kojima se nalazi na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProizvod(int id)
         {

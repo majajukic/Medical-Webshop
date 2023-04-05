@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
+using System.Data;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -22,6 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve korisnike.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetKorisnici([FromQuery] RequestParams requestParams)
         {
@@ -44,6 +47,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jednog korisnika na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpGet("{id:int}", Name = "GetKorisnik")]
         public async Task<IActionResult> GetKorisnik(int id)
         {
@@ -66,6 +70,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Kreira novog korisnika.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateKorisnik([FromBody] KorisnikCreateDto korisnikDTO)
         {
@@ -89,6 +94,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira korisnika na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpPut]
         public async Task<IActionResult> UpdateKorisnik([FromBody] KorisnikUpdateDto korisnikDTO)
         {
@@ -116,6 +122,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise korisnika na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteKorisnik(int id)
         {

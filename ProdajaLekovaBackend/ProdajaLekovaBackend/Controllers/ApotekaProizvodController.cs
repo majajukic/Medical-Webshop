@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs;
@@ -23,6 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve proizvode iz svih apoteka, ukoliko nije prosledjen id konkretne apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetApotekaProizvodi([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId, [FromQuery] string? searchTerm)
         {
@@ -70,6 +72,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve proizvode svih apoteka na osnovu kategorije, ukoliko nije prosledjen id konkretne apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("byTipProizvoda")]
         public async Task<IActionResult> GetApotekaProizvodiByTipProizvoda([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId, [FromQuery] int tipProizvodaId)
         {
@@ -113,6 +116,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve proizvode svih apoteka koji su na popustu, ukoliko nije prosledjen id konkretne apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("naPopustu")]
         public async Task<IActionResult> GetApotekaProizvodiNaPopustu([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
@@ -156,6 +160,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Sortira sve proizvode svih apoteka po ceni rastuce, ukoliko nije prosledjen id konkretne apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("byCenaRastuce")]
         public async Task<IActionResult> GetApotekaProizvodiByCenaAscending([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
@@ -198,6 +203,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Sortira sve proizvode svih apoteka po ceni opadajuce, ukoliko nije prosledjen id konkretne apoteke.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("byCenaOpadajuce")]
         public async Task<IActionResult> GetApotekaProizvodiByCenaDescending([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
@@ -242,6 +248,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jedan proizvod konkretne apoteke na osnovu id-ja.
         /// </summary>
+        [AllowAnonymous]
         [HttpGet("{id:int}", Name = "GetApotekaProizvod")]
         public async Task<IActionResult> GetApotekaProizvod(int id)
         {
@@ -264,6 +271,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Dodavanje postojeceg proizvoda u odredjenu apoteku. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateApotekaProizvod([FromBody] ApotekaProizvodCreateDto apotekaProizvodDTO)
         {
@@ -288,6 +296,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azuriranje atributa osobenih za proizvod u okviru odredjene apoteke na osnovu id-ja. AKTIVIRA TRIGER
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateApotekaProizvod([FromBody] ApotekaProizvodUpdateDto apotekaProizvodDTO)
         {
@@ -316,6 +325,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Brise proizvod iz konkretne apoteke na osnovu id-ja.
         /// </summary>
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteApotekaProizvod(int id)
         {

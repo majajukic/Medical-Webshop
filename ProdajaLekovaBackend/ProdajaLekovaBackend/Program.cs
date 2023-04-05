@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProdajaLekovaBackend.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,15 +27,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         var jwtSection = builder.Configuration.GetSection("Jwt");
         var issuer = jwtSection.GetValue<string>("Issuer");
+        var audience = jwtSection.GetValue<string>("Audience");
         var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ValidIssuer = issuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+            ClockSkew = TimeSpan.Zero
         };
     });
 
@@ -88,11 +93,40 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-//Swagger
+//Swagger configuration with JWT
 builder.Services.AddSwaggerGen(setupAction =>
 {
+    setupAction.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"JWT autorizacija pomocu Bearer sheme. 
+                        Unesite 'Bearer' [razmak] i potom token.
+                        Primer: 'Bearer 12345abcdef'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference()
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "0auth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+
     setupAction.SwaggerDoc("ProdajaLekovaOpenApiSpecification",
-            new Microsoft.OpenApi.Models.OpenApiInfo()
+            new OpenApiInfo()
             {
                 Title = "Prodaja lekova - Web shop",
                 Version = "1",
