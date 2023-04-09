@@ -77,7 +77,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 if (!await _authManager.ValidateKorisnik(korisnikDTO)) return Unauthorized("Nalog ne postoji ili su kredencijali pogresni");
 
-                return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) /*,RefreshToken = await _authManager.CreateRefreshToken()*/ });
+                return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) });
             }
             catch (Exception ex)
             {

@@ -35,7 +35,7 @@ namespace ProdajaLekovaBackend.Services
                 issuer: jwtSettings.GetSection("Issuer").Value,
                 audience: jwtSettings.GetSection("Audience").Value,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(10),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: signingCredentials
                 );
 

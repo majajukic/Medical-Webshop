@@ -107,6 +107,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, 
                     q => q.KorisnikId == kupacId, 
+                    include: q => q.Include(x => x.StavkaPorudzbine).ThenInclude(y => y.ApotekaProizvod).ThenInclude(z => z.Proizvod),
                     orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
 
                 if (porudzbine == null) return NoContent();

@@ -33,7 +33,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var stavke = await _unitOfWork.StavkaPorudzbine.GetAllPagedListAsync(requestParams, 
                     q => q.PorudzbinaId == porudzbinaId,
-                    include: q => q.Include(x => x.ApotekaProizvod.Proizvod.TipProizvoda).Include(x => x.ApotekaProizvod.Apoteka).Include(x => x.Porudzbina));
+                    include: q => q.Include(x => x.ApotekaProizvod.Proizvod.TipProizvoda).Include(x => x.ApotekaProizvod.Apoteka));
 
                 if (stavke == null) return NoContent();
 
@@ -56,7 +56,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
+                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id, include: q => q.Include(x => x.ApotekaProizvod.Proizvod));
 
                 if (stavka == null) return NotFound();
 
