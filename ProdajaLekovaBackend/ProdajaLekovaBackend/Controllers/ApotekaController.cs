@@ -30,7 +30,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                var apoteke = await _unitOfWork.Apoteka.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivApoteke));//kako bi se apoteke izlistale od A-Z
+                var apoteke = await _unitOfWork.Apoteka.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivApoteke));
 
                 if (apoteke == null) return NoContent();
 
@@ -38,9 +38,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(results);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -55,15 +55,15 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
 
-                if(apoteka == null) return NotFound();
+                if(apoteka == null) return NotFound("Apoteka nije pronadjena.");
 
                 var result = _mapper.Map<ApotekaDto>(apoteka);
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -85,9 +85,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return CreatedAtRoute("GetApoteka", new { id = apoteka.ApotekaId }, apoteka);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -103,7 +103,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == apotekaDTO.ApotekaId);
 
-                if (apoteka == null) return NotFound();
+                if (apoteka == null) return NotFound("Apoteka nije pronadjena.");
 
                 _mapper.Map(apotekaDTO, apoteka);
 
@@ -111,11 +111,11 @@ namespace ProdajaLekovaBackend.Controllers
 
                 await _unitOfWork.Save();
 
-                return Ok();
+                return Ok("Uspesna izmena");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -130,7 +130,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
 
-                if (apoteka== null) return NotFound();
+                if (apoteka== null) return NotFound("Apoteka nije pronadjena.");
 
                 await _unitOfWork.Apoteka.DeleteAsync(id);
 
@@ -138,9 +138,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
     }

@@ -7,6 +7,7 @@ namespace ProdajaLekovaBackend.DTOs.PorudzbinaDTOs
         [Required(ErrorMessage = "Obavezno je uneti id porudzbine.")]
         public int PorudzbinaId { get; set; }
         public DateTime? DatumPlacanja { get; set; }
+        public bool? PlacenaPorudzbina { get; set; }
         public string? UplataId { get; set; }
 
     }

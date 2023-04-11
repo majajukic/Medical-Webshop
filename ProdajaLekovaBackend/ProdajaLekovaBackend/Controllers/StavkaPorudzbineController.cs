@@ -25,14 +25,18 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve stavke porudzbine jedne porudzbine.
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
-        [HttpGet("stavkeInPorudzbina")]
-        public async Task<IActionResult> GetStavkeByPorudzbina([FromQuery] RequestParams requestParams, [FromQuery] int porudzbinaId)
+        /*[Authorize(Roles = "Kupac")]
+        [HttpGet("stavkeInPorudzbina/{porudzbinaId:int}")]
+        public async Task<IActionResult> GetStavkeByPorudzbina([FromQuery] RequestParams requestParams, int porudzbinaId, [FromQuery] int kupacId)
         {
             try
             {
+                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
+
+                if (korisnikId != kupacId) return Unauthorized("Nemate prava na ovu akciju.");
+
                 var stavke = await _unitOfWork.StavkaPorudzbine.GetAllPagedListAsync(requestParams, 
-                    q => q.PorudzbinaId == porudzbinaId,
+                    q => q.PorudzbinaId == porudzbinaId && q.Porudzbina.KorisnikId == kupacId,
                     include: q => q.Include(x => x.ApotekaProizvod.Proizvod.TipProizvoda).Include(x => x.ApotekaProizvod.Apoteka));
 
                 if (stavke == null) return NoContent();
@@ -41,22 +45,22 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(results);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serveska greska.");
             }
-        }
+        }*/
 
         /// <summary>
         /// Vraća jednu stavku porudzbine na osnovu id-ja.
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
+        [Authorize(Roles = "Kupac")]
         [HttpGet("{id:int}", Name = "GetStavkaPorudzbine")]
         public async Task<IActionResult> GetStavkaPorudzbine(int id)
         {
             try
             {
-                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id, include: q => q.Include(x => x.ApotekaProizvod.Proizvod));
+                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
 
                 if (stavka == null) return NotFound();
 
@@ -64,16 +68,16 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serveska greska.");
             }
         }
 
         /// <summary>
         /// Dodaje novu stavku u postojecu porudzbinu. AKTIVIRA TRIGER
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")] //ovaj i slicni endpointi ce se mozda menjati ako bude implementirano da i neulogovan korisnik moze da barata korpom.
+        [Authorize(Roles = "Kupac")]
         [HttpPost]
         public async Task<IActionResult> AddStavkaToPorudzbina([FromBody] StavkaCreateDto stavkaDTO)
         {
@@ -88,16 +92,16 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return CreatedAtRoute("GetStavkaPorudzbine", new { id = stavka.StavkaId }, stavka);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serveska greska.");
             }
         }
 
         /// <summary>
         /// Azurira stavku porudzbine. AKTIVIRA TRIGER
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
+        [Authorize(Roles = "Kupac")]
         [HttpPut]
         public async Task<IActionResult> UpdateStavkaPorudzbine([FromBody] StavkaUpdateDto stavkaDTO)
         {
@@ -114,18 +118,18 @@ namespace ProdajaLekovaBackend.Controllers
 
                 await _unitOfWork.Save();
 
-                return Ok();
+                return Ok("Uspesna izmena.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serveska greska.");
             }
         }
 
         /// <summary>
         /// Brise stavku porudzbine na osnovu id-ja. AKTIVIRA TRIGER
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
+        [Authorize(Roles = "Kupac")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStavkaPorudzbine(int id)
         {
@@ -141,9 +145,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serveska greska.");
             }
         }
     }

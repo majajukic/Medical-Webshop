@@ -30,7 +30,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync();
+                var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivTipaProizvoda));
 
                 if (tipoviProizvoda == null) return NoContent();
 
@@ -38,9 +38,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(results);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -55,15 +55,15 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == id);
 
-                if (tipProizvoda == null) return NotFound();
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
 
                 var result = _mapper.Map<TipProizvodaDto>(tipProizvoda);
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -85,9 +85,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return CreatedAtRoute("GetTipProizvoda", new { id = tipProizvoda.TipProizvodaId }, tipProizvoda);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -103,7 +103,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
 
-                if (tipProizvoda == null) return NotFound();
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
 
                 _mapper.Map(tipProizvodaDTO, tipProizvoda);
 
@@ -111,11 +111,11 @@ namespace ProdajaLekovaBackend.Controllers
 
                 await _unitOfWork.Save();
 
-                return Ok();
+                return Ok("Uspesna izmena");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -130,7 +130,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId  == id);
 
-                if (tipProizvoda == null) return NotFound();
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
 
                 await _unitOfWork.TipProizvoda.DeleteAsync(id);
 
@@ -138,9 +138,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
     }

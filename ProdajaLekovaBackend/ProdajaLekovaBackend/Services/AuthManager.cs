@@ -48,13 +48,11 @@ namespace ProdajaLekovaBackend.Services
 
             var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
 
-            var role = korisnik.TipKorisnika;
+            claims.Add(new Claim(ClaimTypes.Role, korisnik.TipKorisnika.ToString()));
 
-            var korisnikId = korisnik.KorisnikId;
+            claims.Add(new Claim("Id", korisnik.KorisnikId.ToString()));
 
-            claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
-
-            claims.Add(new Claim(ClaimTypes.NameIdentifier, korisnikId.ToString()));
+            claims.Add(new Claim("Email", korisnik.Email));
 
             return claims;
         }

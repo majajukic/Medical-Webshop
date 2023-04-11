@@ -10,6 +10,6 @@ namespace ProdajaLekovaBackend.DTOs.PorudzbinaDTOs
         public bool PlacenaPorudzbina { get; set; }
         public DateTime? DatumPlacanja { get; set; }
         public string? UplataId { get; set; }
-        public int KorisnikId { get; set; }
+        public int? KorisnikId { get; set; }
     }
 }

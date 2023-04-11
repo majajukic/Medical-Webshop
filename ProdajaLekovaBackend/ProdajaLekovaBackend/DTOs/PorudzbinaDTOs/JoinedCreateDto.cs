@@ -8,7 +8,6 @@
         public bool? PlacenaPorudzbina { get; set; }
         public DateTime? DatumPlacanja { get; set; }
         public string? UplataId { get; set; }
-        public int KorisnikId { get; set; }
         public int Kolicina { get; set; }
         public decimal Cena { get; set; }
         public decimal? Popust { get; set; }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
+using System.Security.Claims;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -29,7 +30,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                var korisnici = await _unitOfWork.Korisnik.GetAllPagedListAsync(requestParams);
+                var korisnici = await _unitOfWork.Korisnik.GetAllPagedListAsync(requestParams, orderBy: q => q.OrderBy(x => x.Ime));
 
                 if (korisnici == null) return NoContent();
 
@@ -37,9 +38,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(results);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -52,17 +53,23 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
+                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
+
+                var role = User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
+
+                if (korisnikId != id && !role.Equals("Admin")) return Unauthorized("Nemate prava na ovu akciju.");
+
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
 
-                if (korisnik == null) return NotFound();
+                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
 
                 var result = _mapper.Map<KorisnikDto>(korisnik);
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -76,7 +83,11 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
+
                 var korisnik = _mapper.Map<Korisnik>(korisnikDTO);
+
+                korisnik.Lozinka = passwordHash;
 
                 await _unitOfWork.Korisnik.CreateAsync(korisnik);
 
@@ -84,9 +95,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return CreatedAtRoute("GetKorisnik", new { id = korisnik.KorisnikId }, korisnik);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -102,19 +113,23 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikDTO.KorisnikId);
 
-                if (korisnik == null) return NotFound();
+                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
+
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
 
                 _mapper.Map(korisnikDTO, korisnik);
+
+                korisnik.Lozinka = passwordHash;
 
                 _unitOfWork.Korisnik.UpdateAsync(korisnik);
 
                 await _unitOfWork.Save();
 
-                return Ok();
+                return Ok("Uspesna izmena");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -129,7 +144,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
 
-                if (korisnik == null) return NotFound();
+                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
 
                 await _unitOfWork.Korisnik.DeleteAsync(id);
 
@@ -137,9 +152,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
     }

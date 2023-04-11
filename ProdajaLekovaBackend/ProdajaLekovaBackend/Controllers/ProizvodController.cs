@@ -22,16 +22,16 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Vraća sve proizvode (naziv i proizvodjaca).
+        /// Vraća sve proizvode (naziv, proizvodjaca i tip).
         /// </summary>
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetProizvodi()
         {
             try
             {
-                var proizvodi = await _unitOfWork.Proizvod.GetAllAsync(include: q => q.Include(x => x.TipProizvoda).Include(x => x.ApotekaProizvod),
-                    orderBy: q => q.OrderBy(x => x.NazivProizvoda)); //kako bi se proizvodi izlistali od A-Z
+                var proizvodi = await _unitOfWork.Proizvod.GetAllAsync(include: q => q.Include(x => x.TipProizvoda), 
+                    orderBy: q => q.OrderBy(x => x.NazivProizvoda));
 
                 if (proizvodi == null) return NoContent();
 
@@ -39,37 +39,38 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return Ok(results);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
         /// <summary>
-        /// Vraća jedan proizvod na osnovu id-ja (naziv i proizvodjaca).
+        /// Vraća jedan proizvod na osnovu id-ja (naziv, proizvodjaca i tip).
         /// </summary>
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id:int}", Name = "GetProizvod")]
         public async Task<IActionResult> GetProizvod(int id)
         {
             try
             {
-                var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id, include: q => q.Include(x => x.TipProizvoda).Include(x => x.ApotekaProizvod));
+                var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id, 
+                    include: q => q.Include(x => x.TipProizvoda));
 
-                if (proizvod == null) return NotFound();
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen.");
 
                 var result = _mapper.Map<ProizvodDto>(proizvod);
 
                 return Ok(result);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
         /// <summary>
-        /// Kreiranje proizvoda koji ce nakon toga biti dodat u konkretnu apoteku. 
+        /// Kreiranje proizvoda. 
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -87,9 +88,9 @@ namespace ProdajaLekovaBackend.Controllers
                 return CreatedAtRoute("GetProizvod", new { id = proizvod.ProizvodId }, proizvod);
  
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -105,7 +106,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == proizvodDTO.ProizvodId);
 
-                if (proizvod == null) return NotFound();
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen");
 
                 _mapper.Map(proizvodDTO, proizvod);
 
@@ -113,11 +114,11 @@ namespace ProdajaLekovaBackend.Controllers
 
                 await _unitOfWork.Save();
 
-                return Ok();
+                return Ok("Uspesna izmena.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -132,7 +133,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id);
 
-                if (proizvod == null) return NotFound();
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen.");
 
                 await _unitOfWork.Proizvod.DeleteAsync(id);
 
@@ -140,9 +141,9 @@ namespace ProdajaLekovaBackend.Controllers
 
                 return NoContent();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
     }

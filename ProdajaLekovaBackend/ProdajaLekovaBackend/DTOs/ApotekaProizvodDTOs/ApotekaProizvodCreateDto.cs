@@ -17,5 +17,7 @@ namespace ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs
 
         [Required(ErrorMessage = "Obavezno je uneti cenu proizvoda.")]
         public decimal CenaBezPopusta { get; set; }
+
+        public decimal? CenaSaPopustom { get; set; }
     }
 }

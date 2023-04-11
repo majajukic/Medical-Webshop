@@ -119,11 +119,6 @@ namespace ProdajaLekovaBackend.Models
                     .HasMaxLength(35)
                     .HasColumnName("prezime");
 
-                /*entity.Property(e => e.TipKorisnika)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (TipKorisnikaEnum)Enum.Parse(typeof(TipKorisnikaEnum), v));*/
-
                 entity.Property(e => e.Ulica)
                     .HasMaxLength(35)
                     .HasColumnName("ulica");

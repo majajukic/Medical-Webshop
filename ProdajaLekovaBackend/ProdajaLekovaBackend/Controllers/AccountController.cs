@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
@@ -60,9 +58,9 @@ namespace ProdajaLekovaBackend.Controllers
                 return Ok(new { message = "Registracija uspesna!" });
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -75,13 +73,13 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                if (!await _authManager.ValidateKorisnik(korisnikDTO)) return Unauthorized("Nalog ne postoji ili su kredencijali pogresni");
+                if (!await _authManager.ValidateKorisnik(korisnikDTO)) return Unauthorized("Nalog ne postoji ili su kredencijali pogresni.");
 
                 return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, "Serverska greska.");
             }
         }   
     }
