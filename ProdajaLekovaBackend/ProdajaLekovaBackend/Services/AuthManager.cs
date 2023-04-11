@@ -52,8 +52,6 @@ namespace ProdajaLekovaBackend.Services
 
             claims.Add(new Claim("Id", korisnik.KorisnikId.ToString()));
 
-            claims.Add(new Claim("Email", korisnik.Email));
-
             return claims;
         }
 
