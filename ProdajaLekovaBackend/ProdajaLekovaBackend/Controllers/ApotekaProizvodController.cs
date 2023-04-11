@@ -317,6 +317,16 @@ namespace ProdajaLekovaBackend.Controllers
 
                 if (apotekaProizvod == null) return NotFound("Proizvod nije pronadjen");
 
+                //dodavanje popusta na cenu proizvoda, ako popust nije null prilikom izmene
+                if (apotekaProizvodDTO.PopustUprocentima == null)
+                {
+                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta;
+                }
+                else
+                {
+                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta - (apotekaProizvodDTO.CenaBezPopusta * apotekaProizvodDTO.PopustUprocentima / 100);
+                }
+
                 _mapper.Map(apotekaProizvodDTO, apotekaProizvod);
 
                 _unitOfWork.ApotekaProizvod.UpdateAsync(apotekaProizvod);
