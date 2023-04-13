@@ -34,56 +34,8 @@ namespace ProdajaLekovaBackend.Controllers
             try
             {
                 var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams,
-                    orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
-
-                if (porudzbine == null) return NoContent();
-
-                var results = _mapper.Map<List<PorudzbinaDto>>(porudzbine);
-
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
-        }
-
-        /// <summary>
-        /// Vraća placene porudzbine.
-        /// </summary>
-        [Authorize(Roles = "Admin")]
-        [HttpGet("placene")]
-        public async Task<IActionResult> GetPayedPorudzbine([FromQuery] RequestParams requestParams)
-        {
-            try
-            {
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, 
-                    q => q.PlacenaPorudzbina == true, 
-                    orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
-
-                if (porudzbine == null) return NoContent();
-
-                var results = _mapper.Map<List<PorudzbinaDto>>(porudzbine);
-
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
-        }
-
-        /// <summary>
-        /// Vraća neplacene porudzbine.
-        /// </summary>
-        [Authorize(Roles = "Admin")]
-        [HttpGet("neplacene")]
-        public async Task<IActionResult> GetNonPayedPorudzbine([FromQuery] RequestParams requestParams)
-        {
-            try
-            {
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, 
-                    q => q.PlacenaPorudzbina == false,
+                    q => q.PlacenaPorudzbina == true,
+                    include: q => q.Include(x => x.Korisnik),
                     orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
 
                 if (porudzbine == null) return NoContent();
@@ -101,19 +53,15 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve porudzbine jednog kupca.
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
-        [HttpGet("porudzbineByKupac/{id:int}")]
-        public async Task<IActionResult> GetPorudzbineByKupac([FromQuery] RequestParams requestParams, int id)
+        [Authorize(Roles = "Kupac")]
+        [HttpGet("porudzbineByKupac")]
+        public async Task<IActionResult> GetPorudzbineByKupac([FromQuery] RequestParams requestParams)
         {
             try
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
-                var role = User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-
-                if (korisnikId != id && !role.Equals("Admin")) return Unauthorized("Nemate prava na ovu akciju.");
-
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, q => q.KorisnikId == id);
+                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, q => q.KorisnikId == korisnikId);
 
                 if (porudzbine == null) return NoContent();
 
@@ -132,15 +80,13 @@ namespace ProdajaLekovaBackend.Controllers
         /// </summary>
         [Authorize(Roles = "Kupac")]
         [HttpGet("{porudzbinaId:int}", Name = "GetPorudzbina")]
-        public async Task<IActionResult> GetPorudzbina(int porudzbinaId, [FromQuery] int kupacId)
+        public async Task<IActionResult> GetPorudzbina(int porudzbinaId)
         {
             try
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
-                if (korisnikId != kupacId) return Unauthorized("Nemate prava na ovu akciju.");
-
-                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaId && q.Korisnik.KorisnikId == kupacId,
+                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaId && q.Korisnik.KorisnikId == korisnikId,
                     include: q => q.Include(x => x.StavkaPorudzbine).ThenInclude(y => y.ApotekaProizvod).ThenInclude(z => z.Proizvod.TipProizvoda));
 
                 if (porudzbina == null) return NotFound("Porudzbina nije pronadjena.");
@@ -166,19 +112,26 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
+                //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
+                ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == joinedDataDTO.ApotekaProizvodId);
+
+                if (joinedDataDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
+
+                //generisanje random broja porudzbine
                 Random rnd = new();
+
                 int brojPorudzbine = rnd.Next(10000, 99999);
+
                 joinedDataDTO.BrojPorudzbine = "#" + brojPorudzbine.ToString();
 
+                //postavljanje vrednosti za ostala obelezja
                 joinedDataDTO.DatumKreiranja = DateTime.Now;
 
                 joinedDataDTO.PlacenaPorudzbina = false;
 
-                if(joinedDataDTO.Popust == null)
-                {
-                    joinedDataDTO.Popust = 0;
-                }
+                joinedDataDTO.Popust ??= 0;
 
+                //kreiranje porudzbine
                 PorudzbinaCreateDto porudzbinaDTO = new PorudzbinaCreateDto
                 {
                     BrojPorudzbine = joinedDataDTO.BrojPorudzbine,
@@ -196,8 +149,10 @@ namespace ProdajaLekovaBackend.Controllers
 
                 await _unitOfWork.Save();
 
+                //uzimanje id vrednosti kreirane porudzbine
                 int porudzbinaIdKreirani = porudzbina.PorudzbinaId;
 
+                //dodavanje stavke u kreiranu porudzbinu
                 StavkaCreateDto stavkaDTO = new StavkaCreateDto
                 {
                     Kolicina = joinedDataDTO.Kolicina,

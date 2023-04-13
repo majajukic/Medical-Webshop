@@ -24,7 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// </summary>
         [HttpPost]
         [Route("registracija")]
-        public async Task<IActionResult> Register([FromBody] KorisnikCreateDto korisnikDTO)
+        public async Task<IActionResult> Register([FromBody] KorisnikRegisterDto korisnikDTO)
         {
             try
             {
@@ -44,12 +44,14 @@ namespace ProdajaLekovaBackend.Controllers
                     Ulica = korisnikDTO.Ulica,
                     Broj = korisnikDTO.Broj,
                     Mesto = korisnikDTO.Mesto,
-                    TipKorisnika = korisnikDTO.TipKorisnika
+                    //TipKorisnika = (TipKorisnikaEnum)1
                 };
 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
 
                 korisnik.Lozinka = passwordHash;
+
+                korisnik.TipKorisnika = (TipKorisnikaEnum)1;
 
                 await _unitOfWork.Korisnik.CreateAsync(korisnik);
 

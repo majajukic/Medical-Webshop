@@ -269,7 +269,7 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Dodavanje postojeceg proizvoda u odredjenu apoteku. AKTIVIRA TRIGER
+        /// Dodavanje postojeceg proizvoda u odredjenu apoteku.
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -304,7 +304,7 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Azuriranje atributa osobenih za proizvod u okviru odredjene apoteke na osnovu id-ja. AKTIVIRA TRIGER
+        /// Azuriranje atributa osobenih za proizvod u okviru odredjene apoteke na osnovu id-ja.
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPut]

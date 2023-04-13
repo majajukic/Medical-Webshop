@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
+using ProdajaLekovaBackend.Services;
 using System.Security.Claims;
 
 namespace ProdajaLekovaBackend.Controllers
@@ -15,7 +16,7 @@ namespace ProdajaLekovaBackend.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public KorisnikController(IUnitOfWork unitOfWork, IMapper mapper)
+        public KorisnikController(IUnitOfWork unitOfWork, IAuthManager authManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -82,7 +83,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
 
             try
-            {
+            { 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
 
                 var korisnik = _mapper.Map<Korisnik>(korisnikDTO);

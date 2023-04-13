@@ -73,7 +73,8 @@ namespace ProdajaLekovaBackend.Services
             if (!BCrypt.Net.BCrypt.Verify(korisnikDTO.Lozinka, korisnik.Lozinka)) return false;
 
             return true;
-        }
+
+        }  
 
     }
 }

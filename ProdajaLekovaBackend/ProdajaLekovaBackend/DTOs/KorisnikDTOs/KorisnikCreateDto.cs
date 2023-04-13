@@ -32,8 +32,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Mesto { get; set; }
 
-        [Required(ErrorMessage = "Obavezno je uneti tip korisnika.")]
-        public TipKorisnikaEnum TipKorisnika { get; set; }
+        public TipKorisnikaEnum? TipKorisnika { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -43,6 +42,20 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
             {
                 yield return new ValidationResult(
                   "Pogresan format email adrese (primer: email@gmail.com).",
+                  new[] { "KorisnikCreateDTO" });
+            }
+
+            if(!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
+            {
+                yield return new ValidationResult(
+                  "Lozinka mora sadrzati i brojeve i karaktere.",
+                  new[] { "KorisnikCreateDTO" });
+            }
+
+            if(Lozinka.Length < 8)
+            {
+                yield return new ValidationResult(
+                  "Lozinka mora imati minimum 8 karaktera.",
                   new[] { "KorisnikCreateDTO" });
             }
         }

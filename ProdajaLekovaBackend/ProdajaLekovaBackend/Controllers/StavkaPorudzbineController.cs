@@ -23,35 +23,6 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Vraća sve stavke porudzbine jedne porudzbine.
-        /// </summary>
-        /*[Authorize(Roles = "Kupac")]
-        [HttpGet("stavkeInPorudzbina/{porudzbinaId:int}")]
-        public async Task<IActionResult> GetStavkeByPorudzbina([FromQuery] RequestParams requestParams, int porudzbinaId, [FromQuery] int kupacId)
-        {
-            try
-            {
-                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
-
-                if (korisnikId != kupacId) return Unauthorized("Nemate prava na ovu akciju.");
-
-                var stavke = await _unitOfWork.StavkaPorudzbine.GetAllPagedListAsync(requestParams, 
-                    q => q.PorudzbinaId == porudzbinaId && q.Porudzbina.KorisnikId == kupacId,
-                    include: q => q.Include(x => x.ApotekaProizvod.Proizvod.TipProizvoda).Include(x => x.ApotekaProizvod.Apoteka));
-
-                if (stavke == null) return NoContent();
-
-                var results = _mapper.Map<List<StavkaDto>>(stavke);
-
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serveska greska.");
-            }
-        }*/
-
-        /// <summary>
         /// Vraća jednu stavku porudzbine na osnovu id-ja.
         /// </summary>
         [Authorize(Roles = "Kupac")]
@@ -84,6 +55,13 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
+                ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavkaDTO.ApotekaProizvodId);
+
+                if (stavkaDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
+
+                stavkaDTO.Popust ??= 0;
+
                 var stavka = _mapper.Map<StavkaPorudzbine>(stavkaDTO);
 
                 await _unitOfWork.StavkaPorudzbine.CreateAsync(stavka);
@@ -111,6 +89,11 @@ namespace ProdajaLekovaBackend.Controllers
                 var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == stavkaDTO.StavkaId);
 
                 if (stavka == null) return NotFound();
+
+                //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
+                ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavka.ApotekaProizvodId);
+
+                if (stavkaDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
 
                 _mapper.Map(stavkaDTO, stavka);
 

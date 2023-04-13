@@ -1,26 +1,24 @@
-﻿using ProdajaLekovaBackend.Models;
+﻿using Newtonsoft.Json;
+using ProdajaLekovaBackend.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
 {
-    public class KorisnikUpdateDto : IValidatableObject
+    public class KorisnikRegisterDto : IValidatableObject
     {
-        [Required(ErrorMessage = "Obavezno je uneti id korisnika.")]
-        public int KorisnikId { get; set; }
-
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Ime { get; set; }
 
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Prezime { get; set; }
 
-        [Required(ErrorMessage = "Obavezno je uneti lozinku.")]
-        public string Lozinka { get; set; } = null!;
-
         [Required(ErrorMessage = "Obavezno je uneti email.")]
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string Email { get; set; } = null!;
+
+        [Required(ErrorMessage = "Obavezno je uneti lozinku.")]
+        public string Lozinka { get; set; } = null!;
 
         [StringLength(15, ErrorMessage = "Maximum 15 karaktera prekoračeno")]
         public string? BrojTelefona { get; set; }
@@ -34,8 +32,6 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Mesto { get; set; }
 
-        public TipKorisnikaEnum? TipKorisnika { get; set; }
-
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (!Regex.IsMatch(Email, @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
@@ -44,23 +40,22 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
             {
                 yield return new ValidationResult(
                   "Pogresan format email adrese (primer: email@gmail.com).",
-                  new[] { "KorisnikdpdateDTO" });
+                  new[] { "KorisnikCreateDTO" });
             }
 
             if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
             {
                 yield return new ValidationResult(
                   "Lozinka mora sadrzati i brojeve i karaktere.",
-                  new[] { "KorisnikUpdateDTO" });
+                  new[] { "KorisnikRegisterDTO" });
             }
 
             if (Lozinka.Length < 8)
             {
                 yield return new ValidationResult(
                   "Lozinka mora imati minimum 8 karaktera.",
-                  new[] { "KorisnikUpdateDTO" });
+                  new[] { "KorisnikRegisterDTO" });
             }
         }
-
     }
 }
