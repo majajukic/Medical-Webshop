@@ -5,7 +5,6 @@ using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 using ProdajaLekovaBackend.Services;
-using System.Security.Claims;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -16,7 +15,7 @@ namespace ProdajaLekovaBackend.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public KorisnikController(IUnitOfWork unitOfWork, IAuthManager authManager, IMapper mapper)
+        public KorisnikController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -48,19 +47,38 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jednog korisnika na osnovu id-ja.
         /// </summary>
-        [Authorize(Roles = "Admin, Kupac")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id:int}", Name = "GetKorisnik")]
         public async Task<IActionResult> GetKorisnik(int id)
         {
             try
             {
+                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
+
+                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
+
+                var result = _mapper.Map<KorisnikDto>(korisnik);
+
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
+        }
+
+        /// <summary>
+        /// Vraća podatke o trenutno ulogovanom korisniku (profil).
+        /// </summary>
+        [Authorize(Roles = "Admin, Kupac")]
+        [HttpGet("profil")]
+        public async Task<IActionResult> GetProfileDetails()
+        {
+            try
+            {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
-                var role = User.Claims.First(x => x.Type == ClaimTypes.Role).Value;
-
-                if (korisnikId != id && !role.Equals("Admin")) return Unauthorized("Nemate prava na ovu akciju.");
-
-                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
+                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikId);
 
                 if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
 
