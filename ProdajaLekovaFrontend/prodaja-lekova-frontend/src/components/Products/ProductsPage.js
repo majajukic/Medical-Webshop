@@ -1,6 +1,4 @@
 import React from 'react'
-import Header from './Header'
-import Footer from './Footer'
 import ProductCard from './ProductCard'
 import {
   Container,
@@ -14,15 +12,15 @@ import {
   RadioGroup,
   Radio,
   FormControlLabel,
+  Link,
 } from '@mui/material'
 import { Search as SearchIcon } from '@mui/icons-material'
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-const Products = () => {
+const ProductsPage = () => {
   return (
     <div>
-      <Header />
       <Box
         sx={{
           display: 'flex',
@@ -53,10 +51,12 @@ const Products = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          marginTop: '50px'
+          marginTop: '50px',
         }}
       >
-        <Typography variant="subtitle2" sx={{mr: 1}}>Sortiraj po ceni:</Typography>
+        <Typography variant="subtitle2" sx={{ mr: 1 }}>
+          Sortiraj po ceni:
+        </Typography>
         <RadioGroup row defaultValue="ascending">
           <FormControlLabel
             value="ascending"
@@ -69,7 +69,9 @@ const Products = () => {
             label="Opadajuće"
           />
         </RadioGroup>
-        <Button size='small' variant='contained'>Sortiraj</Button>
+        <Button size="small" variant="contained">
+          Sortiraj
+        </Button>
       </Box>
       <TextField
         sx={{
@@ -99,10 +101,12 @@ const Products = () => {
             </Grid>
           ))}
         </Grid>
+        <Link color="primary" href="#" underline="none" sx={{ mt: 3}}>
+          <Typography variant="subtitle1" sx={{marginTop: '50px' }}>Prikaži više</Typography>
+        </Link>
       </Container>
-      <Footer />
     </div>
   )
 }
 
-export default Products
+export default ProductsPage

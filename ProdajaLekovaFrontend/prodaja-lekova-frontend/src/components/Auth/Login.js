@@ -1,5 +1,5 @@
 import * as React from 'react';
-import loginSideImage from '../assets/login-side-img.jpg';
+import loginSideImage from '../../assets/login-side-img.jpg';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Link as RouteLink} from 'react-router-dom';
 import {
