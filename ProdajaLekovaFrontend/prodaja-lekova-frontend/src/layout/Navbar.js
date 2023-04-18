@@ -58,19 +58,19 @@ const Navbar = () => {
         </Box>
         <Button
           component={RouteLink}
-          to="/upravljajProizvodima"
-          color="inherit"
-          sx={{ marginX: '10px' }}
-        >
-          Upravljaj proizvodima
-        </Button>
-        <Button
-          component={RouteLink}
           to="/upravljajApotekama"
           color="inherit"
           sx={{ marginX: '10px' }}
         >
           Upravljaj apotekama
+        </Button>
+        <Button
+          component={RouteLink}
+          to="/upravljajProizvodima"
+          color="inherit"
+          sx={{ marginX: '10px' }}
+        >
+          Upravljaj proizvodima
         </Button>
         <Button
           component={RouteLink}
@@ -80,14 +80,12 @@ const Navbar = () => {
         >
           Upravljaj nalozima
         </Button>
-        <ShoppingCartIcon
-          color="inherit"
-          sx={{ marginX: '10px', fontSize: '2rem', cursor: 'pointer' }}
-        />
-        <AccountCircleIcon
-          color="inherit"
-          sx={{ marginX: '10px', fontSize: '2rem', cursor: 'pointer' }}
-        />
+        <Button /*component={RouteLink} to="/korpa"*/ variant='contained' sx={{ marginX: '10px' }}>
+          <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
+        </Button>
+        <Button component={RouteLink} to="/profil" variant='contained' sx={{ marginX: '10px' }}>
+          <AccountCircleIcon color="white" sx={{ fontSize: '2rem' }} />
+        </Button>
         <Button
           component={RouteLink}
           to="/prijaviSe"

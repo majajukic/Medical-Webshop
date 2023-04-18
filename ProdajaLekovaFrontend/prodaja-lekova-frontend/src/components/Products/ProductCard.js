@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import previewImage from '../../assets/image-preview.png'
-//import DeleteIcon from '@mui/icons-material/Delete'
-//import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
 import {
   Card,
   CardMedia,
@@ -10,11 +10,12 @@ import {
   CardActions,
   Button,
   TextField,
-  //useTheme,
+  useTheme,
 } from '@mui/material'
 
 const ProductCard = () => {
-  //const theme = useTheme()
+  
+  const theme = useTheme()
   const [quantity, setQuantity] = useState(1)
 
   const handleQuantityChange = (event) => {
@@ -64,8 +65,16 @@ const ProductCard = () => {
         />
       </CardContent>
       <CardActions sx={{ mt: 1 }}>
-        {/*<Button size="small"><EditIcon sx={{marginRight: 1, color: theme.palette.primary.main}} /></Button>
-           <Button size="small"><DeleteIcon sx={{marginRight: 1, color: theme.palette.primary.main}}/></Button>*/}
+        <Button size="small">
+          <EditIcon
+            sx={{ marginRight: 1, color: theme.palette.primary.main }}
+          />
+        </Button>
+        <Button size="small">
+          <DeleteIcon
+            sx={{ marginRight: 1, color: theme.palette.primary.main }}
+          />
+        </Button>
         <Button size="medium" variant="contained">
           Dodaj u korpu
         </Button>

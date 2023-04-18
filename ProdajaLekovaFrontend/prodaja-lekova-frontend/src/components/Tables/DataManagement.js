@@ -1,6 +1,7 @@
-import * as React from 'react'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
+import * as React from 'react';
+import Pagination from '../Pagination';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   Table,
   TableBody,
@@ -12,8 +13,6 @@ import {
   Button,
   useTheme,
   Box,
-  Link,
-  Typography,
 } from '@mui/material'
 
 const columns = [
@@ -120,9 +119,7 @@ const DataManagement = (props) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Link color="primary" href="#" underline="none" sx={{ mt: 3 }}>
-        <Typography variant="subtitle1">Prikaži više</Typography>
-      </Link>
+      <Pagination />
       <Box
         sx={{
           display: 'flex',
