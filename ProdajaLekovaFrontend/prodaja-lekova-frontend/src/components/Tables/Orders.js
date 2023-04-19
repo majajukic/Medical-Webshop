@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react'
+import { getUserRole } from '../../utilities/authUtilities'
 import {
   Typography,
   Table,
@@ -60,6 +61,8 @@ const rows = [
 ]
 
 const Orders = () => {
+  const role = getUserRole()
+
   return (
     <Grid item xs={12} sx={{ width: '60%' }}>
       <Paper
@@ -72,7 +75,7 @@ const Orders = () => {
       >
         <Fragment>
           <Typography variant="h5" sx={{ marginBottom: 2 }}>
-            Porudžbine
+            {role === 'Admin' ? 'Sve porudžbine' : 'Moje porudžbine'}
           </Typography>
           <Table size="small">
             <TableHead>

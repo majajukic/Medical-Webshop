@@ -1,7 +1,10 @@
-import * as React from 'react';
-import loginSideImage from '../../assets/login-side-img.jpg';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link as RouteLink} from 'react-router-dom';
+import React, { useState } from 'react'
+import loginSideImage from '../../assets/login-side-img.jpg'
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+import { Link as RouteLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
+import { login } from '../../services/authService'
+import { LOGIN } from '../../constants/actionTypes'
 import {
   Avatar,
   Button,
@@ -13,11 +16,38 @@ import {
   Grid,
   Typography,
   useTheme,
-} from '@mui/material';
+} from '@mui/material'
+
+const initialState = {
+  email: '',
+  lozinka: '',
+}
 
 const Login = () => {
+  const theme = useTheme()
+  const { dispatch } = useAuth()
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState(initialState)
 
-    const theme = useTheme();
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    const data = await login(formData)
+
+    if (data === 400) {
+      alert(
+        'Nalog ne postoji ili su kredencijali pogrešni.',
+      )
+    } else {
+      dispatch({ type: LOGIN, payload: data.data })
+
+      navigate('/')
+    }
+  }
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
@@ -51,29 +81,31 @@ const Login = () => {
           <Typography component="h1" variant="h5">
             Prijavi se
           </Typography>
-          <Box
-            component="form"
-            sx={{ mt: 1 }}
-          >
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
               fullWidth
+              type="email"
               id="email"
               label="Email adresa"
               name="email"
               autoComplete="email"
               autoFocus
+              value={formData.email}
+              onChange={handleChange}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              name="password"
+              name="lozinka"
               label="Lozinka"
               type="password"
               id="password"
               autoComplete="current-password"
+              value={formData.lozinka}
+              onChange={handleChange}
             />
             <Button
               type="submit"
@@ -83,10 +115,22 @@ const Login = () => {
             >
               Prijavi me
             </Button>
-            <Grid container sx={{textAlign: 'center'}}>
+            <Grid
+              container
+              justifyContent="center"
+              direction="column"
+              alignItems="center"
+              spacing={1}
+              sx={{ marginTop: '10px' }}
+            >
               <Grid item>
                 <Link component={RouteLink} to="/registrujSe" variant="body2">
-                  {"Nemaš nalog? Registruj se!"}
+                  {'Nemaš nalog? Registruj se!'}
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link component={RouteLink} to="/" variant="body2">
+                  {'Nazad na početnu stranicu.'}
                 </Link>
               </Grid>
             </Grid>

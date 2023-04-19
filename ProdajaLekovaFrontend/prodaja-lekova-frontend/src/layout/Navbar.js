@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { Fragment, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import { getUserRole } from '../utilities/authUtilities'
+import { LOGOUT } from '../constants/actionTypes'
 import {
   AppBar,
   Toolbar,
@@ -10,13 +13,16 @@ import {
   Box,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { Link as RouteLink } from 'react-router-dom'
+import { Link as RouteLink, useNavigate } from 'react-router-dom'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const navigate = useNavigate()
+  const { state, dispatch } = useAuth()
   const theme = useTheme()
+  const role = getUserRole()
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
@@ -24,6 +30,14 @@ const Navbar = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleAuth = () => {
+    if (state.token) {
+      dispatch({ type: LOGOUT })
+    }
+
+    navigate('/prijaviSe')
   }
 
   return (
@@ -56,39 +70,54 @@ const Navbar = () => {
             <MenuItem onClick={handleMenuClose}>Popuni podacima</MenuItem>
           </Menu>
         </Box>
+        {role === 'Admin' && (
+          <Fragment>
+            <Button
+              component={RouteLink}
+              to="/upravljajApotekama"
+              color="inherit"
+              sx={{ marginX: '10px' }}
+            >
+              Upravljaj apotekama
+            </Button>
+            <Button
+              component={RouteLink}
+              to="/upravljajProizvodima"
+              color="inherit"
+              sx={{ marginX: '10px' }}
+            >
+              Upravljaj proizvodima
+            </Button>
+            <Button
+              component={RouteLink}
+              to="/upravljajNalozima"
+              color="inherit"
+              sx={{ marginX: '10px' }}
+            >
+              Upravljaj nalozima
+            </Button>
+          </Fragment>
+        )}
+        {role === 'Kupac' && (
+          <Button
+            /*component={RouteLink} to="/korpa"*/ variant="contained"
+            sx={{ marginX: '10px' }}
+          >
+            <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
+          </Button>
+        )}
+        {(role === 'Kupac' || role === 'Admin') && (
+          <Button
+            component={RouteLink}
+            to="/profil"
+            variant="contained"
+            sx={{ marginX: '10px' }}
+          >
+            <AccountCircleIcon color="white" sx={{ fontSize: '2rem' }} />
+          </Button>
+        )}
         <Button
-          component={RouteLink}
-          to="/upravljajApotekama"
-          color="inherit"
-          sx={{ marginX: '10px' }}
-        >
-          Upravljaj apotekama
-        </Button>
-        <Button
-          component={RouteLink}
-          to="/upravljajProizvodima"
-          color="inherit"
-          sx={{ marginX: '10px' }}
-        >
-          Upravljaj proizvodima
-        </Button>
-        <Button
-          component={RouteLink}
-          to="/upravljajNalozima"
-          color="inherit"
-          sx={{ marginX: '10px' }}
-        >
-          Upravljaj nalozima
-        </Button>
-        <Button /*component={RouteLink} to="/korpa"*/ variant='contained' sx={{ marginX: '10px' }}>
-          <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
-        </Button>
-        <Button component={RouteLink} to="/profil" variant='contained' sx={{ marginX: '10px' }}>
-          <AccountCircleIcon color="white" sx={{ fontSize: '2rem' }} />
-        </Button>
-        <Button
-          component={RouteLink}
-          to="/prijaviSe"
+          onClick={handleAuth}
           variant="contained"
           color="inherit"
           sx={{
@@ -97,7 +126,7 @@ const Navbar = () => {
             color: theme.palette.primary.main,
           }}
         >
-          Prijavi se
+          {state.token ? 'Odjavi se' : 'Prijavi se'}
         </Button>
       </Toolbar>
     </AppBar>

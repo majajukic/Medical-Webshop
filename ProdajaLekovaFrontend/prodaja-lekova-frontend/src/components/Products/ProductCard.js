@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import previewImage from '../../assets/image-preview.png'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
+import { getUserRole } from '../../utilities/authUtilities'
 import {
   Card,
   CardMedia,
@@ -14,9 +15,9 @@ import {
 } from '@mui/material'
 
 const ProductCard = () => {
-  
   const theme = useTheme()
   const [quantity, setQuantity] = useState(1)
+  const role = getUserRole()
 
   const handleQuantityChange = (event) => {
     setQuantity(event.target.value)
@@ -65,19 +66,25 @@ const ProductCard = () => {
         />
       </CardContent>
       <CardActions sx={{ mt: 1 }}>
-        <Button size="small">
-          <EditIcon
-            sx={{ marginRight: 1, color: theme.palette.primary.main }}
-          />
-        </Button>
-        <Button size="small">
-          <DeleteIcon
-            sx={{ marginRight: 1, color: theme.palette.primary.main }}
-          />
-        </Button>
-        <Button size="medium" variant="contained">
-          Dodaj u korpu
-        </Button>
+        {role === 'Admin' && (
+          <Fragment>
+            <Button size="small">
+              <EditIcon
+                sx={{ marginRight: 1, color: theme.palette.primary.main }}
+              />
+            </Button>
+            <Button size="small">
+              <DeleteIcon
+                sx={{ marginRight: 1, color: theme.palette.primary.main }}
+              />
+            </Button>
+          </Fragment>
+        )}
+        {role === 'Kupac' && (
+          <Button size="medium" variant="contained">
+            Dodaj u korpu
+          </Button>
+        )}
       </CardActions>
     </Card>
   )
