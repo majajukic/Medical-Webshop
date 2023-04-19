@@ -44,7 +44,6 @@ namespace ProdajaLekovaBackend.Controllers
                     Ulica = korisnikDTO.Ulica,
                     Broj = korisnikDTO.Broj,
                     Mesto = korisnikDTO.Mesto,
-                    //TipKorisnika = (TipKorisnikaEnum)1
                 };
 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
@@ -75,7 +74,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                if (!await _authManager.ValidateKorisnik(korisnikDTO)) return Unauthorized("Nalog ne postoji ili su kredencijali pogresni.");
+                if (!await _authManager.ValidateKorisnik(korisnikDTO)) return BadRequest("Nalog ne postoji ili su kredencijali pogresni.");
 
                 return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) });
             }
