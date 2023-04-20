@@ -77,6 +77,10 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
+
+                if (existingApoteka != null) return BadRequest("Apoteka sa datim nazivom vec postoji u bazi.");
+
                 var apoteka = _mapper.Map<Apoteka>(apotekaDTO);
 
                 await _unitOfWork.Apoteka.CreateAsync(apoteka);
@@ -101,9 +105,14 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+
                 var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == apotekaDTO.ApotekaId);
 
                 if (apoteka == null) return NotFound("Apoteka nije pronadjena.");
+
+                var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
+
+                if (existingApoteka != null) return BadRequest("Apoteka sa datim nazivom vec postoji u bazi.");
 
                 _mapper.Map(apotekaDTO, apoteka);
 

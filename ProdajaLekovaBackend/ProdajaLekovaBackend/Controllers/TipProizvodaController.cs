@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ProdajaLekovaBackend.DTOs.ApotekaDTOs;
 using ProdajaLekovaBackend.DTOs.TipProizvodaDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
@@ -77,6 +78,10 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+
+                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+
                 var tipProizvoda = _mapper.Map<TipProizvoda>(tipProizvodaDTO);
 
                 await _unitOfWork.TipProizvoda.CreateAsync(tipProizvoda);
@@ -101,9 +106,14 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+
                 var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
 
                 if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+
+                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+
+                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
 
                 _mapper.Map(tipProizvodaDTO, tipProizvoda);
 
