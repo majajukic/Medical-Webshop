@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import loginSideImage from '../../assets/login-side-img.jpg'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import { Link as RouteLink, useNavigate } from 'react-router-dom'
+import { Link as RouteLink, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { login } from '../../services/authService'
 import { LOGIN } from '../../constants/actionTypes'
@@ -25,9 +25,13 @@ const initialState = {
 
 const Login = () => {
   const theme = useTheme()
-  const { dispatch } = useAuth()
+  const { state, dispatch } = useAuth()
   const navigate = useNavigate()
   const [formData, setFormData] = useState(initialState)
+
+  if (state.token) {
+    return <Navigate to="/" />
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -39,9 +43,7 @@ const Login = () => {
     const data = await login(formData)
 
     if (data === 400) {
-      alert(
-        'Nalog ne postoji ili su kredencijali pogrešni.',
-      )
+      alert('Nalog ne postoji ili su kredencijali pogrešni.')
     } else {
       dispatch({ type: LOGIN, payload: data.data })
 

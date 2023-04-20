@@ -13,7 +13,8 @@ import {
 } from '@mui/material'
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import { useTheme } from '@mui/material'
-import { Link as RouteLink, useNavigate } from 'react-router-dom'
+import { Link as RouteLink, useNavigate, Navigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 
 const initialState = {
   ime: '',
@@ -28,8 +29,13 @@ const initialState = {
 
 const Register = () => {
   const theme = useTheme()
+  const { state } = useAuth()
   const navigate = useNavigate()
   const [formData, setFormData] = useState(initialState)
+
+  if (state.token) {
+    return <Navigate to="/" />
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -51,7 +57,7 @@ const Register = () => {
         alert('Korisnik sa datom mejl adresom već postoji u bazi.')
       } else if (error.response.status === 422) {
         alert(
-          'Lozinka mora imati minimum 8 karaktera - slova i brojeve. Takodje, ime i prezime moraju biti razliciti',
+          'Lozinka mora imati minimum 8 karaktera - slova i brojeve.',
         )
       }
     }
