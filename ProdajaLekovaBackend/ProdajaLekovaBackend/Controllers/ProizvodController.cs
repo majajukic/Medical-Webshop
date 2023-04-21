@@ -24,7 +24,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća sve proizvode (naziv, proizvodjaca i tip).
         /// </summary>
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetProizvodi()
         {
