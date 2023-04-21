@@ -1,5 +1,11 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import { getUserRole } from '../../utilities/authUtilities'
+import {
+  getPorudzbine,
+  getPorudzbineByKupac,
+} from '../../services/porudzbinaService'
+import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Typography,
   Table,
@@ -9,59 +15,38 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  useTheme,
 } from '@mui/material'
 import Pagination from '../Pagination'
-
-// Generate Order Data
-function createData(id, date, name, shipTo, paymentMethod, amount) {
-  return { id, date, name, shipTo, paymentMethod, amount }
-}
-
-const rows = [
-  createData(
-    0,
-    '16 Mar, 2019',
-    'Elvis Presley',
-    'Tupelo, MS',
-    'VISA ⠀•••• 3719',
-    312.44,
-  ),
-  createData(
-    1,
-    '16 Mar, 2019',
-    'Paul McCartney',
-    'London, UK',
-    'VISA ⠀•••• 2574',
-    866.99,
-  ),
-  createData(
-    2,
-    '16 Mar, 2019',
-    'Tom Scholz',
-    'Boston, MA',
-    'MC ⠀•••• 1253',
-    100.81,
-  ),
-  createData(
-    3,
-    '16 Mar, 2019',
-    'Michael Jackson',
-    'Gary, IN',
-    'AMEX ⠀•••• 2000',
-    654.39,
-  ),
-  createData(
-    4,
-    '15 Mar, 2019',
-    'Bruce Springsteen',
-    'Long Branch, NJ',
-    'VISA ⠀•••• 5919',
-    212.79,
-  ),
-]
+import { useAuth } from '../../context/AuthContext'
 
 const Orders = () => {
   const role = getUserRole()
+  const { state } = useAuth()
+  const theme = useTheme()
+  const [porudzbine, setPorudzbine] = useState([])
+
+  useEffect(() => {
+    if (role === 'Admin') {
+      console.log('porudzbine useeffecr')
+      getPorudzbine(state.token)
+        .then((response) => {
+          setPorudzbine(response.data)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else if (role === 'Kupac') {
+      console.log('porudzbine kupac useeffecr')
+      getPorudzbineByKupac(state.token)
+        .then((response) => {
+          setPorudzbine(response.data)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }, [])
 
   return (
     <Grid item xs={12} sx={{ width: '60%' }}>
@@ -80,26 +65,66 @@ const Orders = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Ship To</TableCell>
-                <TableCell>Payment Method</TableCell>
-                <TableCell align="right">Sale Amount</TableCell>
+                <TableCell>Broj porudžbine</TableCell>
+                <TableCell>Datum kreiranja</TableCell>
+                <TableCell>Ukupan iznos</TableCell>
+                <TableCell>Plaćena porudžbina?</TableCell>
+                <TableCell>Datum plaćanja</TableCell>
+                {role === 'Admin' && <TableCell>Korisnik</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.shipTo}</TableCell>
-                  <TableCell>{row.paymentMethod}</TableCell>
-                  <TableCell align="right">{`$${row.amount}`}</TableCell>
+              {porudzbine.length > 0 ? (
+                porudzbine.map((porudzbina) => (
+                  <TableRow key={porudzbina.porudzbinaId}>
+                    <TableCell>{porudzbina.brojPorudzbine}</TableCell>
+                    <TableCell>
+                      {format(
+                        new Date(porudzbina.datumKreiranja),
+                        'dd/MM/yyyy',
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {porudzbina.ukupanIznos.toLocaleString('sr-RS', {
+                        style: 'currency',
+                        currency: 'RSD',
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      {porudzbina.placenaPorudzbina === true ? 'Da' : 'Ne'}
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(porudzbina.datumPlacanja), 'dd/MM/yyyy')}
+                    </TableCell>
+                    {role === 'Admin' && (
+                      <TableCell>
+                        {porudzbina.korisnik.ime +
+                          ' ' +
+                          porudzbina.korisnik.prezime}
+                      </TableCell>
+                    )}
+                    {role === 'Kupac' && (
+                      <TableCell>
+                        <DeleteIcon
+                          sx={{
+                            marginRight: 1,
+                            color: theme.palette.primary.main,
+                            fontSize: '1.5rem',
+                            cursor: 'pointer'
+                          }}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow variant="subtitle2">
+                  <TableCell>Nema porudžbina</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
-          <Pagination />
+          {porudzbine.length > 9 && <Pagination />}
         </Fragment>
       </Paper>
     </Grid>

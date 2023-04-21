@@ -7,7 +7,7 @@ import Register from './components/Auth/Register';
 import ProfilePage from './components/Auth/ProfilePage';
 import NotFoundPage from './components/NotFoundPage';
 import ProductsPage from './components/Products/ProductsPage';
-import DataManagement from './components/Tables/DataManagement';
+import SharedTableContainer from './components/Tables/SharedTableContainer';
 import Layout from './layout/Layout';
 import { AuthProvider } from './context/AuthContext';
 
@@ -19,9 +19,9 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <Routes>
             <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
-            <Route path="/upravljajApotekama" element={<Layout><DataManagement isPharmacyTable={true} /></Layout>} />
-            <Route path="/upravljajProizvodima" element={<Layout><DataManagement isProductTable={true} /></Layout>} />
-            <Route path="/upravljajNalozima" element={<Layout><DataManagement isUserTable={true}/></Layout>} />
+            <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
+            <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
+            <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />
             <Route path="/profil" element={<Layout><ProfilePage /></Layout>} />
             <Route path="/prijaviSe" element={<Login />} />
             <Route path="/registrujSe" element={ <Register />} />

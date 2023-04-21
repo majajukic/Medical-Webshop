@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Fragment} from 'react';
 import ProductCard from './ProductCard';
 import ProductCategories from './ProductCategories';
 import ProductSorting from './ProductSorting';
@@ -10,7 +10,7 @@ const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 const ProductsPage = () => {
   return (
-    <div>
+    <Fragment>
       <ProductCategories />
       <ProductSorting />
       <ProductSearch />
@@ -24,7 +24,7 @@ const ProductsPage = () => {
         </Grid>
         <Pagination />
       </Container>
-    </div>
+    </Fragment>
   )
 }
 

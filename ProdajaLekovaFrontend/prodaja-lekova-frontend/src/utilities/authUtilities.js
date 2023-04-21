@@ -13,3 +13,13 @@ export const getUserRole = () => {
   )
 }
 
+export const bearerConfig = (token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+
+  return config;
+}
+

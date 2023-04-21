@@ -1,14 +1,14 @@
-import React from 'react'
-import Navbar from './Navbar';
-import Footer from './Footer';
+import React, { Fragment } from 'react'
+import Navbar from './Navbar'
+import Footer from './Footer'
 
-const Layout = ({children}) => {
+const Layout = ({ children }) => {
   return (
-    <div>
+    <Fragment>
       <Navbar />
       {children}
       <Footer />
-    </div>
+    </Fragment>
   )
 }
 

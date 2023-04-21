@@ -40,12 +40,12 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const data = await login(formData)
+    const response = await login(formData)
 
-    if (data === 400) {
+    if (response === 400) {
       alert('Nalog ne postoji ili su kredencijali pogrešni.')
     } else {
-      dispatch({ type: LOGIN, payload: data.data })
+      dispatch({ type: LOGIN, payload: response.data })
 
       navigate('/')
     }

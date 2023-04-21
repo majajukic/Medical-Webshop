@@ -1,10 +1,10 @@
-import React from 'react'
+import React, {Fragment} from 'react'
 import { Search as SearchIcon } from '@mui/icons-material'
 import { TextField, InputAdornment, IconButton } from '@mui/material'
 
 const ProductSearch = () => {
   return (
-    <div>
+    <Fragment>
       <TextField
         sx={{
           marginTop: '70px',
@@ -25,7 +25,7 @@ const ProductSearch = () => {
           ),
         }}
       />
-    </div>
+    </Fragment>
   )
 }
 
