@@ -13,14 +13,32 @@ import {
   TextField,
   useTheme,
 } from '@mui/material'
+import { useProizvod } from '../../context/ProizvodContext'
+import { deleteProizvod } from '../../services/proizvodService'
+import { useAuth } from '../../context/AuthContext'
+import { DELETE_PRODUCT } from '../../constants/actionTypes'
 
-const ProductCard = () => {
+const ProductCard = ({ proizvodProp }) => {
   const theme = useTheme()
   const [quantity, setQuantity] = useState(1)
+  const { dispatch: proizvodiDispatch } = useProizvod()
+  const { state } = useAuth()
   const role = getUserRole()
 
   const handleQuantityChange = (event) => {
     setQuantity(event.target.value)
+  }
+
+  const handleDelete = (id) => {
+    if (window.confirm('Da li ste sigurni da želite da obrišete ovaj proizvod iz date apoteke?')) {
+      deleteProizvod(id, state.token)
+        .then(() => {
+          proizvodiDispatch({ type: DELETE_PRODUCT, payload: id })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
   }
 
   return (
@@ -38,32 +56,56 @@ const ProductCard = () => {
         sx={{
           pt: '5%',
         }}
-        image={previewImage}
-        alt="random"
+        src={proizvodProp.slika}
+        alt="slika proizvoda"
       />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h5" component="h2">
-          Persen
+          {proizvodProp.proizvod.nazivProizvoda}
         </Typography>
         <Typography>
-          <strong>Tip:</strong> Lek
+          <strong>Tip: </strong>
+          {proizvodProp.proizvod.tipProizvoda.nazivTipaProizvoda}
         </Typography>
         <Typography>
-          <strong>Proizcodjač:</strong> Galenika
+          <strong>Proizvodjač: </strong>
+          {proizvodProp.proizvod.proizvodjac}
         </Typography>
         <Typography>
-          <strong>Cena:</strong> 350din
+          <strong>Cena: </strong>{' '}
+          {proizvodProp.cenaBezPopusta.toLocaleString('sr-RS', {
+            style: 'currency',
+            currency: 'RSD',
+          })}
         </Typography>
-        <TextField
-          label="Količina"
-          type="number"
-          InputLabelProps={{
-            shrink: true,
-          }}
-          value={quantity}
-          onChange={handleQuantityChange}
-          sx={{ mt: 2, width: '50%' }}
-        />
+        {proizvodProp.popustUprocentima && (
+          <Typography sx={{color: 'red'}}>
+            <strong>Cena sa popustom: </strong>{' '}
+            {proizvodProp.cenaSaPopustom.toLocaleString('sr-RS', {
+              style: 'currency',
+              currency: 'RSD',
+            })}
+          </Typography>
+        )}
+        <Typography>
+          <strong>Apoteka: </strong>
+          {proizvodProp.apoteka.nazivApoteke}
+        </Typography>
+        {role === 'Kupac' && (
+          <TextField
+            label="Količina"
+            type="number"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            inputProps={{
+              min: 1,
+            }}
+            value={quantity}
+            onChange={handleQuantityChange}
+            sx={{ mt: 2, width: '50%' }}
+          />
+        )}
       </CardContent>
       <CardActions sx={{ mt: 1 }}>
         {role === 'Admin' && (
@@ -73,7 +115,7 @@ const ProductCard = () => {
                 sx={{ marginRight: 1, color: theme.palette.primary.main }}
               />
             </Button>
-            <Button size="small">
+            <Button size="small" onClick={() => handleDelete(proizvodProp.apotekaProizvodId)}>
               <DeleteIcon
                 sx={{ marginRight: 1, color: theme.palette.primary.main }}
               />

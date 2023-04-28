@@ -28,3 +28,15 @@ export const getPorudzbineByKupac = async (token) => {
       return error.response.status
     }
 }
+
+export const deletePorudzbina = async (id, token) => {
+  try {
+
+    const authConfig = bearerConfig(token);
+
+    await api.deletePorudzbina(id, authConfig);
+
+  } catch (error) {
+    return error.response.status
+  }
+}

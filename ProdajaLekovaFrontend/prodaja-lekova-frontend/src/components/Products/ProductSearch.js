@@ -1,11 +1,36 @@
-import React, {Fragment} from 'react'
+import React, { Fragment, useState } from 'react'
 import { Search as SearchIcon } from '@mui/icons-material'
 import { TextField, InputAdornment, IconButton } from '@mui/material'
+import { getProizvodiBySearch } from '../../services/proizvodService'
+import { useProizvod } from '../../context/ProizvodContext'
+import { GET_PRODUCTS_BY_SEARCH } from '../../constants/actionTypes'
 
 const ProductSearch = () => {
+  const [searchTerm, setSearchTerm] = useState('')
+  const { dispatch: proizvodiDispatch } = useProizvod()
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value)
+  }
+
+  const handleSearch = (searchTerm) => {
+    getProizvodiBySearch(searchTerm)
+      .then((response) => {
+        proizvodiDispatch({
+          type: GET_PRODUCTS_BY_SEARCH,
+          payload: response.data,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+
   return (
     <Fragment>
       <TextField
+        value={searchTerm}
+        onChange={handleChange}
         sx={{
           marginTop: '70px',
           position: 'absolute',
@@ -14,11 +39,11 @@ const ProductSearch = () => {
           transform: 'translateX(-50%)',
         }}
         variant="outlined"
-        label="Search"
+        label="Pretraga po nazivu proizvoda"
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <IconButton size="small">
+              <IconButton size="small" onClick={() => handleSearch(searchTerm)}>
                 <SearchIcon />
               </IconButton>
             </InputAdornment>

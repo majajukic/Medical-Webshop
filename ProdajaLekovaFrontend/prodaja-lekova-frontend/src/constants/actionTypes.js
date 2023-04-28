@@ -1,3 +1,17 @@
 //auth tipovi akcija
-export const LOGIN = "LOGIN";
-export const LOGOUT = "LOGOUT";
+export const LOGIN = 'LOGIN'
+export const LOGOUT = 'LOGOUT'
+
+//apoteka tipovi akcija
+export const DELETE_PHARMACY = 'DELETE_PHARMACY'
+export const GET_PHARMACIES = 'GET_PHARMACIES'
+
+//proizvod tipovi akcija
+export const DELETE_PRODUCT = 'DELETE_PRODUCT'
+export const GET_PRODUCTS = 'GET_PRODUCTS'
+export const GET_PRODUCTS_ASCENDING = 'GET_PRODUCTS_ASCENDING'
+export const GET_PRODUCTS_DESCENDING = 'GET_PRODUCTS_DESCENDING'
+export const GET_PRODUCTS_DISCOUNT = 'GET_PRODUCTS_DISCOUNT'
+export const GET_PRODUCTS_BY_SEARCH = 'GET_PRODUCTS_BY_SEARCH'
+export const GET_PRODUCTS_BY_TYPE = 'GET_PRODUCTS_BY_TYPE'
+export const GET_PRODUCTS_BY_PHARMACY = 'GET_PRODUCTS_BY_PHARMACY'

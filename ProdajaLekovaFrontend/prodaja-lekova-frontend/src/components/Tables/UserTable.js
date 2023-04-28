@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
+import Pagination from '../Pagination'
 import {
   Box,
   Button,
@@ -9,7 +10,7 @@ import {
   useTheme,
   Table,
 } from '@mui/material'
-import { getKorisnici } from '../../services/korisnikService'
+import { getKorisnici, deleteKorisnik } from '../../services/korisnikService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useAuth } from '../../context/AuthContext'
@@ -40,75 +41,98 @@ const UserTable = () => {
       .catch((error) => {
         console.error(error)
       })
-  }, [])
+  }, [state.token])
+
+  const handleDelete = (id) => {
+    if (window.confirm('Da li ste sigurni da želite da obrišete ovu stavku?')) {
+      deleteKorisnik(id, state.tok)
+        .then(() => {
+          setKorisnici(
+            korisnici.filter((korisnik) => korisnik.korisnikId !== id),
+          )
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }
 
   return (
-    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      <TableHead>
-        <TableRow>
-          {columns.map((column) => (
-            <TableCell
-              key={column.id}
-              align="left"
-              style={{ minWidth: column.minWidth }}
-            >
-              {column.label}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {korisnici.length > 0 && korisnici.map((korisnik) => (
-          <TableRow key={korisnik.korisnikId}>
-            <TableCell align="left">{korisnik.korisnikId}</TableCell>
-            <TableCell align="left">{korisnik.ime}</TableCell>
-            <TableCell align="left">{korisnik.prezime}</TableCell>
-            <TableCell align="left">{korisnik.email}</TableCell>
-            <TableCell align="left">{korisnik.brojTelefona}</TableCell>
-            <TableCell align="left">{korisnik.ulica}</TableCell>
-            <TableCell align="left">{korisnik.broj}</TableCell>
-            <TableCell align="left">{korisnik.mesto}</TableCell>
-            <TableCell align="left">
-              {korisnik.tipKorisnika === 0 ? 'Admin' : 'Kupac'}
-            </TableCell>
-            <TableCell>
-              <Button size="small">
-                <EditIcon
-                  sx={{
-                    marginRight: 1,
-                    color: theme.palette.primary.main,
-                    fontSize: '2rem',
-                  }}
-                />
-              </Button>
-            </TableCell>
-            <TableCell>
-              <Button size="small">
-                <DeleteIcon
-                  sx={{
-                    marginRight: 1,
-                    color: theme.palette.primary.main,
-                    fontSize: '2rem',
-                  }}
-                />
-              </Button>
-            </TableCell>
+    <Fragment>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {columns.map((column) => (
+              <TableCell
+                key={column.id}
+                align="left"
+                style={{ minWidth: column.minWidth }}
+              >
+                {column.label}
+              </TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableBody>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: '50px',
-          marginTop: '50px',
-          marginInlineStart: '10px',
-        }}
-      >
-        <Button variant="contained">Dodaj novog korisnika</Button>
-      </Box>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {korisnici.length > 0 &&
+            korisnici.map((korisnik) => (
+              <TableRow key={korisnik.korisnikId}>
+                <TableCell align="left">{korisnik.korisnikId}</TableCell>
+                <TableCell align="left">{korisnik.ime}</TableCell>
+                <TableCell align="left">{korisnik.prezime}</TableCell>
+                <TableCell align="left">{korisnik.email}</TableCell>
+                <TableCell align="left">{korisnik.brojTelefona}</TableCell>
+                <TableCell align="left">{korisnik.ulica}</TableCell>
+                <TableCell align="left">{korisnik.broj}</TableCell>
+                <TableCell align="left">{korisnik.mesto}</TableCell>
+                <TableCell align="left">
+                  {korisnik.tipKorisnika === 0 ? 'Admin' : 'Kupac'}
+                </TableCell>
+                <TableCell>
+                  <Button size="small">
+                    <EditIcon
+                      sx={{
+                        marginRight: 1,
+                        color: theme.palette.primary.main,
+                        fontSize: '2rem',
+                      }}
+                    />
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="small"
+                    onClick={() => handleDelete(korisnik.korisnikId)}
+                  >
+                    <DeleteIcon
+                      sx={{
+                        marginRight: 1,
+                        color: theme.palette.primary.main,
+                        fontSize: '2rem',
+                      }}
+                    />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: '50px',
+            marginTop: '50px',
+            marginInlineStart: '10px',
+          }}
+        >
+          <Button variant="contained">Dodaj novog korisnika</Button>
+        </Box>
+      </Table>
+      {korisnici.length > 9 && (
+        <Pagination />
+      )}
+    </Fragment>
   )
 }
 

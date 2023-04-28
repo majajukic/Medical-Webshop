@@ -26,7 +26,6 @@ const SharedTableContainer = (props) => {
         {props.isProductTable && <ProductTable />}
         {props.isUserTable && <UserTable />}
       </TableContainer>
-      <Pagination />
     </Fragment>
   )
 }

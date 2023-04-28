@@ -28,3 +28,16 @@ export const getProfil = async (token) => {
     return error.response.status
   }
 }
+
+export const deleteKorisnik = async (id, token) => {
+  try {
+
+    const authConfig = bearerConfig(token);
+
+    await api.getProfil(id, authConfig);
+
+  } catch (error) {
+    return error.response.status
+  }
+}
+

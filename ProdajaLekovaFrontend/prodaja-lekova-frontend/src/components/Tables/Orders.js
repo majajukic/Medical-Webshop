@@ -4,6 +4,7 @@ import { getUserRole } from '../../utilities/authUtilities'
 import {
   getPorudzbine,
   getPorudzbineByKupac,
+  deletePorudzbina,
 } from '../../services/porudzbinaService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import {
@@ -15,6 +16,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Button,
   useTheme,
 } from '@mui/material'
 import Pagination from '../Pagination'
@@ -46,7 +48,23 @@ const Orders = () => {
           console.error(error)
         })
     }
-  }, [])
+  }, [state.token, role])
+
+  const handleDelete = (id) => {
+    if (
+      window.confirm('Da li ste sigurni da želite da obrišete ovu porudžbinu?')
+    ) {
+      deletePorudzbina(id, state.token)
+        .then(() => {
+          setPorudzbine(
+            porudzbine.filter((porudzbina) => porudzbina.porudzbinaId !== id),
+          )
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }
 
   return (
     <Grid item xs={12} sx={{ width: '60%' }}>
@@ -105,14 +123,18 @@ const Orders = () => {
                     )}
                     {role === 'Kupac' && (
                       <TableCell>
-                        <DeleteIcon
-                          sx={{
-                            marginRight: 1,
-                            color: theme.palette.primary.main,
-                            fontSize: '1.5rem',
-                            cursor: 'pointer'
-                          }}
-                        />
+                        <Button
+                          onClick={() => handleDelete(porudzbina.porudzbinaId)}
+                        >
+                          <DeleteIcon
+                            sx={{
+                              marginRight: 1,
+                              color: theme.palette.primary.main,
+                              fontSize: '1.5rem',
+                              cursor: 'pointer',
+                            }}
+                          />
+                        </Button>
                       </TableCell>
                     )}
                   </TableRow>

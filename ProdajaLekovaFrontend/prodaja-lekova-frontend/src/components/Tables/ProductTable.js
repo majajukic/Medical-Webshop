@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { getProizvodi } from '../../services/proizvodService'
+import React, { useState, useEffect, Fragment } from 'react'
+import { getProizvodi, deleteProizvod } from '../../services/proizvodService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
+import Pagination from '../Pagination'
 import {
   TableHead,
   TableRow,
@@ -12,6 +13,7 @@ import {
   Box,
   Table,
 } from '@mui/material'
+import { useAuth } from '../../context/AuthContext'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -22,6 +24,7 @@ const columns = [
 
 const ProductTable = () => {
   const theme = useTheme()
+  const { state } = useAuth()
   const [proizvodi, setProizvodi] = useState([])
 
   useEffect(() => {
@@ -35,76 +38,99 @@ const ProductTable = () => {
       })
   }, [])
 
+  const handleDelete = (id) => {
+    if (window.confirm('Da li ste sigurni da želite da obrišete ovu stavku?')) {
+      deleteProizvod(id, state.token)
+        .then(() => {
+          setProizvodi(
+            proizvodi.filter((proizvod) => proizvod.proizvodId !== id),
+          )
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }
+
   return (
-    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      <TableHead>
-        <TableRow>
-          {columns.map((column) => (
-            <TableCell
-              key={column.id}
-              align="left"
-              style={{ minWidth: column.minWidth }}
-            >
-              {column.label}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {proizvodi.length > 0 && proizvodi.map((proizvod) => (
-          <TableRow key={proizvod.proizvodId}>
-            <TableCell align="left">{proizvod.proizvodId}</TableCell>
-            <TableCell align="left">{proizvod.nazivProizvoda}</TableCell>
-            <TableCell align="left">{proizvod.proizvodjac}</TableCell>
-            <TableCell align="left">
-              {proizvod.tipProizvoda.nazivTipaProizvoda}
-            </TableCell>
-            <TableCell>
-              <Button size="small">
-                <EditIcon
-                  sx={{
-                    marginRight: 1,
-                    color: theme.palette.primary.main,
-                    fontSize: '2rem',
-                  }}
-                />
-              </Button>
-            </TableCell>
-            <TableCell>
-              <Button size="small">
-                <DeleteIcon
-                  sx={{
-                    marginRight: 1,
-                    color: theme.palette.primary.main,
-                    fontSize: '2rem',
-                  }}
-                />
-              </Button>
-            </TableCell>
+    <Fragment>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {columns.map((column) => (
+              <TableCell
+                key={column.id}
+                align="left"
+                style={{ minWidth: column.minWidth }}
+              >
+                {column.label}
+              </TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableBody>
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          marginBottom: '50px',
-          marginTop: '50px',
-          marginLeft: '10px',
-        }}
-      >
-        <Button variant="contained" sx={{ marginRight: '10px' }}>
-          Dodaj novi proizvod
-        </Button>
-        <Button variant="contained" sx={{ marginRight: '10px' }}>
-          Dodaj novi tip proizvoda
-        </Button>
-        <Button variant="contained" sx={{ marginRight: '10px' }}>
-          Dodaj proizvod u apoteku
-        </Button>
-      </Box>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {proizvodi.length > 0 &&
+            proizvodi.map((proizvod) => (
+              <TableRow key={proizvod.proizvodId}>
+                <TableCell align="left">{proizvod.proizvodId}</TableCell>
+                <TableCell align="left">{proizvod.nazivProizvoda}</TableCell>
+                <TableCell align="left">{proizvod.proizvodjac}</TableCell>
+                <TableCell align="left">
+                  {proizvod.tipProizvoda.nazivTipaProizvoda}
+                </TableCell>
+                <TableCell>
+                  <Button size="small">
+                    <EditIcon
+                      sx={{
+                        marginRight: 1,
+                        color: theme.palette.primary.main,
+                        fontSize: '2rem',
+                      }}
+                    />
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <Button
+                    size="small"
+                    onClick={() => handleDelete(proizvod.proizvodId)}
+                  >
+                    <DeleteIcon
+                      sx={{
+                        marginRight: 1,
+                        color: theme.palette.primary.main,
+                        fontSize: '2rem',
+                      }}
+                    />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+        </TableBody>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            marginBottom: '50px',
+            marginTop: '50px',
+            marginLeft: '10px',
+          }}
+        >
+          <Button variant="contained" sx={{ marginRight: '10px' }}>
+            Dodaj novi proizvod
+          </Button>
+          <Button variant="contained" sx={{ marginRight: '10px' }}>
+            Dodaj novi tip proizvoda
+          </Button>
+          <Button variant="contained" sx={{ marginRight: '10px' }}>
+            Dodaj proizvod u apoteku
+          </Button>
+        </Box>
+      </Table>
+      {proizvodi.length > 9 && (
+        <Pagination />
+      )}
+    </Fragment>
   )
 }
 

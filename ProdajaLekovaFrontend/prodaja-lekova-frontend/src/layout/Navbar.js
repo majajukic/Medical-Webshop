@@ -1,7 +1,12 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
+import { useApoteka } from '../context/ApotekaContext'
 import { getUserRole } from '../utilities/authUtilities'
-import { LOGOUT } from '../constants/actionTypes'
+import {
+  GET_PHARMACIES,
+  LOGOUT,
+  GET_PRODUCTS_BY_PHARMACY,
+} from '../constants/actionTypes'
 import {
   AppBar,
   Toolbar,
@@ -17,24 +22,41 @@ import { Link as RouteLink, useNavigate } from 'react-router-dom'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { getApoteke } from '../services/apotekaService'
+import { useProizvod } from '../context/ProizvodContext'
+import { getProizvodiByApoteka } from '../services/proizvodService'
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null)
-  const [apoteke, setApoteke] = useState([])
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
+  const { state: apotekaState, dispatch: apotekaDispatch } = useApoteka()
+  const { dispatch: proizvodiDispatch } = useProizvod()
   const theme = useTheme()
   const role = getUserRole()
 
   useEffect(() => {
     getApoteke()
       .then((response) => {
-        setApoteke(response.data)
+        apotekaDispatch({ type: GET_PHARMACIES, payload: response.data })
       })
       .catch((error) => {
         console.error(error)
       })
-  }, [])
+  }, [apotekaDispatch])
+
+  const handleMenuItemClick = (apotekaId) => {
+    getProizvodiByApoteka(apotekaId)
+      .then((response) => {
+        proizvodiDispatch({
+          type: GET_PRODUCTS_BY_PHARMACY,
+          payload: response.data,
+        })
+        handleMenuClose()
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
@@ -79,11 +101,15 @@ const Navbar = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-          {apoteke.length > 0 && apoteke.map((apoteka) => (
-            <MenuItem key={apoteka.apotekaId} onClick={handleMenuClose}>
-              {apoteka.nazivApoteke}
-            </MenuItem>
-          ))}
+            {apotekaState.apoteke.length > 0 &&
+              apotekaState.apoteke.map((apoteka) => (
+                <MenuItem
+                  key={apoteka.apotekaId}
+                  onClick={() => handleMenuItemClick(apoteka.apotekaId)}
+                >
+                  {apoteka.nazivApoteke}
+                </MenuItem>
+              ))}
           </Menu>
         </Box>
         {role === 'Admin' && (
