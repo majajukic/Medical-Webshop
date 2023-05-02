@@ -101,7 +101,11 @@ namespace ProdajaLekovaBackend.Controllers
         {
 
             try
-            { 
+            {
+                var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
+
+                if (existingKorisnik != null) return BadRequest("Korisnik sa datom mejl adresom vec postoji u bazi");
+
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
 
                 var korisnik = _mapper.Map<Korisnik>(korisnikDTO);
@@ -130,6 +134,10 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
+
+                if (existingKorisnik != null) return BadRequest("Korisnik sa datom mejl adresom vec postoji u bazi");
+
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikDTO.KorisnikId);
 
                 if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
