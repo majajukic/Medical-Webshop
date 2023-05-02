@@ -1,8 +1,7 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect } from 'react'
 import { getProizvodi, deleteProizvod } from '../../services/proizvodService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import Pagination from '../Pagination'
 import {
   TableHead,
   TableRow,
@@ -14,6 +13,7 @@ import {
   Table,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
+import ProductDialog from '../Dialogs/ProductDialog'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -26,6 +26,7 @@ const ProductTable = () => {
   const theme = useTheme()
   const { state } = useAuth()
   const [proizvodi, setProizvodi] = useState([])
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     console.log('proizvod useeffecr')
@@ -52,9 +53,17 @@ const ProductTable = () => {
     }
   }
 
+  const handleOpen = () => {
+    setDialogOpen(true)
+  }
+
+  const handleAddNewProizvod = (newProizvod) => {
+    setProizvodi([...proizvodi, newProizvod]);
+  };
+
   return (
-    <Fragment>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      {proizvodi.length > 0 && (
         <TableHead>
           <TableRow>
             {columns.map((column) => (
@@ -68,69 +77,75 @@ const ProductTable = () => {
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {proizvodi.length > 0 &&
-            proizvodi.map((proizvod) => (
-              <TableRow key={proizvod.proizvodId}>
-                <TableCell align="left">{proizvod.proizvodId}</TableCell>
-                <TableCell align="left">{proizvod.nazivProizvoda}</TableCell>
-                <TableCell align="left">{proizvod.proizvodjac}</TableCell>
-                <TableCell align="left">
-                  {proizvod.tipProizvoda.nazivTipaProizvoda}
-                </TableCell>
-                <TableCell>
-                  <Button size="small">
-                    <EditIcon
-                      sx={{
-                        marginRight: 1,
-                        color: theme.palette.primary.main,
-                        fontSize: '2rem',
-                      }}
-                    />
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    onClick={() => handleDelete(proizvod.proizvodId)}
-                  >
-                    <DeleteIcon
-                      sx={{
-                        marginRight: 1,
-                        color: theme.palette.primary.main,
-                        fontSize: '2rem',
-                      }}
-                    />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-start',
-            alignItems: 'center',
-            marginBottom: '50px',
-            marginTop: '50px',
-            marginLeft: '10px',
-          }}
-        >
-          <Button variant="contained" sx={{ marginRight: '10px' }}>
-            Dodaj novi proizvod
-          </Button>
-          <Button variant="contained" sx={{ marginRight: '10px' }}>
-            Dodaj novi tip proizvoda
-          </Button>
-          <Button variant="contained" sx={{ marginRight: '10px' }}>
-            Dodaj proizvod u apoteku
-          </Button>
-        </Box>
-      </Table>
-      {proizvodi.length > 9 && (
-        <Pagination />
       )}
-    </Fragment>
+      <TableBody>
+        {proizvodi.length > 0 ? (
+          proizvodi.map((proizvod) => (
+            <TableRow key={proizvod.proizvodId}>
+              <TableCell align="left">{proizvod.proizvodId}</TableCell>
+              <TableCell align="left">{proizvod.nazivProizvoda}</TableCell>
+              <TableCell align="left">{proizvod.proizvodjac}</TableCell>
+              <TableCell align="left">
+                {proizvod.tipProizvoda.nazivTipaProizvoda}
+              </TableCell>
+              <TableCell>
+                <Button size="small">
+                  <EditIcon
+                    sx={{
+                      marginRight: 1,
+                      color: theme.palette.primary.main,
+                      fontSize: '2rem',
+                    }}
+                  />
+                </Button>
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="small"
+                  onClick={() => handleDelete(proizvod.proizvodId)}
+                >
+                  <DeleteIcon
+                    sx={{
+                      marginRight: 1,
+                      color: theme.palette.primary.main,
+                      fontSize: '2rem',
+                    }}
+                  />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow variant="subtitle2">
+            <TableCell>Nema proizvoda</TableCell>
+          </TableRow>
+        )}
+        <TableRow>
+          <TableCell colSpan={4}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                marginBottom: '50px',
+                marginTop: '50px',
+                marginLeft: '10px',
+              }}
+            >
+              <Button variant="contained" sx={{ marginRight: '10px' }} onClick={handleOpen}>
+                Dodaj novi proizvod
+              </Button>
+              {dialogOpen && (
+                <ProductDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} onAddNew={handleAddNewProizvod} />
+              )}
+              <Button variant="contained" sx={{ marginRight: '10px' }}>
+                Dodaj proizvod u apoteku
+              </Button>
+            </Box>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   )
 }
 

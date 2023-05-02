@@ -4,10 +4,12 @@ import { TextField, InputAdornment, IconButton } from '@mui/material'
 import { getProizvodiBySearch } from '../../services/proizvodService'
 import { useProizvod } from '../../context/ProizvodContext'
 import { GET_PRODUCTS_BY_SEARCH } from '../../constants/actionTypes'
+import { useNavigate } from 'react-router-dom'
 
 const ProductSearch = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const navigate = useNavigate()
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value)
@@ -20,6 +22,7 @@ const ProductSearch = () => {
           type: GET_PRODUCTS_BY_SEARCH,
           payload: response.data,
         })
+        navigate("/")
       })
       .catch((error) => {
         console.error(error)

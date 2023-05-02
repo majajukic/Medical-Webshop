@@ -1,8 +1,8 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getApoteke, deleteApoteka } from '../../services/apotekaService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
-import Pagination from '../Pagination'
+import PharmacyDialog from '../Dialogs/PharmacyDialog'
 import {
   TableHead,
   TableRow,
@@ -23,6 +23,7 @@ const columns = [
 ]
 
 const PharmacyTable = () => {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const theme = useTheme()
   const { state } = useAuth()
   const { state: apotekaState, dispatch } = useApoteka()
@@ -51,9 +52,13 @@ const PharmacyTable = () => {
     }
   }
 
+  const handleOpen = () => {
+    setDialogOpen(true)
+  }
+
   return (
-    <Fragment>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      {apotekaState.apoteke.length > 0 && (
         <TableHead>
           <TableRow>
             {columns.map((column) => (
@@ -67,55 +72,66 @@ const PharmacyTable = () => {
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {apotekaState.apoteke.length > 0 &&
-            apotekaState.apoteke.map((apoteka) => (
-              <TableRow key={apoteka.apotekaId}>
-                <TableCell align="left">{apoteka.apotekaId}</TableCell>
-                <TableCell align="left">{apoteka.nazivApoteke}</TableCell>
-                <TableCell>
-                  <Button size="small">
-                    <EditIcon
-                      sx={{
-                        marginRight: 1,
-                        color: theme.palette.primary.main,
-                        fontSize: '2rem',
-                      }}
-                    />
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <Button
-                    size="small"
-                    onClick={() => handleDelete(apoteka.apotekaId)}
-                  >
-                    <DeleteIcon
-                      sx={{
-                        marginRight: 1,
-                        color: theme.palette.primary.main,
-                        fontSize: '2rem',
-                      }}
-                    />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-strat',
-            alignItems: 'left',
-            marginBottom: '50px',
-            marginTop: '50px',
-            marginLeft: '10px',
-          }}
-        >
-          <Button variant="contained">Dodaj novu apoteku</Button>
-        </Box>
-      </Table>
-      {apotekaState.apoteke.length > 9 && <Pagination />}
-    </Fragment>
+      )}
+      <TableBody>
+        {apotekaState.apoteke.length > 0 ? (
+          apotekaState.apoteke.map((apoteka) => (
+            <TableRow key={apoteka.apotekaId}>
+              <TableCell align="left">{apoteka.apotekaId}</TableCell>
+              <TableCell align="left">{apoteka.nazivApoteke}</TableCell>
+              <TableCell>
+                <Button size="small">
+                  <EditIcon
+                    sx={{
+                      marginRight: 1,
+                      color: theme.palette.primary.main,
+                      fontSize: '2rem',
+                    }}
+                  />
+                </Button>
+              </TableCell>
+              <TableCell>
+                <Button
+                  size="small"
+                  onClick={() => handleDelete(apoteka.apotekaId)}
+                >
+                  <DeleteIcon
+                    sx={{
+                      marginRight: 1,
+                      color: theme.palette.primary.main,
+                      fontSize: '2rem',
+                    }}
+                  />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow variant="subtitle2">
+            <TableCell>Nema apoteka</TableCell>
+          </TableRow>
+        )}
+        <TableRow>
+          <TableCell colSpan={4}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'left',
+                marginBottom: '50px',
+                marginTop: '50px',
+                marginLeft: '10px',
+              }}
+            >
+              <Button variant="contained" onClick={handleOpen}>Dodaj novu apoteku</Button>
+              {dialogOpen && (
+                <PharmacyDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
+              )}
+            </Box>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   )
 }
 

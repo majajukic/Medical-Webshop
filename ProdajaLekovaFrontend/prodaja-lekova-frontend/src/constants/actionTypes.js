@@ -5,6 +5,7 @@ export const LOGOUT = 'LOGOUT'
 //apoteka tipovi akcija
 export const DELETE_PHARMACY = 'DELETE_PHARMACY'
 export const GET_PHARMACIES = 'GET_PHARMACIES'
+export const CREATE_PHARMACY = 'CREATE_PHARMACY'
 
 //proizvod tipovi akcija
 export const DELETE_PRODUCT = 'DELETE_PRODUCT'

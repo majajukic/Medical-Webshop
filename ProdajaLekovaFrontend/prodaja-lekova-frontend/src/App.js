@@ -23,6 +23,8 @@ const App = () => {
             <ThemeProvider theme={theme}>
               <Routes>
                 <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
+                <Route path="/apoteka/:apotekaId" exact element={<Layout><ProductsPage /></Layout>} />
+                <Route path="/kategorija/:kategorijaId" exact element={<Layout><ProductsPage /></Layout>}  />
                 <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
                 <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
                 <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />

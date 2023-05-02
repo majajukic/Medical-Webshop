@@ -52,6 +52,7 @@ const Navbar = () => {
           payload: response.data,
         })
         handleMenuClose()
+        navigate(`/apoteka/${apotekaId}`)
       })
       .catch((error) => {
         console.error(error)

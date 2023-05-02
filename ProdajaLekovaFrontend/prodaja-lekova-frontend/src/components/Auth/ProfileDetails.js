@@ -1,13 +1,16 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { Paper, Grid, Box, Typography, Button } from '@mui/material'
-import { getProfil } from '../../services/korisnikService'
+import { getProfil, deleteKorisnik } from '../../services/korisnikService'
 import { getUserRole } from '../../utilities/authUtilities'
 import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { LOGOUT } from '../../constants/actionTypes'
 
 const ProfileDetails = () => {
   const [profileDetails, setProfileDetails] = useState({})
   const role = getUserRole()
-  const { state } = useAuth()
+  const { state, dispatch } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     console.log('korisnik useeffecr')
@@ -18,7 +21,22 @@ const ProfileDetails = () => {
       .catch((error) => {
         console.error(error)
       })
-  }, [])
+  }, [state.token])
+
+  const handleDelete = (id) => {
+    if (window.confirm('Da li ste sigurni da želite da obrišete profil?')) {
+      deleteKorisnik(id, state.token)
+        .then(() => {
+          if (state.token) {
+            dispatch({ type: LOGOUT })
+          }
+          navigate('/prijaviSe')
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }
 
   return (
     <Grid item xs={12} md={4} lg={3} sx={{ width: '30%' }}>
@@ -47,19 +65,19 @@ const ProfileDetails = () => {
               </Typography>
               <Typography color="text.secondary">
                 <strong>Broj telefona:</strong>{' '}
-                {role === 'Kupac'
+                {(role === 'Kupac' &&  profileDetails.brojTelefona)
                   ? profileDetails.brojTelefona
                   : 'Nema podataka o broju telefona'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Ulica i broj:</strong>{' '}
-                {role === 'Kupac'
+                {(role === 'Kupac' &&  profileDetails.ulica)
                   ? profileDetails.ulica + ' ' + profileDetails.broj
                   : 'Nema podataka o ulici i broju'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Mesto:</strong>{' '}
-                {role === 'Kupac'
+                {(role === 'Kupac' &&  profileDetails.mesto)
                   ? profileDetails.mesto
                   : 'Nema podataka o mestu'}
               </Typography>
@@ -75,7 +93,9 @@ const ProfileDetails = () => {
             }}
           >
             <Button variant="outlined">Uredi nalog</Button>
-            <Button variant="contained">Obriši nalog</Button>
+            <Button variant="contained" onClick={() => handleDelete(profileDetails.korisnikId)}>
+              Obriši nalog
+            </Button>
           </Box>
         </Fragment>
       </Paper>

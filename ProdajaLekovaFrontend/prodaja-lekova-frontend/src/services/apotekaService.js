@@ -12,6 +12,20 @@ export const getApoteke = async () => {
   }
 }
 
+export const createApoteka = async (token, newPharmacy) => {
+  try {
+
+    const authConfig = bearerConfig(token)
+
+    const data = await api.createApoteka(newPharmacy, authConfig)
+
+    return data
+
+  }catch (error) {
+    return error.response.status
+  }
+}
+
 export const deleteApoteka = async (id, token) => {
   try {
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, Fragment } from 'react'
 import { Button, Box } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import {
   getTipoviProizvoda,
   getProizvodiByTip,
@@ -11,6 +12,7 @@ import { GET_PRODUCTS, GET_PRODUCTS_BY_TYPE } from '../../constants/actionTypes'
 const ProductCategories = () => {
   const [tipoviProivoda, setTipoviProizvoda] = useState([])
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const navigate = useNavigate()
 
   useEffect(() => {
     getTipoviProizvoda()
@@ -22,13 +24,14 @@ const ProductCategories = () => {
       })
   }, [proizvodiDispatch])
 
-  const handleClick = (type) => {
-    getProizvodiByTip(type)
+  const handleClick = (tipId) => {
+    getProizvodiByTip(tipId)
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_BY_TYPE,
           payload: response.data,
         })
+        navigate(`/kategorija/${tipId}`)
       })
       .catch((error) => {
         console.error(error)
@@ -42,6 +45,7 @@ const ProductCategories = () => {
           type: GET_PRODUCTS,
           payload: response.data,
         })
+        navigate("/")
       })
       .catch((error) => {
         console.error(error)

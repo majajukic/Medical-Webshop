@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   Button,
   Box,
@@ -22,6 +23,7 @@ import {
 const ProductSorting = () => {
   const [sortDirection, setSortDirection] = useState('ascending')
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const navigate = useNavigate()
 
   const handleSortDirectionChange = (event) => {
     setSortDirection(event.target.value)
@@ -35,6 +37,7 @@ const ProductSorting = () => {
             type: GET_PRODUCTS_ASCENDING,
             payload: response.data,
           })
+          navigate("/")
         })
         .catch((error) => {
           console.error(error)
@@ -46,6 +49,7 @@ const ProductSorting = () => {
             type: GET_PRODUCTS_DESCENDING,
             payload: response.data,
           })
+          navigate("/")
         })
         .catch((error) => {
           console.error(error)
@@ -60,6 +64,7 @@ const ProductSorting = () => {
           type: GET_PRODUCTS_DISCOUNT,
           payload: response.data,
         })
+        navigate("/")
       })
       .catch((error) => {
         console.error(error)

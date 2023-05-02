@@ -81,16 +81,18 @@ const Orders = () => {
             {role === 'Admin' ? 'Sve porudžbine' : 'Moje porudžbine'}
           </Typography>
           <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Broj porudžbine</TableCell>
-                <TableCell>Datum kreiranja</TableCell>
-                <TableCell>Ukupan iznos</TableCell>
-                <TableCell>Plaćena porudžbina?</TableCell>
-                <TableCell>Datum plaćanja</TableCell>
-                {role === 'Admin' && <TableCell>Korisnik</TableCell>}
-              </TableRow>
-            </TableHead>
+            {porudzbine.length > 0 && (
+              <TableHead>
+                <TableRow>
+                  <TableCell>Broj porudžbine</TableCell>
+                  <TableCell>Datum kreiranja</TableCell>
+                  <TableCell>Ukupan iznos</TableCell>
+                  <TableCell>Plaćena porudžbina?</TableCell>
+                  <TableCell>Datum plaćanja</TableCell>
+                  {role === 'Admin' && <TableCell>Korisnik</TableCell>}
+                </TableRow>
+              </TableHead>
+            )}
             <TableBody>
               {porudzbine.length > 0 ? (
                 porudzbine.map((porudzbina) => (
@@ -146,7 +148,7 @@ const Orders = () => {
               )}
             </TableBody>
           </Table>
-          {porudzbine.length > 9 && <Pagination />}
+          <Pagination />
         </Fragment>
       </Paper>
     </Grid>

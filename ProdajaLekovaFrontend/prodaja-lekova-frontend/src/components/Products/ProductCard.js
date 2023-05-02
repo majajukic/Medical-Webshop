@@ -1,5 +1,4 @@
 import React, { Fragment, useState } from 'react'
-import previewImage from '../../assets/image-preview.png'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { getUserRole } from '../../utilities/authUtilities'
@@ -14,7 +13,7 @@ import {
   useTheme,
 } from '@mui/material'
 import { useProizvod } from '../../context/ProizvodContext'
-import { deleteProizvod } from '../../services/proizvodService'
+import { deleteProizvodFromApoteka } from '../../services/proizvodService'
 import { useAuth } from '../../context/AuthContext'
 import { DELETE_PRODUCT } from '../../constants/actionTypes'
 
@@ -29,11 +28,15 @@ const ProductCard = ({ proizvodProp }) => {
     setQuantity(event.target.value)
   }
 
-  const handleDelete = (id) => {
-    if (window.confirm('Da li ste sigurni da želite da obrišete ovaj proizvod iz date apoteke?')) {
-      deleteProizvod(id, state.token)
+  const handleDelete = (apotekaId) => {
+    if (
+      window.confirm(
+        'Da li ste sigurni da želite da obrišete ovaj proizvod iz date apoteke?',
+      )
+    ) {
+      deleteProizvodFromApoteka(apotekaId, state.token)
         .then(() => {
-          proizvodiDispatch({ type: DELETE_PRODUCT, payload: id })
+          proizvodiDispatch({ type: DELETE_PRODUCT, payload: apotekaId })
         })
         .catch((error) => {
           console.error(error)
@@ -79,7 +82,7 @@ const ProductCard = ({ proizvodProp }) => {
           })}
         </Typography>
         {proizvodProp.popustUprocentima && (
-          <Typography sx={{color: 'red'}}>
+          <Typography sx={{ color: 'red' }}>
             <strong>Cena sa popustom: </strong>{' '}
             {proizvodProp.cenaSaPopustom.toLocaleString('sr-RS', {
               style: 'currency',
@@ -106,6 +109,14 @@ const ProductCard = ({ proizvodProp }) => {
             sx={{ mt: 2, width: '50%' }}
           />
         )}
+        {role === 'Admin' && (
+          <Typography>
+            <strong>Stanje zaliha: </strong>
+            {proizvodProp.stanjeZaliha > 0
+              ? proizvodProp.stanjeZaliha
+              : 'Trenutno nema na stanju'}
+          </Typography>
+        )}
       </CardContent>
       <CardActions sx={{ mt: 1 }}>
         {role === 'Admin' && (
@@ -115,18 +126,24 @@ const ProductCard = ({ proizvodProp }) => {
                 sx={{ marginRight: 1, color: theme.palette.primary.main }}
               />
             </Button>
-            <Button size="small" onClick={() => handleDelete(proizvodProp.apotekaProizvodId)}>
+            <Button
+              size="small"
+              onClick={() => handleDelete(proizvodProp.apotekaProizvodId)}
+            >
               <DeleteIcon
                 sx={{ marginRight: 1, color: theme.palette.primary.main }}
               />
             </Button>
           </Fragment>
         )}
-        {role === 'Kupac' && (
-          <Button size="medium" variant="contained">
-            Dodaj u korpu
-          </Button>
-        )}
+        {role === 'Kupac' &&
+          (proizvodProp.stanjeZaliha > 0 ? (
+            <Button size="medium" variant="contained">
+              Dodaj u korpu
+            </Button>
+          ) : (
+            <Typography>Proizvoda trenutno nema na stanju.</Typography>
+          ))}
       </CardActions>
     </Card>
   )
