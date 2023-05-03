@@ -2,7 +2,7 @@
 
 namespace ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs
 {
-    public class ApotekaProizvodUpdateDto
+    public class ApotekaProizvodUpdateDto : IValidatableObject
     {
         [Required(ErrorMessage = "Obavezno je uneti id.")]
         public int ApotekaProizvodId { get; set; }
@@ -23,5 +23,21 @@ namespace ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs
 
         public decimal? CenaSaPopustom { get; set; }
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (StanjeZaliha <= 0)
+            {
+                yield return new ValidationResult(
+                  "Stanje zaliha mora biti vece od 0.",
+                  new[] { "ApotekaProizvodUpdateDto" });
+            }
+
+            if (PopustUprocentima <= 0 || CenaBezPopusta <= 0)
+            {
+                yield return new ValidationResult(
+                  "Popust i cena moraju biti vece od 0.",
+                  new[] { "ApotekaProizvodUpdateDto" });
+            }
+        }
     }
 }
