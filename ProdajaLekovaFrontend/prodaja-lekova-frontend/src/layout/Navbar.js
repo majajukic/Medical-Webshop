@@ -6,6 +6,7 @@ import {
   GET_PHARMACIES,
   LOGOUT,
   GET_PRODUCTS_BY_PHARMACY,
+  GET_PRODUCTS
 } from '../constants/actionTypes'
 import {
   AppBar,
@@ -23,7 +24,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { getApoteke } from '../services/apotekaService'
 import { useProizvod } from '../context/ProizvodContext'
-import { getProizvodiByApoteka } from '../services/proizvodService'
+import { getProizvodiByApoteka, getProizvodiHomePage } from '../services/proizvodService'
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null)
@@ -59,6 +60,18 @@ const Navbar = () => {
       })
   }
 
+  const handleDisplayAll = () => {
+    getProizvodiHomePage()
+        .then((response) => {
+          proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
+
+          navigate("/")
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+  }
+
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget)
   }
@@ -84,7 +97,7 @@ const Navbar = () => {
           alignItems: 'center',
         }}
       >
-        <Link component={RouteLink} to="/" sx={{ color: 'white' }}>
+        <Link onClick={handleDisplayAll} sx={{ color: 'white', cursor: 'pointer' }}>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             PharmacyGO
           </Typography>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Button,
   Dialog,
@@ -10,7 +10,7 @@ import {
   Box,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
-import { createProizvod, getProizvodById } from '../../services/proizvodService'
+import { createProizvod, getProizvodById, getTipoviProizvoda } from '../../services/proizvodService'
 
 const initialState = {
   nazivProizvoda: '',
@@ -20,7 +20,19 @@ const initialState = {
 
 const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
   const [input, setInput] = useState(initialState)
+  const [tipoviProizvoda, setTipoviProizvoda] = useState([])
   const { state } = useAuth()
+
+  useEffect(() => {
+    console.log('dropdown useeffect')
+    getTipoviProizvoda()
+      .then((response) => {
+        setTipoviProizvoda(response.data)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }, [])
 
   const handleClose = () => {
     setDialogOpen(false)
@@ -93,11 +105,9 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             required
           >
             <MenuItem value={0}>Izaberite tip proizvoda</MenuItem>
-            <MenuItem value={1}>Lek</MenuItem>
-            <MenuItem value={2}>Vitamin</MenuItem>
-            <MenuItem value={3}>Suplement</MenuItem>
-            <MenuItem value={4}>Kozmetika</MenuItem>
-            <MenuItem value={5}>Medicinsko sredstvo</MenuItem>
+            {tipoviProizvoda.map((tip) => (
+              <MenuItem key={tip.tipProizvodaId} value={tip.tipProizvodaId}>{tip.nazivTipaProizvoda}</MenuItem>
+            ))}
           </Select>
         </DialogContent>
         <DialogActions>

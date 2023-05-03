@@ -7,6 +7,7 @@ import {
   GET_PRODUCTS_BY_SEARCH,
   GET_PRODUCTS_BY_TYPE,
   GET_PRODUCTS_BY_PHARMACY,
+  ADD_PRODUCT_TO_PHARMACY,
 } from '../constants/actionTypes'
 
 const proizvodReducer = (state, action) => {
@@ -45,6 +46,11 @@ const proizvodReducer = (state, action) => {
       return {
         ...state,
         proizvodi: action.payload,
+      }
+    case ADD_PRODUCT_TO_PHARMACY:
+      return {
+        ...state,
+        proizvodi: [...state.proizvodi, action.payload],
       }
     case DELETE_PRODUCT:
       return {

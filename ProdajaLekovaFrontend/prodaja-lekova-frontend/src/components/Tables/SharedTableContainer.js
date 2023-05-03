@@ -1,5 +1,4 @@
 import React, { Fragment } from 'react'
-import Pagination from '../Pagination'
 import PharmacyTable from './PharmacyTable'
 import ProductTable from './ProductTable.js'
 import UserTable from './UserTable'
@@ -26,7 +25,6 @@ const SharedTableContainer = (props) => {
         {props.isProductTable && <ProductTable />}
         {props.isUserTable && <UserTable />}
       </TableContainer>
-      <Pagination />
     </Fragment>
   )
 }

@@ -3,8 +3,7 @@ import ProductCard from './ProductCard'
 import ProductCategories from './ProductCategories'
 import ProductSorting from './ProductSorting'
 import ProductSearch from './ProductSearch'
-import { Container, Grid, Typography } from '@mui/material'
-import Pagination from '../Pagination'
+import { Container, Grid, Typography, Pagination } from '@mui/material'
 import { useProizvod } from '../../context/ProizvodContext'
 import {
   getProizvodiHomePage,

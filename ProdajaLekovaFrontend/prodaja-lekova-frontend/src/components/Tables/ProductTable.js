@@ -13,7 +13,10 @@ import {
   Table,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
+import { useProizvod } from '../../context/ProizvodContext'
 import ProductDialog from '../Dialogs/ProductDialog'
+import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
+import { ADD_PRODUCT_TO_PHARMACY } from '../../constants/actionTypes'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -27,6 +30,7 @@ const ProductTable = () => {
   const { state } = useAuth()
   const [proizvodi, setProizvodi] = useState([])
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [secondDialogOpen, setSecondDialogOpen] = useState(false);
 
   useEffect(() => {
     console.log('proizvod useeffecr')
@@ -55,6 +59,10 @@ const ProductTable = () => {
 
   const handleOpen = () => {
     setDialogOpen(true)
+  }
+
+  const handleSecondOpen = () => {
+    setSecondDialogOpen(true)
   }
 
   const handleAddNewProizvod = (newProizvod) => {
@@ -138,9 +146,12 @@ const ProductTable = () => {
               {dialogOpen && (
                 <ProductDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} onAddNew={handleAddNewProizvod} />
               )}
-              <Button variant="contained" sx={{ marginRight: '10px' }}>
+              <Button variant="contained" sx={{ marginRight: '10px' }} onClick={handleSecondOpen}>
                 Dodaj proizvod u apoteku
               </Button>
+              {secondDialogOpen && (
+                <ProductPharmacyDialog dialogOpen={secondDialogOpen} setDialogOpen={setSecondDialogOpen} />
+              )}
             </Box>
           </TableCell>
         </TableRow>

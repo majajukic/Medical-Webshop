@@ -8,6 +8,7 @@ import {
   TableBody,
   useTheme,
   Table,
+  Pagination,
 } from '@mui/material'
 import { getKorisnici, deleteKorisnik } from '../../services/korisnikService'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -31,7 +32,7 @@ const UserTable = () => {
   const theme = useTheme()
   const { state } = useAuth()
   const [korisnici, setKorisnici] = useState([])
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     console.log('korisnik useeffecr')
@@ -63,8 +64,8 @@ const UserTable = () => {
   }
 
   const handleAddNewKorisnik = (newKorisnik) => {
-    setKorisnici([...korisnici, newKorisnik]);
-  };
+    setKorisnici([...korisnici, newKorisnik])
+  }
 
   return (
     <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -141,14 +142,21 @@ const UserTable = () => {
                 marginInlineStart: '10px',
               }}
             >
-              <Button variant="contained" onClick={handleOpen}>Dodaj novog korisnika</Button>
+              <Button variant="contained" onClick={handleOpen}>
+                Dodaj novog korisnika
+              </Button>
               {dialogOpen && (
-                <UserDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} onAddNew={handleAddNewKorisnik} />
+                <UserDialog
+                  dialogOpen={dialogOpen}
+                  setDialogOpen={setDialogOpen}
+                  onAddNew={handleAddNewKorisnik}
+                />
               )}
             </Box>
           </TableCell>
         </TableRow>
       </TableBody>
+      <Pagination />
     </Table>
   )
 }

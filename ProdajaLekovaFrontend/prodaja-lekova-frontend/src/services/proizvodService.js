@@ -61,6 +61,16 @@ export const getProizvodiByApoteka = async (pharmacy) => {
   }
 }
 
+export const getProizvodByApoteka = async (pharmacyId) => {
+  try {
+    const data = await api.getProizvodByApoteka(pharmacyId)
+
+    return data
+  } catch (error) {
+    return error.response.status
+  }
+}
+
 export const getProizvodiCenaRastuce = async () => {
   try {
     const data = await api.getProizvodiCenaRastuce()
@@ -108,6 +118,18 @@ export const createProizvod = async (token, newProduct) => {
     const authConfig = bearerConfig(token)
 
     const data = await api.createProizvod(newProduct, authConfig)
+
+    return data
+  } catch (error) {
+    return error.response.status
+  }
+}
+
+export const addProizvodToApoteka = async (token, newProduct) => {
+  try {
+    const authConfig = bearerConfig(token)
+
+    const data = await api.addProizvodToApoteka(newProduct, authConfig)
 
     return data
   } catch (error) {

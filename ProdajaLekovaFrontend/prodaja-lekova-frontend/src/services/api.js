@@ -21,10 +21,12 @@ export const getProizvodiCenaOpadajuce = () => BASE_URL.get('/api/apotekaProizvo
 export const getProizvodiPopust = () => BASE_URL.get('/api/apotekaProizvod/naPopustu')
 export const getProizvodiBySearch = (searchTerm) => BASE_URL.get(`/api/apotekaProizvod?searchTerm=${searchTerm}`)
 export const getProizvodiByApoteka = (pharmacy) => BASE_URL.get(`/api/apotekaProizvod?apotekaId=${pharmacy}`)
+export const getProizvodByApoteka = (pharmacyId) => BASE_URL.get(`/api/apotekaProizvod/${pharmacyId}`)
 export const getProizvodiByTip = (type) => BASE_URL.get(`/api/apotekaProizvod/byTipProizvoda?tipProizvodaId=${type}`)
 export const deleteProizvod = (id, authConfig) => BASE_URL.delete(`/api/proizvod/${id}`, authConfig)
 export const deleteProizvodFromApoteka = (id, authConfig) => BASE_URL.delete(`/api/apotekaProizvod/${id}`, authConfig)
 export const createProizvod = (newProduct, authConfig) => BASE_URL.post(`/api/proizvod`, newProduct, authConfig)
+export const addProizvodToApoteka = (newProduct, authConfig) => BASE_URL.post(`/api/apotekaProizvod`, newProduct, authConfig)
 
 //API endpointi za korisnike:
 export const getKorisnici = (authConfig) => BASE_URL.get('/api/korisnik', authConfig)
