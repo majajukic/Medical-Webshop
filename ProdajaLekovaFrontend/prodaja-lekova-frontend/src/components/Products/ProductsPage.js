@@ -55,7 +55,7 @@ const ProductsPage = () => {
             </Typography>
           )}
         </Grid>
-        <Pagination />
+        <Pagination sx={{ marginTop: '30px' }} />
       </Container>
     </Fragment>
   )

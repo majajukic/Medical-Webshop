@@ -13,10 +13,8 @@ import {
   Table,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
-import { useProizvod } from '../../context/ProizvodContext'
 import ProductDialog from '../Dialogs/ProductDialog'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
-import { ADD_PRODUCT_TO_PHARMACY } from '../../constants/actionTypes'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -29,8 +27,10 @@ const ProductTable = () => {
   const theme = useTheme()
   const { state } = useAuth()
   const [proizvodi, setProizvodi] = useState([])
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [secondDialogOpen, setSecondDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [secondDialogOpen, setSecondDialogOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const [isEdit, setIsEdit] = useState(false)
 
   useEffect(() => {
     console.log('proizvod useeffecr')
@@ -65,9 +65,19 @@ const ProductTable = () => {
     setSecondDialogOpen(true)
   }
 
+  const handleIsEdit = (proizvod) => {
+    setIsEdit(true)
+    setSelectedProduct(proizvod)
+    setDialogOpen(true)
+  }
+
   const handleAddNewProizvod = (newProizvod) => {
-    setProizvodi([...proizvodi, newProizvod]);
-  };
+    setProizvodi([...proizvodi, newProizvod])
+  }
+
+  const handleEditProizvod = (proizvodi) => {
+    setProizvodi(proizvodi)
+  }
 
   return (
     <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -97,7 +107,7 @@ const ProductTable = () => {
                 {proizvod.tipProizvoda.nazivTipaProizvoda}
               </TableCell>
               <TableCell>
-                <Button size="small">
+                <Button size="small" onClick={() => handleIsEdit(proizvod)}>
                   <EditIcon
                     sx={{
                       marginRight: 1,
@@ -140,19 +150,44 @@ const ProductTable = () => {
                 marginLeft: '10px',
               }}
             >
-              <Button variant="contained" sx={{ marginRight: '10px' }} onClick={handleOpen}>
+              <Button
+                variant="contained"
+                sx={{ marginRight: '10px' }}
+                onClick={handleOpen}
+              >
                 Dodaj novi proizvod
               </Button>
-              {dialogOpen && (
-                <ProductDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} onAddNew={handleAddNewProizvod} />
+              {dialogOpen && !isEdit && (
+                <ProductDialog
+                  dialogOpen={dialogOpen}
+                  setDialogOpen={setDialogOpen}
+                  onAddNew={handleAddNewProizvod}
+                />
               )}
-              <Button variant="contained" sx={{ marginRight: '10px' }} onClick={handleSecondOpen}>
+              <Button
+                variant="contained"
+                sx={{ marginRight: '10px' }}
+                onClick={handleSecondOpen}
+              >
                 Dodaj proizvod u apoteku
               </Button>
               {secondDialogOpen && (
-                <ProductPharmacyDialog dialogOpen={secondDialogOpen} setDialogOpen={setSecondDialogOpen} />
+                <ProductPharmacyDialog
+                  dialogOpen={secondDialogOpen}
+                  setDialogOpen={setSecondDialogOpen}
+                />
               )}
             </Box>
+            {dialogOpen && isEdit && (
+              <ProductDialog
+                dialogOpen={dialogOpen}
+                setDialogOpen={setDialogOpen}
+                productToEdit={selectedProduct}
+                isEdit={isEdit}
+                setIsEdit={setIsEdit}
+                onEdit={handleEditProizvod}
+              />
+            )}
           </TableCell>
         </TableRow>
       </TableBody>

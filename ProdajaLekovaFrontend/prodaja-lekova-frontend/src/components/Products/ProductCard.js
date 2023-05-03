@@ -94,6 +94,12 @@ const ProductCard = ({ proizvodProp }) => {
           <strong>Apoteka: </strong>
           {proizvodProp.apoteka.nazivApoteke}
         </Typography>
+        <Typography>
+          <strong>Na stanju: </strong>
+          {proizvodProp.stanjeZaliha > 0
+            ? proizvodProp.stanjeZaliha
+            : 'Trenutno nema na stanju'}
+        </Typography>
         {role === 'Kupac' && (
           <TextField
             label="Količina"
@@ -108,14 +114,6 @@ const ProductCard = ({ proizvodProp }) => {
             onChange={handleQuantityChange}
             sx={{ mt: 2, width: '50%' }}
           />
-        )}
-        {role === 'Admin' && (
-          <Typography>
-            <strong>Stanje zaliha: </strong>
-            {proizvodProp.stanjeZaliha > 0
-              ? proizvodProp.stanjeZaliha
-              : 'Trenutno nema na stanju'}
-          </Typography>
         )}
       </CardContent>
       <CardActions sx={{ mt: 1 }}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Button,
   Dialog,
@@ -10,9 +10,15 @@ import {
   Box,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
-import { createKorisnik } from '../../services/korisnikService'
+import {
+  createKorisnik,
+  getKorisnici,
+  getProfil,
+  updateKorisnik,
+} from '../../services/korisnikService'
 
 const initialState = {
+  korisnikId: null,
   ime: '',
   prezime: '',
   email: '',
@@ -24,12 +30,62 @@ const initialState = {
   tipKorisnika: 0,
 }
 
-const UserDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
+const UserDialog = ({
+  dialogOpen,
+  setDialogOpen,
+  onAddNew,
+  onEdit,
+  onProfileEdit,
+  profileToEdit,
+  userToEdit,
+  isEdit,
+  setIsEdit,
+  isEditProfile,
+  setIsEditProfile,
+}) => {
   const [input, setInput] = useState(initialState)
   const { state } = useAuth()
 
+  useEffect(() => {
+    if (userToEdit) {
+      setInput({
+        korisnikId: userToEdit.korisnikId,
+        ime: userToEdit.ime,
+        prezime: userToEdit.prezime,
+        email: userToEdit.email,
+        lozinka: userToEdit.lozinka,
+        brojTelefona: userToEdit.brojTelefona,
+        ulica: userToEdit.ulica,
+        broj: userToEdit.broj,
+        mesto: userToEdit.mesto,
+        tipKorisnika: userToEdit.tipKorisnika,
+      })
+      setIsEdit(true)
+    } else if (profileToEdit) {
+      setInput({
+        korisnikId: profileToEdit.korisnikId,
+        ime: profileToEdit.ime,
+        prezime: profileToEdit.prezime,
+        email: profileToEdit.email,
+        lozinka: profileToEdit.lozinka,
+        brojTelefona: profileToEdit.brojTelefona,
+        ulica: profileToEdit.ulica,
+        broj: profileToEdit.broj,
+        mesto: profileToEdit.mesto,
+        tipKorisnika: profileToEdit.tipKorisnika,
+      })
+      setIsEditProfile(true)
+    }
+  }, [userToEdit, profileToEdit])
+
   const handleClose = () => {
     setDialogOpen(false)
+
+    if (isEdit) {
+      setIsEdit(false)
+    } else if (isEditProfile) {
+      setIsEditProfile(false)
+    }
   }
 
   const handleInputChange = (e) => {
@@ -43,22 +99,54 @@ const UserDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      const response = await createKorisnik(state.token, input)
+    if (isEdit || isEditProfile) {
+      try {
+        const response = await updateKorisnik(state.token, input)
+        if (response.status === 200) {
+          setInput(initialState)
+          handleClose()
 
-      if (response === 422) {
-        alert('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
-      } else if (response === 400) {
-        alert('Korisnik sa datom mejl adresom vec postoji u bazi.')
-      } else {
-        onAddNew(response.data)
-
-        setInput(initialState)
-
-        handleClose()
+          if (isEdit) {
+            getKorisnici(state.token)
+              .then((response) => {
+                onEdit(response.data)
+              })
+              .catch((error) => {
+                console.error(error)
+              })
+          } else {
+            getProfil(state.token)
+              .then((response) => {
+                onProfileEdit(response.data)
+              })
+              .catch((error) => {
+                console.error(error)
+              })
+          }
+        } else if (response === 422) {
+          alert('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+        }
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error)
+    } else {
+      try {
+        const response = await createKorisnik(state.token, input)
+
+        if (response === 422) {
+          alert('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+        } else if (response === 400) {
+          alert('Korisnik sa datom mejl adresom vec postoji u bazi.')
+        } else {
+          onAddNew(response.data)
+
+          setInput(initialState)
+
+          handleClose()
+        }
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 
@@ -151,26 +239,28 @@ const UserDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             onChange={handleInputChange}
             sx={{ marginBottom: '20px' }}
           />
-          <Select
-            labelId="Tip korisnika"
-            id="user-type"
-            name="tipKorisnika"
-            value={input.tipKorisnika}
-            onChange={handleSelectChange}
-            sx={{ marginBottom: '20px' }}
-            fullWidth
-            required
-          >
-            <MenuItem value={0}>Admin</MenuItem>
-            <MenuItem value={1}>Kupac</MenuItem>
-          </Select>
+          {!isEditProfile && (
+            <Select
+              labelId="Tip korisnika"
+              id="user-type"
+              name="tipKorisnika"
+              value={input.tipKorisnika}
+              onChange={handleSelectChange}
+              sx={{ marginBottom: '20px' }}
+              fullWidth
+              required
+            >
+              <MenuItem value={0}>Admin</MenuItem>
+              <MenuItem value={1}>Kupac</MenuItem>
+            </Select>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="outlined">
-            Cancel
+            Odustani
           </Button>
           <Button variant="contained" type="submit">
-            Create
+            {isEdit || isEditProfile ? 'Sačuvaj' : 'Kreiraj'}
           </Button>
         </DialogActions>
       </Box>

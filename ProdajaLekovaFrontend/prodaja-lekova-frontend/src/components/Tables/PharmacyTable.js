@@ -23,7 +23,9 @@ const columns = [
 ]
 
 const PharmacyTable = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [isEdit, setIsEdit] = useState(false)
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null)
   const theme = useTheme()
   const { state } = useAuth()
   const { state: apotekaState, dispatch } = useApoteka()
@@ -56,6 +58,12 @@ const PharmacyTable = () => {
     setDialogOpen(true)
   }
 
+  const handleIsEdit = (apoteka) => {
+    setIsEdit(true)
+    setSelectedPharmacy(apoteka)
+    setDialogOpen(true)
+  }
+
   return (
     <Table sx={{ minWidth: 650 }} aria-label="simple table">
       {apotekaState.apoteke.length > 0 && (
@@ -80,7 +88,7 @@ const PharmacyTable = () => {
               <TableCell align="left">{apoteka.apotekaId}</TableCell>
               <TableCell align="left">{apoteka.nazivApoteke}</TableCell>
               <TableCell>
-                <Button size="small">
+                <Button size="small" onClick={() => handleIsEdit(apoteka)}>
                   <EditIcon
                     sx={{
                       marginRight: 1,
@@ -123,9 +131,23 @@ const PharmacyTable = () => {
                 marginLeft: '10px',
               }}
             >
-              <Button variant="contained" onClick={handleOpen}>Dodaj novu apoteku</Button>
-              {dialogOpen && (
-                <PharmacyDialog dialogOpen={dialogOpen} setDialogOpen={setDialogOpen} />
+              <Button variant="contained" onClick={handleOpen}>
+                Dodaj novu apoteku
+              </Button>
+              {dialogOpen && !isEdit && (
+                <PharmacyDialog
+                  dialogOpen={dialogOpen}
+                  setDialogOpen={setDialogOpen}
+                />
+              )}
+              {dialogOpen && isEdit && (
+                <PharmacyDialog
+                  dialogOpen={dialogOpen}
+                  setDialogOpen={setDialogOpen}
+                  pharmacyToEdit={selectedPharmacy}
+                  isEdit={isEdit}
+                  setIsEdit={setIsEdit}
+                />
               )}
             </Box>
           </TableCell>

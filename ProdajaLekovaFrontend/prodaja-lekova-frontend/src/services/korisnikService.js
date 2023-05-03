@@ -37,6 +37,19 @@ export const createKorisnik = async (token, newUser) => {
   }
 }
 
+export const updateKorisnik = async (token, updatedUser) => {
+  try {
+    const authConfig = bearerConfig(token)
+
+    const response = await api.updateKorisnik(updatedUser, authConfig)
+
+    return response
+  } catch (error) {
+    console.log(error)
+    return error.response.status
+  }
+}
+
 export const deleteKorisnik = async (id, token) => {
   try {
     const authConfig = bearerConfig(token)
@@ -46,4 +59,3 @@ export const deleteKorisnik = async (id, token) => {
     return error.response.status
   }
 }
-

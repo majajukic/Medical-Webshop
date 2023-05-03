@@ -10,6 +10,7 @@ export const register = (formData) => BASE_URL.post('/api/account/registracija',
 export const getApoteke = () => BASE_URL.get('/api/apoteka')
 export const deleteApoteka = (id, authConfig) => BASE_URL.delete(`/api/apoteka/${id}`, authConfig)
 export const createApoteka = (newPharmacy, authConfig) => BASE_URL.post(`/api/apoteka`, newPharmacy, authConfig)
+export const updateApoteka = (updatedPharmacy, authConfig) => BASE_URL.put(`/api/apoteka`, updatedPharmacy, authConfig)
 
 //API endpointi za proizvode:
 export const getProizvodi = () => BASE_URL.get('/api/proizvod')
@@ -27,12 +28,14 @@ export const deleteProizvod = (id, authConfig) => BASE_URL.delete(`/api/proizvod
 export const deleteProizvodFromApoteka = (id, authConfig) => BASE_URL.delete(`/api/apotekaProizvod/${id}`, authConfig)
 export const createProizvod = (newProduct, authConfig) => BASE_URL.post(`/api/proizvod`, newProduct, authConfig)
 export const addProizvodToApoteka = (newProduct, authConfig) => BASE_URL.post(`/api/apotekaProizvod`, newProduct, authConfig)
+export const updateProizvod = (updatedProduct, authConfig) => BASE_URL.put(`/api/proizvod`, updatedProduct, authConfig)
 
 //API endpointi za korisnike:
 export const getKorisnici = (authConfig) => BASE_URL.get('/api/korisnik', authConfig)
 export const getProfil = (authConfig) => BASE_URL.get('/api/korisnik/profil', authConfig)
 export const deleteKorisnik = (id, authConfig) => BASE_URL.delete(`/api/korisnik/${id}`, authConfig)
 export const createKorisnik = (newUser, authConfig) => BASE_URL.post(`/api/korisnik`, newUser, authConfig)
+export const updateKorisnik = (updatedUser, authConfig) => BASE_URL.put(`/api/korisnik`, updatedUser, authConfig)
 
 //API endpointi za porudzbine:
 export const getPorudzbine = (authConfig) => BASE_URL.get('/api/porudzbina', authConfig)

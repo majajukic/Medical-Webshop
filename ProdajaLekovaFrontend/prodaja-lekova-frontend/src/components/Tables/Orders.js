@@ -18,8 +18,8 @@ import {
   TableRow,
   Button,
   useTheme,
+  Pagination
 } from '@mui/material'
-import Pagination from '../Pagination'
 import { useAuth } from '../../context/AuthContext'
 
 const Orders = () => {
@@ -148,9 +148,9 @@ const Orders = () => {
               )}
             </TableBody>
           </Table>
-          <Pagination />
         </Fragment>
       </Paper>
+      <Pagination sx={{ marginTop: '20px' }} />
     </Grid>
   )
 }

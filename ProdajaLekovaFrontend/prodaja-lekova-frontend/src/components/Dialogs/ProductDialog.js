@@ -10,18 +10,45 @@ import {
   Box,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
-import { createProizvod, getProizvodById, getTipoviProizvoda } from '../../services/proizvodService'
+import {
+  createProizvod,
+  getProizvodById,
+  getTipoviProizvoda,
+  getProizvodi,
+  updateProizvod,
+} from '../../services/proizvodService'
 
 const initialState = {
+  proizvodId: null,
   nazivProizvoda: '',
   proizvodjac: '',
   tipProizvodaId: 0,
 }
 
-const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
+const ProductDialog = ({
+  dialogOpen,
+  setDialogOpen,
+  onAddNew,
+  onEdit,
+  productToEdit,
+  isEdit,
+  setIsEdit,
+}) => {
   const [input, setInput] = useState(initialState)
   const [tipoviProizvoda, setTipoviProizvoda] = useState([])
   const { state } = useAuth()
+
+  useEffect(() => {
+    if (productToEdit) {
+      setInput({
+        proizvodId: productToEdit.proizvodId,
+        nazivProizvoda: productToEdit.nazivProizvoda,
+        proizvodjac: productToEdit.proizvodjac,
+        tipProizvodaId: productToEdit.tipProizvoda.tipProizvodaId,
+      })
+      setIsEdit(true)
+    }
+  }, [productToEdit])
 
   useEffect(() => {
     console.log('dropdown useeffect')
@@ -36,6 +63,10 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
 
   const handleClose = () => {
     setDialogOpen(false)
+
+    if (isEdit) {
+      setIsEdit(false)
+    }
   }
 
   const handleInputChange = (e) => {
@@ -49,18 +80,41 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      const response = await createProizvod(state.token, input)
+    if (isEdit) {
+      try {
+        const response = await updateProizvod(state.token, input)
 
-      const createdProduct = await getProizvodById(state.token, response.data.proizvodId)
+        if (response.status === 200) {
+          setInput(initialState)
+          handleClose()
+          getProizvodi()
+            .then((response) => {
+              onEdit(response.data)
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    } else {
+      try {
+        const response = await createProizvod(state.token, input)
 
-      onAddNew(createdProduct.data)
+        const createdProduct = await getProizvodById(
+          state.token,
+          response.data.proizvodId,
+        )
 
-      setInput(initialState)
+        onAddNew(createdProduct.data)
 
-      handleClose()
-    } catch (error) {
-      console.log(error)
+        setInput(initialState)
+
+        handleClose()
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 
@@ -79,7 +133,7 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             required
             value={input.nazivProizvoda}
             onChange={handleInputChange}
-            sx={{marginBottom:'20px'}}
+            sx={{ marginBottom: '20px' }}
           />
           <TextField
             autoFocus
@@ -92,7 +146,7 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             required
             value={input.proizvodjac}
             onChange={handleInputChange}
-            sx={{marginBottom:'20px'}}
+            sx={{ marginBottom: '20px' }}
           />
           <Select
             labelId="Tip proizvoda"
@@ -100,22 +154,24 @@ const ProductDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             name="tipProizvoda"
             value={input.tipProizvodaId}
             onChange={handleSelectChange}
-            sx={{marginBottom:'20px'}}
+            sx={{ marginBottom: '20px' }}
             fullWidth
             required
           >
             <MenuItem value={0}>Izaberite tip proizvoda</MenuItem>
             {tipoviProizvoda.map((tip) => (
-              <MenuItem key={tip.tipProizvodaId} value={tip.tipProizvodaId}>{tip.nazivTipaProizvoda}</MenuItem>
+              <MenuItem key={tip.tipProizvodaId} value={tip.tipProizvodaId}>
+                {tip.nazivTipaProizvoda}
+              </MenuItem>
             ))}
           </Select>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="outlined">
-            Cancel
+            Odustani
           </Button>
           <Button variant="contained" type="submit">
-            Create
+            {isEdit ? 'Sačuvaj' : 'Kreiraj'}
           </Button>
         </DialogActions>
       </Box>

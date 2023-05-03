@@ -182,10 +182,10 @@ const ProductPharmacyDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} variant="outlined">
-            Cancel
+            Odustani
           </Button>
           <Button variant="contained" type="submit">
-            Create
+            Kreiraj
           </Button>
         </DialogActions>
       </Box>

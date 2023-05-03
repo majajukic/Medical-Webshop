@@ -4,10 +4,13 @@ import { getProfil, deleteKorisnik } from '../../services/korisnikService'
 import { getUserRole } from '../../utilities/authUtilities'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import UserDialog from '../Dialogs/UserDialog'
 import { LOGOUT } from '../../constants/actionTypes'
 
 const ProfileDetails = () => {
   const [profileDetails, setProfileDetails] = useState({})
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [isEditProfile, setIsEditProfile] = useState(false)
   const role = getUserRole()
   const { state, dispatch } = useAuth()
   const navigate = useNavigate()
@@ -38,6 +41,15 @@ const ProfileDetails = () => {
     }
   }
 
+  const handleIsEditProfile = (korisnik) => {
+    setIsEditProfile(true)
+    setDialogOpen(true)
+  }
+
+  const handleEditProfile = (korisnik) => {
+    setProfileDetails(korisnik)
+  }
+
   return (
     <Grid item xs={12} md={4} lg={3} sx={{ width: '30%' }}>
       <Paper
@@ -65,19 +77,19 @@ const ProfileDetails = () => {
               </Typography>
               <Typography color="text.secondary">
                 <strong>Broj telefona:</strong>{' '}
-                {(role === 'Kupac' &&  profileDetails.brojTelefona)
+                {role === 'Kupac' && profileDetails.brojTelefona
                   ? profileDetails.brojTelefona
                   : 'Nema podataka o broju telefona'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Ulica i broj:</strong>{' '}
-                {(role === 'Kupac' &&  profileDetails.ulica)
+                {role === 'Kupac' && profileDetails.ulica
                   ? profileDetails.ulica + ' ' + profileDetails.broj
                   : 'Nema podataka o ulici i broju'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Mesto:</strong>{' '}
-                {(role === 'Kupac' &&  profileDetails.mesto)
+                {role === 'Kupac' && profileDetails.mesto
                   ? profileDetails.mesto
                   : 'Nema podataka o mestu'}
               </Typography>
@@ -92,8 +104,23 @@ const ProfileDetails = () => {
               marginTop: '40px',
             }}
           >
-            <Button variant="outlined">Uredi nalog</Button>
-            <Button variant="contained" onClick={() => handleDelete(profileDetails.korisnikId)}>
+            <Button variant="outlined" onClick={handleIsEditProfile}>
+              Uredi profil
+            </Button>
+            {dialogOpen && (
+              <UserDialog
+                dialogOpen={dialogOpen}
+                setDialogOpen={setDialogOpen}
+                profileToEdit={profileDetails}
+                isEditProfile={isEditProfile}
+                setIsEditProfile={setIsEditProfile}
+                onProfileEdit={handleEditProfile}
+              />
+            )}
+            <Button
+              variant="contained"
+              onClick={() => handleDelete(profileDetails.korisnikId)}
+            >
               Obriši nalog
             </Button>
           </Box>
