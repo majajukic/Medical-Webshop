@@ -58,14 +58,18 @@ namespace ProdajaLekovaBackend.Controllers
                 }
                 else
                 {
-                    var filteredResults = results.Where(q => q.Proizvod.NazivProizvoda.ToLower().Contains(searchTerm));
+                    var allApotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllAsync(include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+
+                    var allResults = _mapper.Map<List<ApotekaProizvodDto>>(allApotekaProizvodi);
+
+                    var filteredResults = allResults.Where(q => q.Proizvod.NazivProizvoda.ToLower().Contains(searchTerm));
 
                     return Ok(filteredResults);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Serverska greska.");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -254,7 +258,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
-                var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id, include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka));
+                var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id, include: q => q.Include(x => x.Proizvod.TipProizvoda).Include(x => x.Apoteka));
 
                 if (apotekaProizvod == null) return NotFound("Proizvod nije pronadjen.");
 

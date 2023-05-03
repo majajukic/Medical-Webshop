@@ -26,7 +26,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Ulica { get; set; }
 
-        [StringLength(5, ErrorMessage = "Maximum 5 karaktera prekoračeno")]
+        [StringLength(25, ErrorMessage = "Maximum 5 karaktera prekoračeno")]
         public string? Broj { get; set; }
 
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
