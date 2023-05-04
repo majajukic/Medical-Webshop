@@ -233,5 +233,25 @@ namespace ProdajaLekovaBackend.Controllers
                 return StatusCode(500, "Serverska greska.");
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("ukupnoPorudzbina")]
+        public async Task<IActionResult> GetTotalPorudzbine()
+        {
+            int total = await _unitOfWork.Porudzbina.GetTotalCountAsync();
+
+            return Ok(total);
+        }
+
+        [Authorize(Roles = "Kupac")]
+        [HttpGet("ukupnoPorudzbinaByKupac")]
+        public async Task<IActionResult> GetTotalPorudzbineByKupac()
+        {
+            var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
+
+            int total = await _unitOfWork.Porudzbina.GetTotalCountAsync(q => q.KorisnikId == korisnikId);
+
+            return Ok(total);
+        }
     }
 }

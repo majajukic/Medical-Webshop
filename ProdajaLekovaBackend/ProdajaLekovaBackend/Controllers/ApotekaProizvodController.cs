@@ -371,5 +371,41 @@ namespace ProdajaLekovaBackend.Controllers
                 return StatusCode(500, "Serverska greska.");
             }
         }
+
+        [AllowAnonymous]
+        [HttpGet("ukupnoProizvoda")]
+        public async Task<IActionResult> GetTotalApotekaProizvod([FromQuery] int? apotekaId)
+        {
+            int total;
+
+            if (apotekaId == null)
+            {
+                total = await _unitOfWork.ApotekaProizvod.GetTotalCountAsync();
+            } else
+            {
+                total = await _unitOfWork.ApotekaProizvod.GetTotalCountAsync(q => q.ApotekaId == apotekaId);
+            }
+
+            return Ok(total);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("ukupnoProizvodaPoTipu")]
+        public async Task<IActionResult> GetTotalApotekaProizvodByTip([FromQuery] int tipProizvodaId)
+        {
+            int total = await _unitOfWork.ApotekaProizvod.GetTotalCountAsync(q => q.Proizvod.TipProizvodaId == tipProizvodaId);
+
+            return Ok(total);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("ukupnoProizvodaNaPopustu")]
+        public async Task<IActionResult> GetTotalApotekaProizvodNaPopustu()
+        {
+            int total = await _unitOfWork.ApotekaProizvod.GetTotalCountAsync(q => q.PopustUprocentima != null);
+
+            return Ok(total);
+        }
+
     }
 }

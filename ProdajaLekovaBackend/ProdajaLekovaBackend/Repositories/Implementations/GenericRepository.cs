@@ -96,5 +96,22 @@ namespace ProdajaLekovaBackend.Repositories.Implementations
             var entity = await _db.FindAsync(id);
             _db.Remove(entity);
         }
+
+        public async Task<int> GetTotalCountAsync(Expression<Func<T, bool>> expression = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null)
+        {
+            IQueryable<T> query = _db;
+
+            if (expression != null)
+            {
+                query = query.Where(expression);
+            }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            return await query.AsNoTracking().CountAsync();
+        }
     }
 }

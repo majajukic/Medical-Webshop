@@ -29,5 +29,9 @@ namespace ProdajaLekovaBackend.Repositories.Interfaces
         void UpdateAsync(T entity);
 
         Task DeleteAsync(int id);
+
+        Task<int> GetTotalCountAsync(
+            Expression<Func<T, bool>> expression = null, 
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null);
     }
 }

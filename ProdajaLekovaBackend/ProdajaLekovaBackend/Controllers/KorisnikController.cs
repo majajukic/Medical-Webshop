@@ -26,11 +26,11 @@ namespace ProdajaLekovaBackend.Controllers
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetKorisnici([FromQuery] RequestParams requestParams)
+        public async Task<IActionResult> GetKorisnici()
         {
             try
             {
-                var korisnici = await _unitOfWork.Korisnik.GetAllPagedListAsync(requestParams, orderBy: q => q.OrderBy(x => x.Ime));
+                var korisnici = await _unitOfWork.Korisnik.GetAllAsync(orderBy: q => q.OrderBy(x => x.Ime));
 
                 if (korisnici == null) return NoContent();
 
