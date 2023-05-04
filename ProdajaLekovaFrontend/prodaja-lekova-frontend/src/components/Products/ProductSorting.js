@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router'
+import { usePagination } from '../../context/PaginationContext'
 import {
   Button,
   Box,
@@ -23,6 +24,10 @@ import {
 const ProductSorting = () => {
   const [sortDirection, setSortDirection] = useState('ascending')
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const {
+    state: paginationState,
+    dispatch: paginationDispatch,
+  } = usePagination()
   const navigate = useNavigate()
 
   const handleSortDirectionChange = (event) => {
@@ -31,7 +36,7 @@ const ProductSorting = () => {
 
   const handleSort = () => {
     if (sortDirection === 'ascending') {
-      getProizvodiCenaRastuce()
+      getProizvodiCenaRastuce(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({
             type: GET_PRODUCTS_ASCENDING,
@@ -43,7 +48,7 @@ const ProductSorting = () => {
           console.error(error)
         })
     } else {
-      getProizvodiCenaOpadajuce()
+      getProizvodiCenaOpadajuce(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({
             type: GET_PRODUCTS_DESCENDING,

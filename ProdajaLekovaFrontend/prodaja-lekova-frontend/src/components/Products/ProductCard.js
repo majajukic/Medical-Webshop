@@ -117,6 +117,7 @@ const ProductCard = ({ proizvodProp }) => {
             }}
             inputProps={{
               min: 1,
+              max: proizvodProp.stanjeZaliha,
             }}
             value={quantity}
             onChange={handleQuantityChange}

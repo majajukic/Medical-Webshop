@@ -6,7 +6,7 @@ import {
   GET_PHARMACIES,
   LOGOUT,
   GET_PRODUCTS_BY_PHARMACY,
-  GET_PRODUCTS
+  GET_PRODUCTS,
 } from '../constants/actionTypes'
 import {
   AppBar,
@@ -24,14 +24,23 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import { getApoteke } from '../services/apotekaService'
 import { useProizvod } from '../context/ProizvodContext'
-import { getProizvodiByApoteka, getProizvodiHomePage } from '../services/proizvodService'
+import {
+  getProizvodiByApoteka,
+  getProizvodiHomePage,
+} from '../services/proizvodService'
+import { usePagination } from '../context/PaginationContext'
 
 const Navbar = () => {
+  const PAGE = 1
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
   const { state: apotekaState, dispatch: apotekaDispatch } = useApoteka()
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const {
+    state: paginationState,
+    dispatch: paginationDispatch,
+  } = usePagination()
   const theme = useTheme()
   const role = getUserRole()
 
@@ -46,7 +55,7 @@ const Navbar = () => {
   }, [apotekaDispatch])
 
   const handleMenuItemClick = (apotekaId) => {
-    getProizvodiByApoteka(apotekaId)
+    getProizvodiByApoteka(apotekaId, paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_BY_PHARMACY,
@@ -61,15 +70,15 @@ const Navbar = () => {
   }
 
   const handleDisplayAll = () => {
-    getProizvodiHomePage()
-        .then((response) => {
-          proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
+    getProizvodiHomePage(PAGE)
+      .then((response) => {
+        proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
 
-          navigate("/")
-        })
-        .catch((error) => {
-          console.error(error)
-        })
+        navigate('/')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 
   const handleMenuOpen = (event) => {
@@ -97,7 +106,10 @@ const Navbar = () => {
           alignItems: 'center',
         }}
       >
-        <Link onClick={handleDisplayAll} sx={{ color: 'white', cursor: 'pointer' }}>
+        <Link
+          onClick={handleDisplayAll}
+          sx={{ color: 'white', cursor: 'pointer' }}
+        >
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             PharmacyGO
           </Typography>

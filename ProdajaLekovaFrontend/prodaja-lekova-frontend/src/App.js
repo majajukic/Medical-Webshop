@@ -12,6 +12,7 @@ import Layout from './layout/Layout';
 import { AuthProvider } from './context/AuthContext';
 import { ProizvodProvider } from './context/ProizvodContext';
 import { ApotekaProvider } from './context/ApotekaContext';
+import { PaginationProvider } from './context/PaginationContext';
 
 const App = () => {
 
@@ -19,22 +20,24 @@ const App = () => {
     <AuthProvider>
       <ProizvodProvider>
         <ApotekaProvider>
-          <BrowserRouter>
-            <ThemeProvider theme={theme}>
-              <Routes>
-                <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
-                <Route path="/apoteka/:apotekaId" exact element={<Layout><ProductsPage /></Layout>} />
-                <Route path="/kategorija/:kategorijaId" exact element={<Layout><ProductsPage /></Layout>}  />
-                <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
-                <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
-                <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />
-                <Route path="/profil" element={<Layout><ProfilePage /></Layout>} />
-                <Route path="/prijaviSe" element={<Login />} />
-                <Route path="/registrujSe" element={ <Register />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-            </ThemeProvider>
-          </BrowserRouter>
+          <PaginationProvider>
+            <BrowserRouter>
+              <ThemeProvider theme={theme}>
+                <Routes>
+                  <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
+                  <Route path="/apoteka/:apotekaId" exact element={<Layout><ProductsPage /></Layout>} />
+                  <Route path="/kategorija/:kategorijaId" exact element={<Layout><ProductsPage /></Layout>}  />
+                  <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
+                  <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
+                  <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />
+                  <Route path="/profil" element={<Layout><ProfilePage /></Layout>} />
+                  <Route path="/prijaviSe" element={<Login />} />
+                  <Route path="/registrujSe" element={ <Register />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </ThemeProvider>
+            </BrowserRouter>
+          </PaginationProvider>
         </ApotekaProvider>
       </ProizvodProvider>
     </AuthProvider>

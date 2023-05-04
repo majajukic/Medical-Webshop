@@ -6,6 +6,7 @@ import {
   getProizvodi,
   addProizvodToApoteka,
   updateProizvodInApoteka,
+  getProizvodiCount,
 } from '../../services/proizvodService'
 import {
   Button,
@@ -20,12 +21,15 @@ import {
 import {
   ADD_PRODUCT_TO_PHARMACY,
   GET_PRODUCTS,
+  GET_PRODUCTS_BY_PHARMACY,
 } from '../../constants/actionTypes'
 import {
   getProizvodByApoteka,
   getProizvodiHomePage,
+  getProizvodiByApoteka,
 } from '../../services/proizvodService'
 import { useNavigate } from 'react-router-dom'
+import { usePagination } from '../../context/PaginationContext'
 
 const initialState = {
   apotekaProizvodId: null,
@@ -48,6 +52,7 @@ const ProductPharmacyDialog = ({
   const [proizvodi, setProizvodi] = useState([])
   const { state: apotekaState } = useApoteka()
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const { state: paginationState } = usePagination()
   const { state } = useAuth()
   const navigate = useNavigate()
 
@@ -103,14 +108,17 @@ const ProductPharmacyDialog = ({
         if (response.status === 200) {
           setInput(initialState)
           handleClose()
-          getProizvodiHomePage()
+          getProizvodiByApoteka(input.apotekaId, paginationState.currentPage)
             .then((response) => {
-              proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
+              proizvodiDispatch({
+                type: GET_PRODUCTS_BY_PHARMACY,
+                payload: response.data,
+              })
             })
             .catch((error) => {
               console.error(error)
             })
-          //navigate(`/apoteka/${input.apotekaId}`)
+          navigate(`/apoteka/${input.apotekaId}`)
         } else if (response === 422) {
           alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
         }

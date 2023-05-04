@@ -123,7 +123,7 @@ const Orders = () => {
                           porudzbina.korisnik.prezime}
                       </TableCell>
                     )}
-                    {role === 'Kupac' && (
+                    {(role === 'Kupac' && porudzbina.placenaPorudzbina === false) && (
                       <TableCell>
                         <Button
                           onClick={() => handleDelete(porudzbina.porudzbinaId)}

@@ -4,15 +4,22 @@ import { useNavigate } from 'react-router-dom'
 import {
   getTipoviProizvoda,
   getProizvodiByTip,
-  getProizvodiHomePage,
+ // getProizvodiByTipCount,
 } from '../../services/proizvodService'
 import { useProizvod } from '../../context/ProizvodContext'
-import { GET_PRODUCTS, GET_PRODUCTS_BY_TYPE } from '../../constants/actionTypes'
+import { GET_PRODUCTS_BY_TYPE } from '../../constants/actionTypes'
+import { usePagination } from '../../context/PaginationContext'
+//import { useParams } from 'react-router-dom'
 
 const ProductCategories = () => {
   const [tipoviProivoda, setTipoviProizvoda] = useState([])
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const {
+    state: paginationState,
+    dispatch: paginationDispatch,
+  } = usePagination()
   const navigate = useNavigate()
+  //const { kategorijaId } = useParams()
 
   useEffect(() => {
     getTipoviProizvoda()
@@ -24,28 +31,35 @@ const ProductCategories = () => {
       })
   }, [proizvodiDispatch])
 
+  /*useEffect(() => {
+    console.log('count tipovi')
+    if (kategorijaId) {
+      getProizvodiByTipCount(kategorijaId)
+        .then((response) => {
+          updateTotalRecords(response.data)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }, [paginationDispatch, kategorijaId])*/
+
   const handleClick = (tipId) => {
-    getProizvodiByTip(tipId)
+    if (paginationState.totalRecords <= paginationState.pageSize) {
+      paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: 1 })
+    } else {
+      paginationDispatch({
+        type: 'SET_CURRENT_PAGE',
+        payload: paginationState.currentPage,
+      })
+    }
+    getProizvodiByTip(tipId, paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_BY_TYPE,
           payload: response.data,
         })
         navigate(`/kategorija/${tipId}`)
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-  }
-
-  const handleShowAll = () => {
-    getProizvodiHomePage()
-      .then((response) => {
-        proizvodiDispatch({
-          type: GET_PRODUCTS,
-          payload: response.data,
-        })
-        navigate("/")
       })
       .catch((error) => {
         console.error(error)
@@ -74,7 +88,6 @@ const ProductCategories = () => {
             </Button>
           </Fragment>
         ))}
-        <Button variant='contained' onClick={handleShowAll}>Svi proizvodi</Button>
     </Box>
   )
 }

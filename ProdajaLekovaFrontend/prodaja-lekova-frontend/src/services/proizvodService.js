@@ -21,9 +21,9 @@ export const getTipoviProizvoda = async () => {
   }
 }
 
-export const getProizvodiHomePage = async () => {
+export const getProizvodiHomePage = async (pageNumber) => {
   try {
-    const data = await api.getProizvodiHomePage()
+    const data = await api.getProizvodiHomePage(pageNumber)
 
     return data
   } catch (error) {
@@ -41,9 +41,9 @@ export const getProizvodiBySearch = async (searchTerm) => {
   }
 }
 
-export const getProizvodiByTip = async (type) => {
+export const getProizvodiByTip = async (type, pageNumber) => {
   try {
-    const data = await api.getProizvodiByTip(type)
+    const data = await api.getProizvodiByTip(pageNumber, type)
 
     return data
   } catch (error) {
@@ -51,9 +51,19 @@ export const getProizvodiByTip = async (type) => {
   }
 }
 
-export const getProizvodiByApoteka = async (pharmacy) => {
+export const getProizvodiByTipCount = async (type) => {
   try {
-    const data = await api.getProizvodiByApoteka(pharmacy)
+    const total = await api.getProizvodiByTipCount(type)
+
+    return total
+  } catch (error) {
+    return error.response.status
+  }
+}
+
+export const getProizvodiByApoteka = async (pharmacy, pageNumber) => {
+  try {
+    const data = await api.getProizvodiByApoteka(pharmacy, pageNumber)
 
     return data
   } catch (error) {
@@ -71,9 +81,9 @@ export const getProizvodByApoteka = async (pharmacyId) => {
   }
 }
 
-export const getProizvodiCenaRastuce = async () => {
+export const getProizvodiCenaRastuce = async (pageNumber) => {
   try {
-    const data = await api.getProizvodiCenaRastuce()
+    const data = await api.getProizvodiCenaRastuce(pageNumber)
 
     return data
   } catch (error) {
@@ -91,9 +101,9 @@ export const getProizvodiPopust = async () => {
   }
 }
 
-export const getProizvodiCenaOpadajuce = async () => {
+export const getProizvodiCenaOpadajuce = async (pageNumber) => {
   try {
-    const data = await api.getProizvodiCenaOpadajuce()
+    const data = await api.getProizvodiCenaOpadajuce(pageNumber)
 
     return data
   } catch (error) {
@@ -108,6 +118,26 @@ export const getProizvodById = async (token, id) => {
     const data = await api.getProizvodById(id, authConfig)
 
     return data
+  } catch (error) {
+    return error.response.status
+  }
+}
+
+export const getProizvodiCountByApoteka = async (pharmacy) => {
+  try {
+    const total = await api.getProizvodiCountByApoteka(pharmacy)
+
+    return total
+  } catch (error) {
+    return error.response.status
+  }
+}
+
+export const getProizvodiCount = async () => {
+  try {
+    const total = await api.getProizvodiCount()
+
+    return total
   } catch (error) {
     return error.response.status
   }
