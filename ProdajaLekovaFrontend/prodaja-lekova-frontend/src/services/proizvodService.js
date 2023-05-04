@@ -149,6 +149,21 @@ export const updateProizvod = async (token, updatedProduct) => {
   }
 }
 
+export const updateProizvodInApoteka = async (token, updatedProduct) => {
+  try {
+    const authConfig = bearerConfig(token)
+
+    const response = await api.updateProizvodInApoteka(
+      updatedProduct,
+      authConfig,
+    )
+
+    return response
+  } catch (error) {
+    return error.response.status
+  }
+}
+
 export const deleteProizvod = async (id, token) => {
   try {
     const authConfig = bearerConfig(token)

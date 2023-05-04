@@ -5,6 +5,7 @@ import { useProizvod } from '../../context/ProizvodContext'
 import {
   getProizvodi,
   addProizvodToApoteka,
+  updateProizvodInApoteka,
 } from '../../services/proizvodService'
 import {
   Button,
@@ -16,27 +17,54 @@ import {
   MenuItem,
   Box,
 } from '@mui/material'
-import { ADD_PRODUCT_TO_PHARMACY } from '../../constants/actionTypes'
-import { getProizvodByApoteka } from '../../services/proizvodService'
+import {
+  ADD_PRODUCT_TO_PHARMACY,
+  GET_PRODUCTS,
+} from '../../constants/actionTypes'
+import {
+  getProizvodByApoteka,
+  getProizvodiHomePage,
+} from '../../services/proizvodService'
 import { useNavigate } from 'react-router-dom'
 
 const initialState = {
+  apotekaProizvodId: null,
   proizvodId: 0,
   apotekaId: 0,
   stanjeZaliha: '',
   slika: '',
   popustUprocentima: '',
   cenaBezPopusta: '',
-  //cenaSaPopustom: 0,
 }
 
-const ProductPharmacyDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
+const ProductPharmacyDialog = ({
+  dialogOpen,
+  setDialogOpen,
+  productToEdit,
+  isEdit,
+  setIsEdit,
+}) => {
   const [input, setInput] = useState(initialState)
   const [proizvodi, setProizvodi] = useState([])
   const { state: apotekaState } = useApoteka()
   const { dispatch: proizvodiDispatch } = useProizvod()
   const { state } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (productToEdit) {
+      setInput({
+        apotekaProizvodId: productToEdit.apotekaProizvodId,
+        proizvodId: productToEdit.proizvod.proizvodId,
+        apotekaId: productToEdit.apoteka.apotekaId,
+        stanjeZaliha: productToEdit.stanjeZaliha,
+        slika: productToEdit.slika || '',
+        popustUprocentima: productToEdit.popustUprocentima || '',
+        cenaBezPopusta: productToEdit.cenaBezPopusta,
+      })
+      setIsEdit(true)
+    }
+  }, [productToEdit])
 
   useEffect(() => {
     console.log('dropdown useeffect')
@@ -51,6 +79,10 @@ const ProductPharmacyDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
 
   const handleClose = () => {
     setDialogOpen(false)
+
+    if (isEdit) {
+      setIsEdit(false)
+    }
   }
 
   const handleInputChange = (e) => {
@@ -64,30 +96,52 @@ const ProductPharmacyDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      const response = await addProizvodToApoteka(state.token, input)
+    if (isEdit) {
+      try {
+        const response = await updateProizvodInApoteka(state.token, input)
 
-      if (response === 422) {
-        alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
-      } else {
-        const addedProduct = await getProizvodByApoteka(
-          response.data.apotekaProizvodId,
-        )
-
-        proizvodiDispatch({
-          type: ADD_PRODUCT_TO_PHARMACY,
-          payload: addedProduct.data,
-        })
-
-        setInput(initialState)
-
-        handleClose()
-
-        navigate(`/apoteka/${addedProduct.data.apoteka.apotekaId}`)
-        
+        if (response.status === 200) {
+          setInput(initialState)
+          handleClose()
+          getProizvodiHomePage()
+            .then((response) => {
+              proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+          //navigate(`/apoteka/${input.apotekaId}`)
+        } else if (response === 422) {
+          alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
+        }
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error.message)
+    } else {
+      try {
+        const response = await addProizvodToApoteka(state.token, input)
+
+        if (response === 422) {
+          alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
+        } else {
+          const addedProduct = await getProizvodByApoteka(
+            response.data.apotekaProizvodId,
+          )
+
+          proizvodiDispatch({
+            type: ADD_PRODUCT_TO_PHARMACY,
+            payload: addedProduct.data,
+          })
+
+          setInput(initialState)
+
+          handleClose()
+
+          navigate(`/apoteka/${addedProduct.data.apoteka.apotekaId}`)
+        }
+      } catch (error) {
+        console.log(error.message)
+      }
     }
   }
 
@@ -185,7 +239,7 @@ const ProductPharmacyDialog = ({ dialogOpen, setDialogOpen, onAddNew }) => {
             Odustani
           </Button>
           <Button variant="contained" type="submit">
-            Kreiraj
+            {isEdit ? 'Sačuvaj' : 'Kreiraj'}
           </Button>
         </DialogActions>
       </Box>

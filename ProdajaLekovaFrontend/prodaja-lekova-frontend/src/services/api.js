@@ -29,6 +29,7 @@ export const deleteProizvodFromApoteka = (id, authConfig) => BASE_URL.delete(`/a
 export const createProizvod = (newProduct, authConfig) => BASE_URL.post(`/api/proizvod`, newProduct, authConfig)
 export const addProizvodToApoteka = (newProduct, authConfig) => BASE_URL.post(`/api/apotekaProizvod`, newProduct, authConfig)
 export const updateProizvod = (updatedProduct, authConfig) => BASE_URL.put(`/api/proizvod`, updatedProduct, authConfig)
+export const updateProizvodInApoteka = (updatedProduct, authConfig) => BASE_URL.put(`/api/apotekaProizvod`, updatedProduct, authConfig)
 
 //API endpointi za korisnike:
 export const getKorisnici = (authConfig) => BASE_URL.get('/api/korisnik', authConfig)

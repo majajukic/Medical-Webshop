@@ -41,7 +41,7 @@ const ProfileDetails = () => {
     }
   }
 
-  const handleIsEditProfile = (korisnik) => {
+  const handleIsEditProfile = () => {
     setIsEditProfile(true)
     setDialogOpen(true)
   }
@@ -70,26 +70,26 @@ const ProfileDetails = () => {
               <Typography component="p" variant="h6" sx={{ marginBottom: 2 }}>
                 {role === 'Kupac'
                   ? profileDetails.ime + ' ' + profileDetails.prezime
-                  : 'Admin'}
+                  : profileDetails.ime}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Mejl:</strong> {profileDetails.email}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Broj telefona:</strong>{' '}
-                {role === 'Kupac' && profileDetails.brojTelefona
+                {profileDetails.brojTelefona
                   ? profileDetails.brojTelefona
                   : 'Nema podataka o broju telefona'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Ulica i broj:</strong>{' '}
-                {role === 'Kupac' && profileDetails.ulica
+                {profileDetails.ulica
                   ? profileDetails.ulica + ' ' + profileDetails.broj
                   : 'Nema podataka o ulici i broju'}
               </Typography>
               <Typography color="text.secondary">
                 <strong>Mesto:</strong>{' '}
-                {role === 'Kupac' && profileDetails.mesto
+                {profileDetails.mesto
                   ? profileDetails.mesto
                   : 'Nema podataka o mestu'}
               </Typography>

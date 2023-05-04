@@ -16,16 +16,24 @@ import { useProizvod } from '../../context/ProizvodContext'
 import { deleteProizvodFromApoteka } from '../../services/proizvodService'
 import { useAuth } from '../../context/AuthContext'
 import { DELETE_PRODUCT } from '../../constants/actionTypes'
+import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
 
 const ProductCard = ({ proizvodProp }) => {
   const theme = useTheme()
   const [quantity, setQuantity] = useState(1)
+  const [isEdit, setIsEdit] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
   const { dispatch: proizvodiDispatch } = useProizvod()
   const { state } = useAuth()
   const role = getUserRole()
 
   const handleQuantityChange = (event) => {
     setQuantity(event.target.value)
+  }
+
+  const handleIsEdit = () => {
+    setIsEdit(true)
+    setDialogOpen(true)
   }
 
   const handleDelete = (apotekaId) => {
@@ -119,11 +127,20 @@ const ProductCard = ({ proizvodProp }) => {
       <CardActions sx={{ mt: 1 }}>
         {role === 'Admin' && (
           <Fragment>
-            <Button size="small">
+            <Button size="small" onClick={handleIsEdit}>
               <EditIcon
                 sx={{ marginRight: 1, color: theme.palette.primary.main }}
               />
             </Button>
+            {dialogOpen && isEdit && (
+              <ProductPharmacyDialog
+                dialogOpen={dialogOpen}
+                setDialogOpen={setDialogOpen}
+                productToEdit={proizvodProp}
+                isEdit={isEdit}
+                setIsEdit={setIsEdit}
+              />
+            )}
             <Button
               size="small"
               onClick={() => handleDelete(proizvodProp.apotekaProizvodId)}

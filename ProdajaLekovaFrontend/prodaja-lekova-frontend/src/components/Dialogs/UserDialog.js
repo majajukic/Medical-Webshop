@@ -50,28 +50,28 @@ const UserDialog = ({
     if (userToEdit) {
       setInput({
         korisnikId: userToEdit.korisnikId,
-        ime: userToEdit.ime,
-        prezime: userToEdit.prezime,
+        ime: userToEdit.ime || '',
+        prezime: userToEdit.prezime || '',
         email: userToEdit.email,
         lozinka: userToEdit.lozinka,
-        brojTelefona: userToEdit.brojTelefona,
-        ulica: userToEdit.ulica,
-        broj: userToEdit.broj,
-        mesto: userToEdit.mesto,
+        brojTelefona: userToEdit.brojTelefona || '',
+        ulica: userToEdit.ulica || '',
+        broj: userToEdit.broj || '',
+        mesto: userToEdit.mesto || '',
         tipKorisnika: userToEdit.tipKorisnika,
       })
       setIsEdit(true)
     } else if (profileToEdit) {
       setInput({
         korisnikId: profileToEdit.korisnikId,
-        ime: profileToEdit.ime,
-        prezime: profileToEdit.prezime,
+        ime: profileToEdit.ime || '',
+        prezime: profileToEdit.prezime || '',
         email: profileToEdit.email,
         lozinka: profileToEdit.lozinka,
-        brojTelefona: profileToEdit.brojTelefona,
-        ulica: profileToEdit.ulica,
-        broj: profileToEdit.broj,
-        mesto: profileToEdit.mesto,
+        brojTelefona: profileToEdit.brojTelefona || '',
+        ulica: profileToEdit.ulica || '',
+        broj: profileToEdit.broj || '',
+        mesto: profileToEdit.mesto || '',
         tipKorisnika: profileToEdit.tipKorisnika,
       })
       setIsEditProfile(true)
