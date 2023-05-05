@@ -10,12 +10,20 @@ import {
   getProizvodiCountByApoteka,
   getProizvodiCount,
   getProizvodiByApoteka,
+  getProizvodiCenaRastuce,
+  getProizvodiCenaOpadajuce,
+  getProizvodiPopust,
+  getProizvodiByTip,
 } from '../../services/proizvodService'
 import {
   GET_PRODUCTS,
   GET_PRODUCTS_BY_PHARMACY,
+  GET_PRODUCTS_ASCENDING,
+  GET_PRODUCTS_DESCENDING,
+  GET_PRODUCTS_DISCOUNT,
+  GET_PRODUCTS_BY_SEARCH,
 } from '../../constants/actionTypes'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { usePagination } from '../../context/PaginationContext'
 
 const ProductsPage = () => {
@@ -27,7 +35,7 @@ const ProductsPage = () => {
   const { apotekaId } = useParams()
   const { kategorijaId } = useParams()
   const { terminPretrage } = useParams()
-  const [isDiscount, setIsDiscount] = useState(false)
+  const location = useLocation()
 
   const handlePageChange = useCallback(
     (event, page) => {
@@ -46,7 +54,14 @@ const ProductsPage = () => {
 
   useEffect(() => {
     console.log('home useeffect')
-    if (!apotekaId && !kategorijaId && !terminPretrage && !isDiscount) {
+    if (
+      !apotekaId &&
+      !kategorijaId &&
+      !terminPretrage &&
+      location.pathname !== '/proizvodi/cenaRastuce' &&
+      location.pathname !== '/proizvodi/cenaOpadajuce' &&
+      location.pathname !== '/proizvodi/naPopustu'
+    ) {
       getProizvodiHomePage(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
@@ -63,12 +78,56 @@ const ProductsPage = () => {
           })
         },
       )
+    } else if (location.pathname === '/proizvodi/cenaRastuce') {
+      getProizvodiCenaRastuce(paginationState.currentPage)
+        .then((response) => {
+          proizvodiDispatch({
+            type: GET_PRODUCTS_ASCENDING,
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else if (location.pathname === '/proizvodi/cenaOpadajuce') {
+      getProizvodiCenaOpadajuce(paginationState.currentPage)
+        .then((response) => {
+          proizvodiDispatch({
+            type: GET_PRODUCTS_DESCENDING,
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else if (location.pathname === '/proizvodi/naPopustu') {
+      getProizvodiPopust(paginationState.currentPage)
+        .then((response) => {
+          proizvodiDispatch({
+            type: GET_PRODUCTS_DISCOUNT,
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else if (kategorijaId) {
+      getProizvodiByTip(kategorijaId, paginationState.currentPage)
+        .then((response) => {
+          proizvodiDispatch({
+            type: GET_PRODUCTS_BY_SEARCH,
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     }
   }, [
     apotekaId,
     kategorijaId,
     terminPretrage,
-    isDiscount,
+    location.pathname,
     proizvodiDispatch,
     paginationState,
   ])
@@ -86,7 +145,14 @@ const ProductsPage = () => {
         .catch((error) => {
           console.error(error)
         })
-    } else if (!apotekaId && !kategorijaId && !terminPretrage && !isDiscount) {
+    } else if (
+      !apotekaId &&
+      !kategorijaId &&
+      !terminPretrage &&
+      location.pathname !== '/proizvodi/cenaRastuce' &&
+      location.pathname !== '/proizvodi/cenaOpadajuce' &&
+      location.pathname !== '/proizvodi/naPopustu'
+    ) {
       getProizvodiCount()
         .then((response) => {
           paginationDispatch({
@@ -102,19 +168,16 @@ const ProductsPage = () => {
     apotekaId,
     kategorijaId,
     terminPretrage,
-    isDiscount,
+    location.pathname,
     paginationDispatch,
     proizvodiDispatch,
+    paginationState.currentPage,
   ])
-
-  const handleIsDiscount = (isDiscount) => {
-    setIsDiscount(isDiscount)
-  }
 
   return (
     <Fragment>
       <ProductCategories />
-      <ProductSorting handleDiscount={handleIsDiscount} />
+      <ProductSorting />
       <ProductSearch />
       <Container sx={{ py: 8 }} maxWidth="md">
         <Grid container spacing={18} sx={{ marginTop: 4, marginBottom: 2 }}>

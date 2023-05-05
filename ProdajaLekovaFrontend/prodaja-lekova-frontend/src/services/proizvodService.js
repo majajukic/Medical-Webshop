@@ -115,9 +115,9 @@ export const getProizvodiCenaRastuce = async (pageNumber) => {
   }
 }
 
-export const getProizvodiPopust = async () => {
+export const getProizvodiPopust = async (pageNumber) => {
   try {
-    const data = await api.getProizvodiPopust()
+    const data = await api.getProizvodiPopust(pageNumber)
 
     return data
   } catch (error) {

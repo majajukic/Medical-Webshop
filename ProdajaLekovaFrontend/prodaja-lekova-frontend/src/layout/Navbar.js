@@ -29,9 +29,10 @@ import {
   getProizvodiHomePage,
 } from '../services/proizvodService'
 import { usePagination } from '../context/PaginationContext'
+import { getProizvodiCount } from '../services/api'
 
 const Navbar = () => {
-  const PAGE = 1
+  //const PAGE = 1
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
@@ -39,6 +40,7 @@ const Navbar = () => {
   const { dispatch: proizvodiDispatch } = useProizvod()
   const {
     state: paginationState,
+    dispatch: paginationDispatch,
   } = usePagination()
   const theme = useTheme()
   const role = getUserRole()
@@ -69,7 +71,18 @@ const Navbar = () => {
   }
 
   const handleDisplayAll = () => {
-    getProizvodiHomePage(PAGE)
+    getProizvodiCount()
+      .then((response) => {
+        paginationDispatch({
+          type: 'SET_TOTAL_RECORDS',
+          payload: response.data,
+        })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    getProizvodiHomePage(paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
 

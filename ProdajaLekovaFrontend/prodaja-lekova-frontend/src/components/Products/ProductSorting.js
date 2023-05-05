@@ -23,9 +23,10 @@ import {
   GET_PRODUCTS_DISCOUNT,
 } from '../../constants/actionTypes'
 
-const ProductSorting = ({handleDiscount}) => {
+const ProductSorting = () => {
   const [sortDirection, setSortDirection] = useState('ascending')
   const [isDisocunt, setIsDiscount] = useState(false)
+  const [isSorting, setIsSorting] = useState(false)
   const { dispatch: proizvodiDispatch } = useProizvod()
   const {
     state: paginationState,
@@ -50,7 +51,7 @@ const ProductSorting = ({handleDiscount}) => {
         .catch((error) => {
           console.error(error)
         })
-    } else {
+    } else if (isSorting) {
       getProizvodiCount()
         .then((response) => {
           paginationDispatch({
@@ -62,11 +63,11 @@ const ProductSorting = ({handleDiscount}) => {
           console.error(error)
         })
     }
-  },  [isDisocunt])
+  },  [isDisocunt, isSorting])
 
   const handleSort = () => {
     setIsDiscount(false)
-    handleDiscount(false)
+    setIsSorting(true)
     if (sortDirection === 'ascending') {
       getProizvodiCenaRastuce(paginationState.currentPage)
         .then((response) => {
@@ -80,8 +81,6 @@ const ProductSorting = ({handleDiscount}) => {
           console.error(error)
         })
     } else {
-      setIsDiscount(false)
-      handleDiscount(false)
       getProizvodiCenaOpadajuce(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({
@@ -98,8 +97,8 @@ const ProductSorting = ({handleDiscount}) => {
 
   const handleFilter = () => {
     setIsDiscount(true)
-    handleDiscount(true)
-    getProizvodiPopust()
+    setIsSorting(false)
+    getProizvodiPopust(paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_DISCOUNT,
