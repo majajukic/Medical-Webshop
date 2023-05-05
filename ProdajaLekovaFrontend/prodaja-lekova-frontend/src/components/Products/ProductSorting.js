@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { usePagination } from '../../context/PaginationContext'
 import {
@@ -13,6 +13,8 @@ import {
   getProizvodiCenaRastuce,
   getProizvodiCenaOpadajuce,
   getProizvodiPopust,
+  getProizvodiByDiscountCount,
+  getProizvodiCount
 } from '../../services/proizvodService'
 import { useProizvod } from '../../context/ProizvodContext'
 import {
@@ -21,8 +23,9 @@ import {
   GET_PRODUCTS_DISCOUNT,
 } from '../../constants/actionTypes'
 
-const ProductSorting = () => {
+const ProductSorting = ({handleDiscount}) => {
   const [sortDirection, setSortDirection] = useState('ascending')
+  const [isDisocunt, setIsDiscount] = useState(false)
   const { dispatch: proizvodiDispatch } = useProizvod()
   const {
     state: paginationState,
@@ -34,7 +37,36 @@ const ProductSorting = () => {
     setSortDirection(event.target.value)
   }
 
+  useEffect(() => {
+    console.log('count discount')
+    if (isDisocunt) {
+      getProizvodiByDiscountCount()
+        .then((response) => {
+          paginationDispatch({
+            type: 'SET_TOTAL_RECORDS',
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else {
+      getProizvodiCount()
+        .then((response) => {
+          paginationDispatch({
+            type: 'SET_TOTAL_RECORDS',
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  },  [isDisocunt])
+
   const handleSort = () => {
+    setIsDiscount(false)
+    handleDiscount(false)
     if (sortDirection === 'ascending') {
       getProizvodiCenaRastuce(paginationState.currentPage)
         .then((response) => {
@@ -42,19 +74,21 @@ const ProductSorting = () => {
             type: GET_PRODUCTS_ASCENDING,
             payload: response.data,
           })
-          navigate("/")
+          navigate("/proizvodi/cenaRastuce")
         })
         .catch((error) => {
           console.error(error)
         })
     } else {
+      setIsDiscount(false)
+      handleDiscount(false)
       getProizvodiCenaOpadajuce(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({
             type: GET_PRODUCTS_DESCENDING,
             payload: response.data,
           })
-          navigate("/")
+          navigate("/proizvodi/cenaOpadajuce")
         })
         .catch((error) => {
           console.error(error)
@@ -63,13 +97,15 @@ const ProductSorting = () => {
   }
 
   const handleFilter = () => {
+    setIsDiscount(true)
+    handleDiscount(true)
     getProizvodiPopust()
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_DISCOUNT,
           payload: response.data,
         })
-        navigate("/")
+        navigate("/proizvodi/naPopustu")
       })
       .catch((error) => {
         console.error(error)

@@ -61,6 +61,30 @@ export const getProizvodiByTipCount = async (type) => {
   }
 }
 
+export const getProizvodiBySearchCount = async (searchTerm) => {
+  try {
+
+    const total = await api.getProizvodiBySearchCount(searchTerm)
+
+    return total
+
+  } catch (error) {
+    return error.response.status
+  }
+}
+
+export const getProizvodiByDiscountCount = async () => {
+  try {
+
+    const total = await api.getProizvodiByDiscountCount()
+
+    return total
+
+  } catch (error) {
+    return error.response.status
+  }
+}
+
 export const getProizvodiByApoteka = async (pharmacy, pageNumber) => {
   try {
     const data = await api.getProizvodiByApoteka(pharmacy, pageNumber)

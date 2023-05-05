@@ -1,15 +1,14 @@
 import React, { useEffect, useState, Fragment } from 'react'
 import { Button, Box } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   getTipoviProizvoda,
   getProizvodiByTip,
- // getProizvodiByTipCount,
+  getProizvodiByTipCount,
 } from '../../services/proizvodService'
 import { useProizvod } from '../../context/ProizvodContext'
 import { GET_PRODUCTS_BY_TYPE } from '../../constants/actionTypes'
 import { usePagination } from '../../context/PaginationContext'
-//import { useParams } from 'react-router-dom'
 
 const ProductCategories = () => {
   const [tipoviProivoda, setTipoviProizvoda] = useState([])
@@ -19,7 +18,7 @@ const ProductCategories = () => {
     dispatch: paginationDispatch,
   } = usePagination()
   const navigate = useNavigate()
-  //const { kategorijaId } = useParams()
+  const { kategorijaId } = useParams()
 
   useEffect(() => {
     getTipoviProizvoda()
@@ -31,35 +30,30 @@ const ProductCategories = () => {
       })
   }, [proizvodiDispatch])
 
-  /*useEffect(() => {
+  useEffect(() => {
     console.log('count tipovi')
     if (kategorijaId) {
       getProizvodiByTipCount(kategorijaId)
         .then((response) => {
-          updateTotalRecords(response.data)
+          paginationDispatch({
+            type: 'SET_TOTAL_RECORDS',
+            payload: response.data,
+          })
         })
         .catch((error) => {
           console.error(error)
         })
     }
-  }, [paginationDispatch, kategorijaId])*/
+  },  [kategorijaId])
 
   const handleClick = (tipId) => {
-    if (paginationState.totalRecords <= paginationState.pageSize) {
-      paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: 1 })
-    } else {
-      paginationDispatch({
-        type: 'SET_CURRENT_PAGE',
-        payload: paginationState.currentPage,
-      })
-    }
+    navigate(`/kategorija/${tipId}`)
     getProizvodiByTip(tipId, paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({
           type: GET_PRODUCTS_BY_TYPE,
           payload: response.data,
         })
-        navigate(`/kategorija/${tipId}`)
       })
       .catch((error) => {
         console.error(error)

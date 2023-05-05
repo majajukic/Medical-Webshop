@@ -6,7 +6,6 @@ import {
   getProizvodi,
   addProizvodToApoteka,
   updateProizvodInApoteka,
-  getProizvodiCount,
 } from '../../services/proizvodService'
 import {
   Button,
@@ -20,12 +19,10 @@ import {
 } from '@mui/material'
 import {
   ADD_PRODUCT_TO_PHARMACY,
-  GET_PRODUCTS,
   GET_PRODUCTS_BY_PHARMACY,
 } from '../../constants/actionTypes'
 import {
   getProizvodByApoteka,
-  getProizvodiHomePage,
   getProizvodiByApoteka,
 } from '../../services/proizvodService'
 import { useNavigate } from 'react-router-dom'
@@ -144,6 +141,8 @@ const ProductPharmacyDialog = ({
           setInput(initialState)
 
           handleClose()
+
+          alert("Proizvod uspesno dodat u apoteku " + addedProduct.data.apoteka.nazivApoteke)
 
           navigate(`/apoteka/${addedProduct.data.apoteka.apotekaId}`)
         }

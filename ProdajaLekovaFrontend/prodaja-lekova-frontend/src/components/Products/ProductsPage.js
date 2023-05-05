@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useCallback, useState } from 'react'
 import ProductCard from './ProductCard'
 import ProductCategories from './ProductCategories'
 import ProductSorting from './ProductSorting'
@@ -7,11 +7,14 @@ import { Container, Grid, Typography, Pagination } from '@mui/material'
 import { useProizvod } from '../../context/ProizvodContext'
 import {
   getProizvodiHomePage,
-  getProizvodiByApoteka,
   getProizvodiCountByApoteka,
   getProizvodiCount,
+  getProizvodiByApoteka,
 } from '../../services/proizvodService'
-import { GET_PRODUCTS } from '../../constants/actionTypes'
+import {
+  GET_PRODUCTS,
+  GET_PRODUCTS_BY_PHARMACY,
+} from '../../constants/actionTypes'
 import { useParams } from 'react-router-dom'
 import { usePagination } from '../../context/PaginationContext'
 
@@ -22,19 +25,28 @@ const ProductsPage = () => {
     dispatch: paginationDispatch,
   } = usePagination()
   const { apotekaId } = useParams()
+  const { kategorijaId } = useParams()
+  const { terminPretrage } = useParams()
+  const [isDiscount, setIsDiscount] = useState(false)
+
+  const handlePageChange = useCallback(
+    (event, page) => {
+      const totalRecords = paginationState.totalRecords
+      const pageSize = paginationState.pageSize
+      const maxPage = Math.ceil(totalRecords / pageSize)
+
+      if (totalRecords <= pageSize) {
+        paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: 1 })
+      } else if (page > 0 && page <= maxPage) {
+        paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: page })
+      }
+    },
+    [paginationState, paginationDispatch],
+  )
 
   useEffect(() => {
     console.log('home useeffect')
-    if (apotekaId) {
-      handlePageChange()
-      getProizvodiByApoteka(apotekaId, paginationState.currentPage)
-        .then((response) => {
-          proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
-        })
-        .catch((error) => {
-          console.error(error)
-        })
-    } else {
+    if (!apotekaId && !kategorijaId && !terminPretrage && !isDiscount) {
       getProizvodiHomePage(paginationState.currentPage)
         .then((response) => {
           proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
@@ -42,14 +54,25 @@ const ProductsPage = () => {
         .catch((error) => {
           console.error(error)
         })
+    } else if (apotekaId) {
+      getProizvodiByApoteka(apotekaId, paginationState.currentPage).then(
+        (response) => {
+          proizvodiDispatch({
+            type: GET_PRODUCTS_BY_PHARMACY,
+            payload: response.data,
+          })
+        },
+      )
     }
   }, [
     apotekaId,
+    kategorijaId,
+    terminPretrage,
+    isDiscount,
     proizvodiDispatch,
-    paginationState.currentPage,
-    paginationState.totalRecords,
+    paginationState,
   ])
-console.log(paginationState)
+
   useEffect(() => {
     console.log('count products main')
     if (apotekaId) {
@@ -63,7 +86,7 @@ console.log(paginationState)
         .catch((error) => {
           console.error(error)
         })
-    } else {
+    } else if (!apotekaId && !kategorijaId && !terminPretrage && !isDiscount) {
       getProizvodiCount()
         .then((response) => {
           paginationDispatch({
@@ -75,29 +98,23 @@ console.log(paginationState)
           console.error(error)
         })
     }
-  }, [apotekaId, proizvodiDispatch, paginationDispatch])
+  }, [
+    apotekaId,
+    kategorijaId,
+    terminPretrage,
+    isDiscount,
+    paginationDispatch,
+    proizvodiDispatch,
+  ])
 
-  function handlePageChange(event, page) {
-    const totalRecords = paginationState.totalRecords
-    const pageSize = paginationState.pageSize
-    const maxPage = Math.ceil(totalRecords / pageSize)
-
-    if (totalRecords <= pageSize) {
-      paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: 1 })
-    } else if (page > 0 && page <= maxPage) {
-      paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: page })
-    }
+  const handleIsDiscount = (isDiscount) => {
+    setIsDiscount(isDiscount)
   }
-
-  /*const handleUpdateTotalRecords = (newTotal) => {
-    console.log(newTotal)
-    paginationDispatch({ type: 'SET_TOTAL_RECORDS', payload: newTotal })
-  }*/
 
   return (
     <Fragment>
-      <ProductCategories /*updateTotalRecords={handleUpdateTotalRecords}*/ />
-      <ProductSorting />
+      <ProductCategories />
+      <ProductSorting handleDiscount={handleIsDiscount} />
       <ProductSearch />
       <Container sx={{ py: 8 }} maxWidth="md">
         <Grid container spacing={18} sx={{ marginTop: 4, marginBottom: 2 }}>

@@ -1,15 +1,21 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { Search as SearchIcon } from '@mui/icons-material'
 import { TextField, InputAdornment, IconButton } from '@mui/material'
-import { getProizvodiBySearch } from '../../services/proizvodService'
+import {
+  getProizvodiBySearch,
+  getProizvodiBySearchCount,
+} from '../../services/proizvodService'
 import { useProizvod } from '../../context/ProizvodContext'
 import { GET_PRODUCTS_BY_SEARCH } from '../../constants/actionTypes'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { usePagination } from '../../context/PaginationContext'
 
 const ProductSearch = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const { dispatch: paginationDispatch } = usePagination()
   const navigate = useNavigate()
+  const { terminPretrage } = useParams()
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value)
@@ -22,12 +28,33 @@ const ProductSearch = () => {
           type: GET_PRODUCTS_BY_SEARCH,
           payload: response.data,
         })
-        navigate("/")
+        if (searchTerm) {
+          navigate(`/proizvodi/${searchTerm}`)
+          setSearchTerm('')
+        } else {
+          navigate('/')
+        }
       })
       .catch((error) => {
         console.error(error)
       })
   }
+
+  useEffect(() => {
+    console.log('count search')
+    if (terminPretrage) {
+      getProizvodiBySearchCount(terminPretrage)
+        .then((response) => {
+          paginationDispatch({
+            type: 'SET_TOTAL_RECORDS',
+            payload: response.data,
+          })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }, [terminPretrage])
 
   return (
     <Fragment>

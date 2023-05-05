@@ -26,6 +26,8 @@ export const getProizvodByApoteka = (pharmacyId) => BASE_URL.get(`/api/apotekaPr
 export const getProizvodiByTip = (pageNumber, type) => BASE_URL.get(`/api/apotekaProizvod/byTipProizvoda?PageNumber=${pageNumber}&tipProizvodaId=${type}`)
 export const getProizvodiCountByApoteka = (pharmacy) => BASE_URL.get(`/api/apotekaProizvod/ukupnoProizvoda?apotekaId=${pharmacy}`)
 export const getProizvodiCount = () => BASE_URL.get('/api/apotekaProizvod/ukupnoProizvoda')
+export const getProizvodiByDiscountCount = () => BASE_URL.get('/api/apotekaProizvod/ukupnoProizvodaNaPopustu')
+export const getProizvodiBySearchCount = (searchTerm) => BASE_URL.get(`/api/apotekaProizvod/ukupnoProizvodaPretraga?searchTerm=${searchTerm}`)
 export const getProizvodiByTipCount = (type) => BASE_URL.get(`/api/apotekaProizvod/ukupnoProizvodaPoTipu?tipProizvodaId=${type}`)
 export const deleteProizvod = (id, authConfig) => BASE_URL.delete(`/api/proizvod/${id}`, authConfig)
 export const deleteProizvodFromApoteka = (id, authConfig) => BASE_URL.delete(`/api/apotekaProizvod/${id}`, authConfig)

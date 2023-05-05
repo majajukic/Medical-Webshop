@@ -39,7 +39,6 @@ const Navbar = () => {
   const { dispatch: proizvodiDispatch } = useProizvod()
   const {
     state: paginationState,
-    dispatch: paginationDispatch,
   } = usePagination()
   const theme = useTheme()
   const role = getUserRole()
@@ -55,6 +54,7 @@ const Navbar = () => {
   }, [apotekaDispatch])
 
   const handleMenuItemClick = (apotekaId) => {
+    navigate(`/apoteka/${apotekaId}`)
     getProizvodiByApoteka(apotekaId, paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({
@@ -62,7 +62,6 @@ const Navbar = () => {
           payload: response.data,
         })
         handleMenuClose()
-        navigate(`/apoteka/${apotekaId}`)
       })
       .catch((error) => {
         console.error(error)
