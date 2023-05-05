@@ -29,12 +29,11 @@ namespace ProdajaLekovaBackend.Controllers
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetPorudzbine([FromQuery] RequestParams requestParams)
+        public async Task<IActionResult> GetPorudzbine()
         {
             try
             {
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams,
-                    q => q.PlacenaPorudzbina == true,
+                var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.PlacenaPorudzbina == true,
                     include: q => q.Include(x => x.Korisnik),
                     orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
 
@@ -55,13 +54,13 @@ namespace ProdajaLekovaBackend.Controllers
         /// </summary>
         [Authorize(Roles = "Kupac")]
         [HttpGet("porudzbineByKupac")]
-        public async Task<IActionResult> GetPorudzbineByKupac([FromQuery] RequestParams requestParams)
+        public async Task<IActionResult> GetPorudzbineByKupac()
         {
             try
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllPagedListAsync(requestParams, q => q.KorisnikId == korisnikId);
+                var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.KorisnikId == korisnikId);
 
                 if (porudzbine == null) return NoContent();
 
@@ -232,26 +231,6 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 return StatusCode(500, "Serverska greska.");
             }
-        }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("ukupnoPorudzbina")]
-        public async Task<IActionResult> GetTotalPorudzbine()
-        {
-            int total = await _unitOfWork.Porudzbina.GetTotalCountAsync();
-
-            return Ok(total);
-        }
-
-        [Authorize(Roles = "Kupac")]
-        [HttpGet("ukupnoPorudzbinaByKupac")]
-        public async Task<IActionResult> GetTotalPorudzbineByKupac()
-        {
-            var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
-
-            int total = await _unitOfWork.Porudzbina.GetTotalCountAsync(q => q.KorisnikId == korisnikId);
-
-            return Ok(total);
         }
     }
 }

@@ -407,5 +407,14 @@ namespace ProdajaLekovaBackend.Controllers
             return Ok(total);
         }
 
+        [AllowAnonymous]
+        [HttpGet("ukupnoProizvodaPretraga")]
+        public async Task<IActionResult> GetTotalApotekaProizvodPretraga([FromQuery] string searchTerm)
+        {
+            int total = await _unitOfWork.ApotekaProizvod.GetTotalCountAsync(q => q.Proizvod.NazivProizvoda.ToLower().Contains(searchTerm));
+
+            return Ok(total);
+        }
+
     }
 }
