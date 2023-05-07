@@ -180,7 +180,7 @@ const Navbar = () => {
         )}
         {role === 'Kupac' && (
           <Button
-            /*component={RouteLink} to="/korpa"*/ variant="contained"
+            component={RouteLink} to="/korpa" variant="contained"
             sx={{ marginX: '10px' }}
           >
             <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />

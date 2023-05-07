@@ -46,5 +46,9 @@ export const updateKorisnik = (updatedUser, authConfig) => BASE_URL.put(`/api/ko
 //API endpointi za porudzbine:
 export const getPorudzbine = (authConfig) => BASE_URL.get('/api/porudzbina', authConfig)
 export const getPorudzbineByKupac = (authConfig) => BASE_URL.get('/api/porudzbina/porudzbineByKupac', authConfig)
+export const getKorpa = (authConfig) => BASE_URL.get('/api/porudzbina/korpa', authConfig)
+export const createPorudzbina = (newOrder, authConfig) => BASE_URL.post(`/api/porudzbina`, newOrder, authConfig)
+export const addStavkaToPorudzbina = (itemToAdd, authConfig) => BASE_URL.post(`/api/stavkaPorudzbine`, itemToAdd, authConfig)
 export const deletePorudzbina = (id, authConfig) => BASE_URL.delete(`/api/porudzbina/${id}`, authConfig)
+export const deleteStavka = (id, authConfig) => BASE_URL.delete(`/api/stavkaPorudzbine/${id}`, authConfig)
 

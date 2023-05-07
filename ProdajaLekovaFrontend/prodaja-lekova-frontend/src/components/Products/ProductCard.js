@@ -14,9 +14,14 @@ import {
 } from '@mui/material'
 import { useProizvod } from '../../context/ProizvodContext'
 import { deleteProizvodFromApoteka } from '../../services/proizvodService'
+import {
+  createPorudzbina,
+  addStavkaToPorudzbina,
+} from '../../services/porudzbinaService'
 import { useAuth } from '../../context/AuthContext'
 import { DELETE_PRODUCT } from '../../constants/actionTypes'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
+import { useKorpa } from '../../context/KorpaContext'
 
 const ProductCard = ({ proizvodProp }) => {
   const theme = useTheme()
@@ -24,6 +29,7 @@ const ProductCard = ({ proizvodProp }) => {
   const [isEdit, setIsEdit] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const { dispatch: proizvodiDispatch } = useProizvod()
+  const { state: korpaState, dispatch: korpaDispatch } = useKorpa()
   const { state } = useAuth()
   const role = getUserRole()
 
@@ -45,6 +51,61 @@ const ProductCard = ({ proizvodProp }) => {
       deleteProizvodFromApoteka(apotekaId, state.token)
         .then(() => {
           proizvodiDispatch({ type: DELETE_PRODUCT, payload: apotekaId })
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    }
+  }
+
+  const handleAddToCart = (kolicina, cena, popust, apotekaProizvodId) => {
+    if (
+      !korpaState.porudzbina &&
+      Object.keys(korpaState.porudzbina)?.length === 0
+    ) {
+      console.log('cart empty')
+      const newPorudzbina = {
+        brojPorudzbine: null,
+        datumKreiranja: null,
+        ukupanIznos: null,
+        placenaPorudzbina: null,
+        datumPlacanja: null,
+        uplataId: null,
+        kolicina: kolicina,
+        cena: cena,
+        popust: popust,
+        apotekaProizvodId: apotekaProizvodId,
+      }
+
+      createPorudzbina(newPorudzbina, state.token)
+        .then((response) => {
+          console.log(response)
+          if (response === 400) {
+            alert('Proizvoda nema dovoljno na stanju za naručiti.')
+          } else if (response.status === 201) {
+            alert('Proizvod dodat u korpu!')
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else {
+      console.log(korpaState.porudzbina.porudzbinaId)
+      const stavkaToAdd = {
+        kolicina: kolicina,
+        cena: cena,
+        popust: popust,
+        porudzbinaId: korpaState.porudzbina.porudzbinaId,
+        apotekaProizvodId: apotekaProizvodId,
+      }
+
+      addStavkaToPorudzbina(stavkaToAdd, state.token)
+        .then((response) => {
+          if (response === 400) {
+            alert('Proizvoda nema dovoljno na stanju za naručiti.')
+          } else if (response.status === 201) {
+            alert('Proizvod dodat u korpu!')
+          }
         })
         .catch((error) => {
           console.error(error)
@@ -154,7 +215,18 @@ const ProductCard = ({ proizvodProp }) => {
         )}
         {role === 'Kupac' &&
           (proizvodProp.stanjeZaliha > 0 ? (
-            <Button size="medium" variant="contained">
+            <Button
+              size="medium"
+              variant="contained"
+              onClick={() =>
+                handleAddToCart(
+                  quantity,
+                  proizvodProp.cenaBezPopusta,
+                  proizvodProp.popustUprocentima,
+                  proizvodProp.apotekaProizvodId,
+                )
+              }
+            >
               Dodaj u korpu
             </Button>
           ) : (

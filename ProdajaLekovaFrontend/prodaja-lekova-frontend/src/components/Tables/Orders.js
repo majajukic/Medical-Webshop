@@ -20,12 +20,15 @@ import {
   useTheme,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
+import { useKorpa } from '../../context/KorpaContext'
+import { EMPTY_CART } from '../../constants/actionTypes'
 
 const Orders = () => {
   const role = getUserRole()
   const { state } = useAuth()
   const theme = useTheme()
   const [porudzbine, setPorudzbine] = useState([])
+  const { dispatch: korpaDispatch } = useKorpa()
 
   useEffect(() => {
     if (role === 'Admin') {
@@ -58,6 +61,7 @@ const Orders = () => {
           setPorudzbine(
             porudzbine.filter((porudzbina) => porudzbina.porudzbinaId !== id),
           )
+          korpaDispatch({ type: EMPTY_CART })
         })
         .catch((error) => {
           console.error(error)
@@ -112,9 +116,16 @@ const Orders = () => {
                     <TableCell>
                       {porudzbina.placenaPorudzbina === true ? 'Da' : 'Ne'}
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(porudzbina.datumPlacanja), 'dd/MM/yyyy')}
-                    </TableCell>
+                    {porudzbina.placenaPorudzbina === true ? (
+                      <TableCell>
+                        {format(
+                          new Date(porudzbina.datumPlacanja),
+                          'dd/MM/yyyy',
+                        )}
+                      </TableCell>
+                    ) : (
+                      <TableCell>/</TableCell>
+                    )}
                     {role === 'Admin' && (
                       <TableCell>
                         {porudzbina.korisnik.ime +
@@ -122,22 +133,25 @@ const Orders = () => {
                           porudzbina.korisnik.prezime}
                       </TableCell>
                     )}
-                    {(role === 'Kupac' && porudzbina.placenaPorudzbina === false) && (
-                      <TableCell>
-                        <Button
-                          onClick={() => handleDelete(porudzbina.porudzbinaId)}
-                        >
-                          <DeleteIcon
-                            sx={{
-                              marginRight: 1,
-                              color: theme.palette.primary.main,
-                              fontSize: '1.5rem',
-                              cursor: 'pointer',
-                            }}
-                          />
-                        </Button>
-                      </TableCell>
-                    )}
+                    {role === 'Kupac' &&
+                      porudzbina.placenaPorudzbina === false && (
+                        <TableCell>
+                          <Button
+                            onClick={() =>
+                              handleDelete(porudzbina.porudzbinaId)
+                            }
+                          >
+                            <DeleteIcon
+                              sx={{
+                                marginRight: 1,
+                                color: theme.palette.primary.main,
+                                fontSize: '1.5rem',
+                                cursor: 'pointer',
+                              }}
+                            />
+                          </Button>
+                        </TableCell>
+                      )}
                   </TableRow>
                 ))
               ) : (

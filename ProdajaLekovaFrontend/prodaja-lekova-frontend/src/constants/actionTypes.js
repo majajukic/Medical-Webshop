@@ -17,3 +17,10 @@ export const GET_PRODUCTS_BY_SEARCH = 'GET_PRODUCTS_BY_SEARCH'
 export const GET_PRODUCTS_BY_TYPE = 'GET_PRODUCTS_BY_TYPE'
 export const GET_PRODUCTS_BY_PHARMACY = 'GET_PRODUCTS_BY_PHARMACY'
 export const ADD_PRODUCT_TO_PHARMACY = 'ADD_PRODUCT_TO_PHARMACY'
+
+//porudzbina tipovi akcija
+export const GET_CART = 'GET_CART'
+export const ADD_CART_ITEM = 'ADD_CART_ITEM'
+export const UPDATE_CART = 'UPDATE_CART'
+export const EMPTY_CART = 'EMPTY_CART'
+export const REMOVE_ITEM = 'REMOVE_ITEM'
