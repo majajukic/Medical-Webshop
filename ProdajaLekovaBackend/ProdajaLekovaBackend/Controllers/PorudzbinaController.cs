@@ -75,7 +75,33 @@ namespace ProdajaLekovaBackend.Controllers
         }
 
         /// <summary>
-        /// Vraća jednu porudzbinu na osnovu id-ja (sadrzaj korpe).
+        /// Vraća sadrzaj korpe.
+        /// </summary>
+        [Authorize(Roles = "Kupac")]
+        [HttpGet("korpa")]
+        public async Task<IActionResult> GetKorpa()
+        {
+            try
+            {
+                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
+
+                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PlacenaPorudzbina == false && q.Korisnik.KorisnikId == korisnikId,
+                    include: q => q.Include(x => x.StavkaPorudzbine).ThenInclude(y => y.ApotekaProizvod).ThenInclude(z => z.Proizvod.TipProizvoda));
+
+                if (porudzbina == null) return NoContent();
+
+                var result = _mapper.Map<PorudzbinaDto>(porudzbina);
+
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
+        }
+
+        /// <summary>
+        /// Vraća jednu porudzbinu na osnovu id-ja.
         /// </summary>
         [Authorize(Roles = "Kupac")]
         [HttpGet("{porudzbinaId:int}", Name = "GetPorudzbina")]
