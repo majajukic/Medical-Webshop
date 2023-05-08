@@ -17,9 +17,10 @@ import { deleteProizvodFromApoteka } from '../../services/proizvodService'
 import {
   createPorudzbina,
   addStavkaToPorudzbina,
+  getKorpa,
 } from '../../services/porudzbinaService'
 import { useAuth } from '../../context/AuthContext'
-import { DELETE_PRODUCT } from '../../constants/actionTypes'
+import { DELETE_PRODUCT, GET_CART } from '../../constants/actionTypes'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
 import { useKorpa } from '../../context/KorpaContext'
 
@@ -60,8 +61,9 @@ const ProductCard = ({ proizvodProp }) => {
 
   const handleAddToCart = (kolicina, cena, popust, apotekaProizvodId) => {
     if (
-      !korpaState.porudzbina &&
-      Object.keys(korpaState.porudzbina)?.length === 0
+      !korpaState?.porudzbina || 
+      Object.keys(korpaState?.porudzbina)?.length === 0 || 
+      !korpaState?.porudzbina?.stavkaPorudzbine?.length
     ) {
       console.log('cart empty')
       const newPorudzbina = {
@@ -79,10 +81,16 @@ const ProductCard = ({ proizvodProp }) => {
 
       createPorudzbina(newPorudzbina, state.token)
         .then((response) => {
-          console.log(response)
           if (response === 400) {
             alert('Proizvoda nema dovoljno na stanju za naručiti.')
           } else if (response.status === 201) {
+            getKorpa(state.token)
+              .then((response) => {
+                korpaDispatch({ type: GET_CART, payload: response.data })
+              })
+              .catch((error) => {
+                console.error(error)
+              })
             alert('Proizvod dodat u korpu!')
           }
         })
@@ -90,7 +98,7 @@ const ProductCard = ({ proizvodProp }) => {
           console.error(error)
         })
     } else {
-      console.log(korpaState.porudzbina.porudzbinaId)
+      console.log('cart not empty')
       const stavkaToAdd = {
         kolicina: kolicina,
         cena: cena,
@@ -104,6 +112,13 @@ const ProductCard = ({ proizvodProp }) => {
           if (response === 400) {
             alert('Proizvoda nema dovoljno na stanju za naručiti.')
           } else if (response.status === 201) {
+            getKorpa(state.token)
+              .then((response) => {
+                korpaDispatch({ type: GET_CART, payload: response.data })
+              })
+              .catch((error) => {
+                console.error(error)
+              })
             alert('Proizvod dodat u korpu!')
           }
         })

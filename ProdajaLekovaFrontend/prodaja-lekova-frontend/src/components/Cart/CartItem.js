@@ -2,8 +2,12 @@ import React from 'react'
 import { Card, CardContent, CardMedia, Typography, Button } from '@mui/material'
 import { useKorpa } from '../../context/KorpaContext'
 import { useAuth } from '../../context/AuthContext'
-import { deletePorudzbina, deleteStavka } from '../../services/porudzbinaService'
-import { EMPTY_CART, REMOVE_ITEM } from '../../constants/actionTypes'
+import {
+  deletePorudzbina,
+  deleteStavka,
+  getKorpa,
+} from '../../services/porudzbinaService'
+import { EMPTY_CART, REMOVE_ITEM, GET_CART } from '../../constants/actionTypes'
 
 const CartItem = ({ item }) => {
   const { state: korpaState, dispatch: korpaDispatch } = useKorpa()
@@ -21,7 +25,13 @@ const CartItem = ({ item }) => {
     } else {
       deleteStavka(stavkaId, state.token)
         .then(() => {
-          korpaDispatch({ type: REMOVE_ITEM, payload: stavkaId })
+          getKorpa(state.token)
+          .then((response) => {
+            korpaDispatch({ type: GET_CART, payload: response.data })
+          })
+          .catch((error) => {
+            console.error(error)
+          })
         })
         .catch((error) => {
           console.error(error)

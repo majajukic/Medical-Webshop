@@ -30,8 +30,6 @@ const Cart = () => {
     return <Navigate to="/notFound" />
   }
 
-  console.log(korpaState)
-
   return (
     <Box sx={{ marginTop: '100px' }}>
       {korpaState.porudzbina ? (

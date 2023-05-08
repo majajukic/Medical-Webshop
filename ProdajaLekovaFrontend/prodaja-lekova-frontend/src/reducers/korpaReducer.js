@@ -4,6 +4,7 @@ import {
   UPDATE_CART,
   EMPTY_CART,
   REMOVE_ITEM,
+  UPDATE_TOTAL,
 } from '../constants/actionTypes'
 
 const korpaReducer = (state, action) => {
@@ -38,6 +39,14 @@ const korpaReducer = (state, action) => {
       return {
         ...state,
         porudzbina: action.payload,
+      }
+    case UPDATE_TOTAL:
+      return {
+        ...state,
+        porudzbina: {
+          ...state.porudzbina,
+          ukupanIznos: action.payload,
+        },
       }
     default:
       return state
