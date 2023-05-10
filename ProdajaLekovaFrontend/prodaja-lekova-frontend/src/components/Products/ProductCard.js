@@ -23,6 +23,7 @@ import { useAuth } from '../../context/AuthContext'
 import { DELETE_PRODUCT, GET_CART } from '../../constants/actionTypes'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
 import { useKorpa } from '../../context/KorpaContext'
+import defaultImage from '../../assets/defaultImage.jpg'
 
 const ProductCard = ({ proizvodProp }) => {
   const theme = useTheme()
@@ -91,7 +92,6 @@ const ProductCard = ({ proizvodProp }) => {
               .catch((error) => {
                 console.error(error)
               })
-            alert('Proizvod dodat u korpu!')
           }
         })
         .catch((error) => {
@@ -119,7 +119,6 @@ const ProductCard = ({ proizvodProp }) => {
               .catch((error) => {
                 console.error(error)
               })
-            alert('Proizvod dodat u korpu!')
           }
         })
         .catch((error) => {
@@ -143,7 +142,7 @@ const ProductCard = ({ proizvodProp }) => {
         sx={{
           pt: '5%',
         }}
-        src={proizvodProp.slika}
+        src={proizvodProp.slika ? proizvodProp.slika : defaultImage }
         alt="slika proizvoda"
       />
       <CardContent sx={{ flexGrow: 1 }}>

@@ -17,6 +17,7 @@ import {
   Menu,
   Link,
   Box,
+  Badge,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
 import { Link as RouteLink, useNavigate } from 'react-router-dom'
@@ -30,13 +31,16 @@ import {
 } from '../services/proizvodService'
 import { usePagination } from '../context/PaginationContext'
 import { getProizvodiCount } from '../services/api'
+import { useKorpa } from '../context/KorpaContext'
 
 const Navbar = () => {
-  //const PAGE = 1
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
   const { state: apotekaState, dispatch: apotekaDispatch } = useApoteka()
+  const { state: korpaState } = useKorpa()
+  const cartItemCount = korpaState.porudzbina?.stavkaPorudzbine?.length || 0
+
   const { dispatch: proizvodiDispatch } = useProizvod()
   const {
     state: paginationState,
@@ -180,10 +184,14 @@ const Navbar = () => {
         )}
         {role === 'Kupac' && (
           <Button
-            component={RouteLink} to="/korpa" variant="contained"
+            component={RouteLink}
+            to="/korpa"
+            variant="contained"
             sx={{ marginX: '10px' }}
           >
-            <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
+            <Badge badgeContent={cartItemCount} color="error">
+              <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
+            </Badge>
           </Button>
         )}
         {(role === 'Kupac' || role === 'Admin') && (
