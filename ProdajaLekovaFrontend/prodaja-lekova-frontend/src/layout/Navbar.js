@@ -7,6 +7,7 @@ import {
   LOGOUT,
   GET_PRODUCTS_BY_PHARMACY,
   GET_PRODUCTS,
+  GET_CART
 } from '../constants/actionTypes'
 import {
   AppBar,
@@ -32,13 +33,14 @@ import {
 import { usePagination } from '../context/PaginationContext'
 import { getProizvodiCount } from '../services/api'
 import { useKorpa } from '../context/KorpaContext'
+import { getKorpa } from '../services/porudzbinaService'
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
   const { state: apotekaState, dispatch: apotekaDispatch } = useApoteka()
-  const { state: korpaState } = useKorpa()
+  const { state: korpaState, dispatch: korpaDispatch } = useKorpa()
   const cartItemCount = korpaState.porudzbina?.stavkaPorudzbine?.length || 0
 
   const { dispatch: proizvodiDispatch } = useProizvod()
@@ -50,6 +52,7 @@ const Navbar = () => {
   const role = getUserRole()
 
   useEffect(() => {
+    console.log('navbar effect')
     getApoteke()
       .then((response) => {
         apotekaDispatch({ type: GET_PHARMACIES, payload: response.data })
@@ -57,7 +60,16 @@ const Navbar = () => {
       .catch((error) => {
         console.error(error)
       })
-  }, [apotekaDispatch])
+      if (role === 'Kupac' && state.token) {
+        getKorpa(state.token)
+          .then((response) => {
+            korpaDispatch({ type: GET_CART, payload: response.data })
+          })
+          .catch((error) => {
+            console.error(error)
+          })
+        }
+  }, [apotekaDispatch, role, state.token, korpaDispatch, cartItemCount])
 
   const handleMenuItemClick = (apotekaId) => {
     navigate(`/apoteka/${apotekaId}`)

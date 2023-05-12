@@ -15,6 +15,8 @@ import { ProizvodProvider } from './context/ProizvodContext';
 import { ApotekaProvider } from './context/ApotekaContext';
 import { KorpaProvider } from './context/KorpaContext';
 import { PaginationProvider } from './context/PaginationContext';
+import PaymentCanceled from './components/Cart/PaymentCanceled';
+import PaymentSuccess from './components/Cart/PaymentSuccess';
 
 const App = () => {
 
@@ -22,32 +24,34 @@ const App = () => {
     <AuthProvider>
       <ProizvodProvider>
         <ApotekaProvider>
-        <KorpaProvider>
-            <PaginationProvider>
-              <BrowserRouter>
-                <ThemeProvider theme={theme}>
-                  <Routes>
-                    <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/proizvodi/:terminPretrage" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/proizvodi/cenaRastuce" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/proizvodi/cenaOpadajuce" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/proizvodi/naPopustu" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/apoteka/:apotekaId" exact element={<Layout><ProductsPage /></Layout>} />
-                    <Route path="/kategorija/:kategorijaId" exact element={<Layout><ProductsPage /></Layout>}  />
-                    <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
-                    <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
-                    <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />
-                    <Route path="/profil" element={<Layout><ProfilePage /></Layout>} />
-                    <Route path="/korpa" element={ <Layout><Cart /></Layout>} />
-                    <Route path="/prijaviSe" element={<Login />} />
-                    <Route path="/registrujSe" element={ <Register />} />
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
-                </ThemeProvider>
-              </BrowserRouter>
-            </PaginationProvider>
-          </KorpaProvider>
-        </ApotekaProvider>
+          <KorpaProvider>
+              <PaginationProvider>
+                <BrowserRouter>
+                  <ThemeProvider theme={theme}>
+                    <Routes>
+                      <Route path="/" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/proizvodi/:terminPretrage" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/proizvodi/cenaRastuce" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/proizvodi/cenaOpadajuce" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/proizvodi/naPopustu" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/apoteka/:apotekaId" exact element={<Layout><ProductsPage /></Layout>} />
+                      <Route path="/kategorija/:kategorijaId" exact element={<Layout><ProductsPage /></Layout>}  />
+                      <Route path="/upravljajApotekama" element={<Layout><SharedTableContainer isPharmacyTable={true} /></Layout>} />
+                      <Route path="/upravljajProizvodima" element={<Layout><SharedTableContainer isProductTable={true} /></Layout>} />
+                      <Route path="/upravljajNalozima" element={<Layout><SharedTableContainer isUserTable={true}/></Layout>} />
+                      <Route path="/profil" element={<Layout><ProfilePage /></Layout>} />
+                      <Route path="/korpa" element={ <Layout><Cart /></Layout>} />
+                      <Route path="/prijaviSe" element={<Login />} />
+                      <Route path="/registrujSe" element={ <Register />} />
+                      <Route path="/placanjeUspesno" element={ <PaymentSuccess />} />
+                      <Route path="/placanjeOtkazano" element={ <PaymentCanceled />} />
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                  </ThemeProvider>
+                </BrowserRouter>
+              </PaginationProvider>
+            </KorpaProvider>
+          </ApotekaProvider>
       </ProizvodProvider>
     </AuthProvider>
   )

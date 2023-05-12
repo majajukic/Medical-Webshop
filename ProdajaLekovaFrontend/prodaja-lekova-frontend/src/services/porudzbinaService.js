@@ -37,6 +37,16 @@ export const getKorpa = async (token) => {
   }
 }
 
+export const getStripeSessionId = async (total) => {
+  try {
+    const data = await api.getStripeSessionId(total)
+
+    return data
+  } catch (error) {
+    return error
+  }
+}
+
 export const createPorudzbina = async (newOrder, token) => {
   try {
     const authConfig = bearerConfig(token)

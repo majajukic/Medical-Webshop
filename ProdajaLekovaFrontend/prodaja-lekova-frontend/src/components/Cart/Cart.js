@@ -5,8 +5,9 @@ import { useAuth } from '../../context/AuthContext'
 import { Navigate } from 'react-router'
 import CartItem from './CartItem'
 import { useKorpa } from '../../context/KorpaContext'
-import { getKorpa } from '../../services/porudzbinaService'
+import { getKorpa, getStripeSessionId } from '../../services/porudzbinaService'
 import { GET_CART } from '../../constants/actionTypes'
+import { loadStripe } from '@stripe/stripe-js'
 
 const Cart = () => {
   const role = getUserRole()
@@ -30,6 +31,22 @@ const Cart = () => {
     return <Navigate to="/notFound" />
   }
 
+  const handleCheckout = async (total) => {
+    try {
+      const payload = { ukupanIznos: total }
+      const response = await getStripeSessionId(payload)
+
+      if (response?.data?.sessionId) {
+        const stripe = await loadStripe(response?.data?.publishKey)
+        await stripe.redirectToCheckout({
+          sessionId: response?.data?.sessionId,
+        })
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <Box sx={{ marginTop: '100px' }}>
       {korpaState.porudzbina ? (
@@ -51,7 +68,12 @@ const Cart = () => {
               currency: 'RSD',
             })}
           </Typography>
-          <Button variant="contained">Plati porudžbinu</Button>
+          <Button
+            variant="contained"
+            onClick={() => handleCheckout(korpaState.porudzbina.ukupanIznos)}
+          >
+            Plati porudžbinu
+          </Button>
         </Fragment>
       ) : (
         <Typography variant="h5" sx={{ marginTop: '100px' }}>
