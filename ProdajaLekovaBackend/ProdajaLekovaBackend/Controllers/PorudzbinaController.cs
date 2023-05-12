@@ -205,7 +205,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira porudzbinu nakon uplate. AKTIVIRA TRIGER
         /// </summary>
-        [Authorize(Roles = "Kupac")]
+        [AllowAnonymous]
         [HttpPut]
         public async Task<IActionResult> UpdatePorudzbina([FromBody] PorudzbinaUpdateDto porudzbinaDTO)
         {

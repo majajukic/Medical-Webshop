@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProdajaLekovaBackend.Services;
 using Microsoft.OpenApi.Models;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+//Stripe:
+var stripeSection = builder.Configuration.GetSection("Stripe");
+var stripeKey = stripeSection.GetValue<string>("PrivateKey");
+StripeConfiguration.ApiKey = stripeKey;
+
 //AutoMapper
 builder.Services.AddAutoMapper(typeof(MapperInitializer));
 
@@ -60,7 +66,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
-
 
 //Controllers and ValidationContext
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
