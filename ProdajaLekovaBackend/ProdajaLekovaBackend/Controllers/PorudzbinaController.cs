@@ -205,7 +205,7 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Azurira porudzbinu nakon uplate. AKTIVIRA TRIGER
         /// </summary>
-        [AllowAnonymous]
+        /*[AllowAnonymous]
         [HttpPut]
         public async Task<IActionResult> UpdatePorudzbina([FromBody] PorudzbinaUpdateDto porudzbinaDTO)
         {
@@ -232,7 +232,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 return StatusCode(500, "Serverska greska.");
             }
-        }
+        }*/
 
         /// <summary>
         /// Brise porudzbinu i sve njene stavke na osnovu id-ja porudzbine.

@@ -6,5 +6,8 @@ namespace ProdajaLekovaBackend.DTOs.CheckoutDTO
     {
         [Required]
         public decimal UkupanIznos { get; set; }
+
+        [Required]
+        public int PorudzbinaId { get; set; }
     }
 }
