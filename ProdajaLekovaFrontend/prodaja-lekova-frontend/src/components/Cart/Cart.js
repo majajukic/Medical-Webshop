@@ -31,9 +31,9 @@ const Cart = () => {
     return <Navigate to="/notFound" />
   }
 
-  const handleCheckout = async (total) => {
+  const handleCheckout = async (total, orderId) => {
     try {
-      const payload = { ukupanIznos: total }
+      const payload = { ukupanIznos: total, porudzbinaId: orderId }
       const response = await getStripeSessionId(payload)
 
       if (response?.data?.sessionId) {
@@ -70,7 +70,7 @@ const Cart = () => {
           </Typography>
           <Button
             variant="contained"
-            onClick={() => handleCheckout(korpaState.porudzbina.ukupanIznos)}
+            onClick={() => handleCheckout(korpaState.porudzbina.ukupanIznos, korpaState.porudzbina.porudzbinaId)}
           >
             Plati porudžbinu
           </Button>
