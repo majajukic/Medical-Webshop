@@ -91,7 +91,6 @@ const Orders = () => {
                   <TableCell>Broj porudžbine</TableCell>
                   <TableCell>Datum kreiranja</TableCell>
                   <TableCell>Ukupan iznos</TableCell>
-                  <TableCell>Plaćena porudžbina?</TableCell>
                   <TableCell>Datum plaćanja</TableCell>
                   {role === 'Admin' && <TableCell>Korisnik</TableCell>}
                 </TableRow>
@@ -113,9 +112,6 @@ const Orders = () => {
                         style: 'currency',
                         currency: 'RSD',
                       })}
-                    </TableCell>
-                    <TableCell>
-                      {porudzbina.placenaPorudzbina === true ? 'Da' : 'Ne'}
                     </TableCell>
                     {porudzbina.placenaPorudzbina === true ? (
                       <TableCell>
