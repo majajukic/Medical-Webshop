@@ -133,7 +133,7 @@ namespace ProdajaLekovaBackend.Controllers
                 }
                 else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
                 {
-                    Console.WriteLine("payment failed");
+                    Console.WriteLine("payment failed", stripeEvent.Type);
                 }
                 else
                 {
