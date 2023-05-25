@@ -45,7 +45,6 @@ export const updateKorisnik = async (token, updatedUser) => {
 
     return response
   } catch (error) {
-    console.log(error)
     return error.response.status
   }
 }

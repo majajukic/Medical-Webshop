@@ -31,7 +31,6 @@ const ProductCategories = () => {
   }, [proizvodiDispatch])
 
   useEffect(() => {
-    console.log('count tipovi')
     if (kategorijaId) {
       getProizvodiByTipCount(kategorijaId)
         .then((response) => {

@@ -22,6 +22,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { useKorpa } from '../../context/KorpaContext'
 import { EMPTY_CART } from '../../constants/actionTypes'
+import { toast } from 'react-toastify'
 
 const Orders = () => {
   const role = getUserRole()
@@ -32,7 +33,6 @@ const Orders = () => {
 
   useEffect(() => {
     if (role === 'Admin') {
-      console.log('porudzbine useeffecr')
       getPorudzbine(state.token)
         .then((response) => {
           setPorudzbine(response.data)
@@ -41,7 +41,6 @@ const Orders = () => {
           console.error(error)
         })
     } else if (role === 'Kupac') {
-      console.log('porudzbine kupac useeffecr')
       getPorudzbineByKupac(state.token)
         .then((response) => {
           setPorudzbine(response.data)
@@ -62,6 +61,8 @@ const Orders = () => {
             porudzbine.filter((porudzbina) => porudzbina.porudzbinaId !== id),
           )
           korpaDispatch({ type: EMPTY_CART })
+
+          toast.success('Porudzbina uspesno obrisana!')
         })
         .catch((error) => {
           console.error(error)

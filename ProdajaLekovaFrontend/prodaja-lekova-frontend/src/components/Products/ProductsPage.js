@@ -53,7 +53,6 @@ const ProductsPage = () => {
   )
 
   useEffect(() => {
-    console.log('home useeffect')
     if (
       !apotekaId &&
       !kategorijaId &&
@@ -133,7 +132,6 @@ const ProductsPage = () => {
   ])
 
   useEffect(() => {
-    console.log('count products main')
     if (apotekaId) {
       getProizvodiCountByApoteka(apotekaId)
         .then((response) => {

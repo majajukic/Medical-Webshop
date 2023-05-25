@@ -39,7 +39,6 @@ const ProductSorting = () => {
   }
 
   useEffect(() => {
-    console.log('count discount')
     if (isDisocunt) {
       getProizvodiByDiscountCount()
         .then((response) => {

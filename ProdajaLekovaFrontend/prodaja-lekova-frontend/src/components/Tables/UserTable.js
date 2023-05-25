@@ -14,6 +14,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useAuth } from '../../context/AuthContext'
 import UserDialog from '../Dialogs/UserDialog'
+import { toast } from 'react-toastify'
 
 const columns = [
   { id: 'korisnikId', label: 'ID', minWidth: 50 },
@@ -36,7 +37,6 @@ const UserTable = () => {
   const [isEdit, setIsEdit] = useState(false)
 
   useEffect(() => {
-    console.log('korisnik useeffecr')
     getKorisnici(state.token)
       .then((response) => {
         setKorisnici(response.data)
@@ -47,12 +47,14 @@ const UserTable = () => {
   }, [state.token])
 
   const handleDelete = (id) => {
-    if (window.confirm('Da li ste sigurni da želite da obrišete ovu stavku?')) {
+    if (window.confirm('Da li ste sigurni da želite da obrišete ovog korisnika?')) {
       deleteKorisnik(id, state.token)
         .then(() => {
           setKorisnici(
             korisnici.filter((korisnik) => korisnik.korisnikId !== id),
           )
+
+          toast.success('Korisnik uspesno obrisan')
         })
         .catch((error) => {
           console.error(error)

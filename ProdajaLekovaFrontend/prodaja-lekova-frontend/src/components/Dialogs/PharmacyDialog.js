@@ -15,6 +15,7 @@ import {
   updateApoteka,
 } from '../../services/apotekaService'
 import { CREATE_PHARMACY, GET_PHARMACIES } from '../../constants/actionTypes'
+import { toast } from 'react-toastify'
 
 const initialState = {
   apotekaId: null,
@@ -73,13 +74,13 @@ const PharmacyDialog = ({
             console.error(error)
           })
       } else if (response === 400) {
-        alert('Apoteka sa ovim nazivom već postoji u bazi.')
+        toast.error('Apoteka sa ovim nazivom već postoji u bazi.')
       }
     } else {
       const response = await createApoteka(state.token, input)
 
       if (response === 400) {
-        alert('Apoteka sa ovim nazivom već postoji u bazi.')
+        toast.error('Apoteka sa ovim nazivom već postoji u bazi.')
       } else {
         dispatch({ type: CREATE_PHARMACY, payload: response.data })
         setInput(initialState)

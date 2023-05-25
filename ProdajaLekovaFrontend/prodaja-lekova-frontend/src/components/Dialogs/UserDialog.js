@@ -16,6 +16,7 @@ import {
   getProfil,
   updateKorisnik,
 } from '../../services/korisnikService'
+import { toast } from 'react-toastify'
 
 const initialState = {
   korisnikId: null,
@@ -124,7 +125,7 @@ const UserDialog = ({
               })
           }
         } else if (response === 422) {
-          alert('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+          toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
         }
       } catch (error) {
         console.log(error)
@@ -134,9 +135,9 @@ const UserDialog = ({
         const response = await createKorisnik(state.token, input)
 
         if (response === 422) {
-          alert('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+          toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
         } else if (response === 400) {
-          alert('Korisnik sa datom mejl adresom vec postoji u bazi.')
+          toast.error('Korisnik sa datom mejl adresom vec postoji u bazi.')
         } else {
           onAddNew(response.data)
 

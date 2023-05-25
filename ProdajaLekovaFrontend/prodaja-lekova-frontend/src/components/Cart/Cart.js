@@ -15,7 +15,6 @@ const Cart = () => {
   const { state: korpaState, dispatch: korpaDispatch } = useKorpa()
 
   useEffect(() => {
-    console.log('cart hook')
     if (role === 'Kupac' && state.token) {
       getKorpa(state.token)
         .then((response) => {

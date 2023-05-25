@@ -41,7 +41,6 @@ const ProductSearch = () => {
   }
 
   useEffect(() => {
-    console.log('count search')
     if (terminPretrage) {
       getProizvodiBySearchCount(terminPretrage)
         .then((response) => {

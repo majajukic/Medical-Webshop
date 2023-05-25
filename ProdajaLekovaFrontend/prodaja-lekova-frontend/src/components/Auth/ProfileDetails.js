@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import UserDialog from '../Dialogs/UserDialog'
 import { LOGOUT } from '../../constants/actionTypes'
+import { toast } from 'react-toastify'
 
 const ProfileDetails = () => {
   const [profileDetails, setProfileDetails] = useState({})
@@ -16,7 +17,6 @@ const ProfileDetails = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log('korisnik useeffecr')
     getProfil(state.token)
       .then((response) => {
         setProfileDetails(response.data)
@@ -33,6 +33,8 @@ const ProfileDetails = () => {
           if (state.token) {
             dispatch({ type: LOGOUT })
           }
+          toast.success('Nalog uspesno obrisan!')
+
           navigate('/prijaviSe')
         })
         .catch((error) => {

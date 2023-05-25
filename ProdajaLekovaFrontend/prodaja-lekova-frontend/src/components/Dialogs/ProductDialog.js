@@ -51,7 +51,6 @@ const ProductDialog = ({
   }, [productToEdit])
 
   useEffect(() => {
-    console.log('dropdown useeffect')
     getTipoviProizvoda()
       .then((response) => {
         setTipoviProizvoda(response.data)

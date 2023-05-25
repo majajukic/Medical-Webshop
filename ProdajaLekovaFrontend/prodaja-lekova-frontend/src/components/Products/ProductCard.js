@@ -24,6 +24,7 @@ import { DELETE_PRODUCT, GET_CART } from '../../constants/actionTypes'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
 import { useKorpa } from '../../context/KorpaContext'
 import defaultImage from '../../assets/defaultImage.jpg'
+import { toast } from 'react-toastify';
 
 const ProductCard = ({ proizvodProp }) => {
   const theme = useTheme()
@@ -53,6 +54,8 @@ const ProductCard = ({ proizvodProp }) => {
       deleteProizvodFromApoteka(apotekaId, state.token)
         .then(() => {
           proizvodiDispatch({ type: DELETE_PRODUCT, payload: apotekaId })
+
+          toast.success('Proizvod uspesno obrisan!')
         })
         .catch((error) => {
           console.error(error)
@@ -66,7 +69,6 @@ const ProductCard = ({ proizvodProp }) => {
       Object.keys(korpaState?.porudzbina)?.length === 0 || 
       !korpaState?.porudzbina?.stavkaPorudzbine?.length
     ) {
-      console.log('cart empty')
       const newPorudzbina = {
         brojPorudzbine: null,
         datumKreiranja: null,
@@ -83,7 +85,9 @@ const ProductCard = ({ proizvodProp }) => {
       createPorudzbina(newPorudzbina, state.token)
         .then((response) => {
           if (response === 400) {
-            alert('Proizvoda nema dovoljno na stanju za naručiti.')
+            toast.error('Proizvoda nema dovoljno na stanju za naručiti.')
+          } else if(response === 422) {
+            toast.error("Kolicina proizvoda za poruciti mora biti veca od 0.")
           } else if (response.status === 201) {
             getKorpa(state.token)
               .then((response) => {
@@ -98,7 +102,6 @@ const ProductCard = ({ proizvodProp }) => {
           console.error(error)
         })
     } else {
-      console.log('cart not empty')
       const stavkaToAdd = {
         kolicina: kolicina,
         cena: cena,
@@ -110,7 +113,9 @@ const ProductCard = ({ proizvodProp }) => {
       addStavkaToPorudzbina(stavkaToAdd, state.token)
         .then((response) => {
           if (response === 400) {
-            alert('Proizvoda nema dovoljno na stanju za naručiti.')
+            toast.error('Proizvoda nema dovoljno na stanju za naručiti.')
+          } else if(response === 422) {
+            toast.error("Kolicina proizvoda za poruciti mora biti veca od 0.")
           } else if (response.status === 201) {
             getKorpa(state.token)
               .then((response) => {
@@ -183,7 +188,7 @@ const ProductCard = ({ proizvodProp }) => {
             ? proizvodProp.stanjeZaliha
             : 'Trenutno nema na stanju'}
         </Typography>
-        {role === 'Kupac' && (
+        {role === 'Kupac' && proizvodProp.stanjeZaliha > 0 &&  (
           <TextField
             label="Količina"
             type="number"
@@ -228,7 +233,7 @@ const ProductCard = ({ proizvodProp }) => {
           </Fragment>
         )}
         {role === 'Kupac' &&
-          (proizvodProp.stanjeZaliha > 0 ? (
+          proizvodProp.stanjeZaliha > 0 && (
             <Button
               size="medium"
               variant="contained"
@@ -243,9 +248,7 @@ const ProductCard = ({ proizvodProp }) => {
             >
               Dodaj u korpu
             </Button>
-          ) : (
-            <Typography>Proizvoda trenutno nema na stanju.</Typography>
-          ))}
+          )}
       </CardActions>
     </Card>
   )

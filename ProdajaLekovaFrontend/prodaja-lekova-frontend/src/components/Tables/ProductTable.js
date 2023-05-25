@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import ProductDialog from '../Dialogs/ProductDialog'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
+import { toast } from 'react-toastify'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -33,7 +34,6 @@ const ProductTable = () => {
   const [isEdit, setIsEdit] = useState(false)
 
   useEffect(() => {
-    console.log('proizvod useeffecr')
     getProizvodi()
       .then((response) => {
         setProizvodi(response.data)
@@ -50,6 +50,7 @@ const ProductTable = () => {
           setProizvodi(
             proizvodi.filter((proizvod) => proizvod.proizvodId !== id),
           )
+          toast.success('Proizvod uspesno obrisan!')
         })
         .catch((error) => {
           console.error(error)

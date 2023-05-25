@@ -52,7 +52,6 @@ const Navbar = () => {
   const role = getUserRole()
 
   useEffect(() => {
-    console.log('navbar effect')
     getApoteke()
       .then((response) => {
         apotekaDispatch({ type: GET_PHARMACIES, payload: response.data })

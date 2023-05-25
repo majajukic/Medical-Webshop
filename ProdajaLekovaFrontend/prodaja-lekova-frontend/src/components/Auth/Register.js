@@ -15,6 +15,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import { useTheme } from '@mui/material'
 import { Link as RouteLink, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { toast } from 'react-toastify'
 
 const initialState = {
   ime: '',
@@ -47,16 +48,14 @@ const Register = () => {
     try {
       await register(formData)
 
-      alert(
-        'Vaš nalog je uspešno kreiran! Nakon potvrde ove poruke, možete se prijaviti u aplikaciju.',
-      )
+      toast.success('Vaš nalog je uspešno kreiran!')
 
       navigate('/prijaviSe')
     } catch (error) {
       if (error.response.status === 400) {
-        alert('Korisnik sa datom mejl adresom već postoji u bazi.')
+        toast.error('Korisnik sa datom mejl adresom već postoji u bazi.')
       } else if (error.response.status === 422) {
-        alert(
+        toast.error(
           'Lozinka mora imati minimum 8 karaktera - slova i brojeve.',
         )
       }

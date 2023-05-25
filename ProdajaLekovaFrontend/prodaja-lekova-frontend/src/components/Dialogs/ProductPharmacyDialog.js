@@ -27,6 +27,7 @@ import {
 } from '../../services/proizvodService'
 import { useNavigate } from 'react-router-dom'
 import { usePagination } from '../../context/PaginationContext'
+import { toast } from 'react-toastify'
 
 const initialState = {
   apotekaProizvodId: null,
@@ -69,7 +70,6 @@ const ProductPharmacyDialog = ({
   }, [productToEdit])
 
   useEffect(() => {
-    console.log('dropdown useeffect')
     getProizvodi()
       .then((response) => {
         setProizvodi(response.data)
@@ -117,7 +117,7 @@ const ProductPharmacyDialog = ({
             })
           navigate(`/apoteka/${input.apotekaId}`)
         } else if (response === 422) {
-          alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
+          toast.error('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
         }
       } catch (error) {
         console.log(error)
@@ -127,7 +127,7 @@ const ProductPharmacyDialog = ({
         const response = await addProizvodToApoteka(state.token, input)
 
         if (response === 422) {
-          alert('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
+          toast.error('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
         } else {
           const addedProduct = await getProizvodByApoteka(
             response.data.apotekaProizvodId,
@@ -142,12 +142,12 @@ const ProductPharmacyDialog = ({
 
           handleClose()
 
-          alert("Proizvod uspesno dodat u apoteku " + addedProduct.data.apoteka.nazivApoteke)
+          toast.success("Proizvod uspesno dodat u apoteku " + addedProduct.data.apoteka.nazivApoteke)
 
           navigate(`/apoteka/${addedProduct.data.apoteka.apotekaId}`)
         }
       } catch (error) {
-        console.log(error.message)
+        console.log(error)
       }
     }
   }

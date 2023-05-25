@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { useApoteka } from '../../context/ApotekaContext'
 import { GET_PHARMACIES, DELETE_PHARMACY } from '../../constants/actionTypes'
+import { toast } from 'react-toastify'
 
 const columns = [
   { id: 'apotekaId', label: 'ID', minWidth: 550 },
@@ -31,8 +32,6 @@ const PharmacyTable = () => {
   const { state: apotekaState, dispatch } = useApoteka()
 
   useEffect(() => {
-    console.log('apoteka useeffecr')
-
     getApoteke()
       .then((response) => {
         dispatch({ type: GET_PHARMACIES, payload: response.data })
@@ -47,6 +46,8 @@ const PharmacyTable = () => {
       deleteApoteka(id, state.token)
         .then(() => {
           dispatch({ type: DELETE_PHARMACY, payload: id })
+
+          toast.success('Apoteka uspesno obrisana!')
         })
         .catch((error) => {
           console.error(error)
