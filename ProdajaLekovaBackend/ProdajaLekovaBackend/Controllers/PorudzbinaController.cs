@@ -60,7 +60,7 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
-                var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.KorisnikId == korisnikId);
+                var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.KorisnikId == korisnikId && q.PlacenaPorudzbina == true);
 
                 if (porudzbine == null) return NoContent();
 
@@ -103,15 +103,13 @@ namespace ProdajaLekovaBackend.Controllers
         /// <summary>
         /// Vraća jednu porudzbinu na osnovu id-ja.
         /// </summary>
-        [Authorize(Roles = "Kupac")]
+        [Authorize(Roles = "Kupac, Admin")]
         [HttpGet("{porudzbinaId:int}", Name = "GetPorudzbina")]
         public async Task<IActionResult> GetPorudzbina(int porudzbinaId)
         {
             try
             {
-                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
-
-                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaId && q.Korisnik.KorisnikId == korisnikId,
+                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaId,
                     include: q => q.Include(x => x.StavkaPorudzbine).ThenInclude(y => y.ApotekaProizvod).ThenInclude(z => z.Proizvod.TipProizvoda));
 
                 if (porudzbina == null) return NotFound("Porudzbina nije pronadjena.");
@@ -200,39 +198,6 @@ namespace ProdajaLekovaBackend.Controllers
                 return StatusCode(500, "Serverska greska.");
             }
         }
-
-
-        /// <summary>
-        /// Azurira porudzbinu nakon uplate. AKTIVIRA TRIGER
-        /// </summary>
-        /*[AllowAnonymous]
-        [HttpPut]
-        public async Task<IActionResult> UpdatePorudzbina([FromBody] PorudzbinaUpdateDto porudzbinaDTO)
-        {
-
-            try
-            {
-                var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaDTO.PorudzbinaId);
-
-                if (porudzbina == null) return NotFound("Porudzbina nije pronadjena.");
-
-                porudzbinaDTO.DatumPlacanja = DateTime.Now;
-
-                porudzbinaDTO.PlacenaPorudzbina = true;
-
-                _mapper.Map(porudzbinaDTO, porudzbina);
-
-                _unitOfWork.Porudzbina.UpdateAsync(porudzbina);
-
-                await _unitOfWork.Save();
-
-                return Ok("Uspesna izmena.");
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
-        }*/
 
         /// <summary>
         /// Brise porudzbinu i sve njene stavke na osnovu id-ja porudzbine.
