@@ -7,7 +7,7 @@ import {
   deleteStavka,
   getKorpa,
 } from '../../services/porudzbinaService'
-import { EMPTY_CART, REMOVE_ITEM, GET_CART } from '../../constants/actionTypes'
+import { EMPTY_CART, GET_CART } from '../../constants/actionTypes'
 
 const CartItem = ({ item }) => {
   const { state: korpaState, dispatch: korpaDispatch } = useKorpa()

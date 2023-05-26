@@ -47,6 +47,7 @@ export const updateKorisnik = (updatedUser, authConfig) => BASE_URL.put(`/api/ko
 export const getPorudzbine = (authConfig) => BASE_URL.get('/api/porudzbina', authConfig)
 export const getPorudzbineByKupac = (authConfig) => BASE_URL.get('/api/porudzbina/porudzbineByKupac', authConfig)
 export const getKorpa = (authConfig) => BASE_URL.get('/api/porudzbina/korpa', authConfig)
+export const getStavkePorudzbine = (id, authConfig) => BASE_URL.get(`/api/porudzbina/${id}`, authConfig)
 export const getStripeSessionId = (total) => BASE_URL.post(`/api/checkout/checkoutSession`, total)
 export const createPorudzbina = (newOrder, authConfig) => BASE_URL.post(`/api/porudzbina`, newOrder, authConfig)
 export const addStavkaToPorudzbina = (itemToAdd, authConfig) => BASE_URL.post(`/api/stavkaPorudzbine`, itemToAdd, authConfig)

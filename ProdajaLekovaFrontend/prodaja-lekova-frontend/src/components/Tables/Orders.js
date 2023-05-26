@@ -4,9 +4,8 @@ import { getUserRole } from '../../utilities/authUtilities'
 import {
   getPorudzbine,
   getPorudzbineByKupac,
-  deletePorudzbina,
+  getStavkePorudzbine,
 } from '../../services/porudzbinaService'
-import DeleteIcon from '@mui/icons-material/Delete'
 import {
   Typography,
   Table,
@@ -16,20 +15,19 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Button,
   useTheme,
+  Accordion,
+  AccordionDetails,
 } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
-import { useKorpa } from '../../context/KorpaContext'
-import { EMPTY_CART } from '../../constants/actionTypes'
-import { toast } from 'react-toastify'
 
 const Orders = () => {
   const role = getUserRole()
   const { state } = useAuth()
   const theme = useTheme()
   const [porudzbine, setPorudzbine] = useState([])
-  const { dispatch: korpaDispatch } = useKorpa()
+  const [stavke, setStavke] = useState([])
+  const [expandedOrder, setExpandedOrder] = useState(null)
 
   useEffect(() => {
     if (role === 'Admin') {
@@ -51,23 +49,24 @@ const Orders = () => {
     }
   }, [state.token, role])
 
-  const handleDelete = (id) => {
-    if (
-      window.confirm('Da li ste sigurni da želite da obrišete ovu porudžbinu?')
-    ) {
-      deletePorudzbina(id, state.token)
-        .then(() => {
-          setPorudzbine(
-            porudzbine.filter((porudzbina) => porudzbina.porudzbinaId !== id),
-          )
-          korpaDispatch({ type: EMPTY_CART })
-
-          toast.success('Porudzbina uspesno obrisana!')
+  const toggleExpand = (porudzbinaId) => {
+    if (expandedOrder === porudzbinaId) {
+      setExpandedOrder(null)
+      setStavke([])
+    } else {
+      setExpandedOrder(porudzbinaId)
+      getStavkePorudzbine(porudzbinaId, state.token)
+        .then((response) => {
+          setStavke(response.data.stavkaPorudzbine)
         })
         .catch((error) => {
           console.error(error)
         })
     }
+  }
+
+  const isActiveRow = (porudzbinaId) => {
+    return expandedOrder === porudzbinaId
   }
 
   return (
@@ -99,7 +98,19 @@ const Orders = () => {
             <TableBody>
               {porudzbine.length > 0 ? (
                 porudzbine.map((porudzbina) => (
-                  <TableRow key={porudzbina.porudzbinaId}>
+                  <TableRow
+                    key={porudzbina.porudzbinaId}
+                    onClick={() => toggleExpand(porudzbina.porudzbinaId)}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: '#F0FFEC',
+                      },
+                      backgroundColor: isActiveRow(porudzbina.porudzbinaId)
+                        ? '#F0FFEC'
+                        : 'inherit',
+                    }}
+                  >
                     <TableCell>{porudzbina.brojPorudzbine}</TableCell>
                     <TableCell>
                       {format(
@@ -130,30 +141,58 @@ const Orders = () => {
                           porudzbina.korisnik.prezime}
                       </TableCell>
                     )}
-                    {role === 'Kupac' &&
-                      porudzbina.placenaPorudzbina === false && (
-                        <TableCell>
-                          <Button
-                            onClick={() =>
-                              handleDelete(porudzbina.porudzbinaId)
-                            }
-                          >
-                            <DeleteIcon
-                              sx={{
-                                marginRight: 1,
-                                color: theme.palette.primary.main,
-                                fontSize: '1.5rem',
-                                cursor: 'pointer',
-                              }}
-                            />
-                          </Button>
-                        </TableCell>
-                      )}
                   </TableRow>
                 ))
               ) : (
                 <TableRow variant="subtitle2">
                   <TableCell>Nema porudžbina</TableCell>
+                </TableRow>
+              )}
+              {/*Accordion*/}
+              {expandedOrder !== null && (
+                <TableRow>
+                  <TableCell colSpan={6}>
+                    <Accordion
+                      expanded={expandedOrder !== null}
+                      sx={{ backgroundColor: theme.palette.background.default }}
+                    >
+                      <AccordionDetails>
+                        <Table>
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Naziv proizvoda</TableCell>
+                              <TableCell>Tip proizvoda</TableCell>
+                              <TableCell>Kolicina</TableCell>
+                              <TableCell>Cena</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {stavke &&
+                              stavke.map((stavka) => (
+                                <TableRow key={stavka.stavkaId}>
+                                  <TableCell>
+                                    {
+                                      stavka.apotekaProizvod.proizvod
+                                        .nazivProizvoda
+                                    }
+                                  </TableCell>
+                                  <TableCell>
+                                    {
+                                      stavka.apotekaProizvod.proizvod
+                                        .tipProizvoda.nazivTipaProizvoda
+                                    }
+                                  </TableCell>
+                                  <TableCell>{stavka.kolicina}</TableCell>
+                                  <TableCell>
+                                    {stavka.apotekaProizvod.cenaSaPopustom}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                          </TableBody>
+                        </Table>
+                      </AccordionDetails>
+                    </Accordion>
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
