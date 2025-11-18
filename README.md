@@ -1,4 +1,4 @@
-# Master Thesis - Code Analysis and Refactor With the Help of an AI Tool
+# Master Thesis - Code Analysis and Refactor Using Claude Code
 
 ## Initial Project Metrics Analysis (Backend & Frontend)
 
