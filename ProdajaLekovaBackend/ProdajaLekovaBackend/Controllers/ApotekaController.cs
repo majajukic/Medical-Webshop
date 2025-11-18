@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ApotekaDTOs;
+using ProdajaLekovaBackend.Exceptions;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 
@@ -14,11 +15,13 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<ApotekaController> _logger;
 
-        public ApotekaController(IUnitOfWork unitOfWork, IMapper mapper)
+        public ApotekaController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApotekaController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -28,20 +31,13 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetApoteke()
         {
-            try
-            {
-                var apoteke = await _unitOfWork.Apoteka.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivApoteke));
+            var apoteke = await _unitOfWork.Apoteka.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivApoteke));
 
-                if (apoteke == null) return NoContent();
+            if (apoteke == null) return NoContent();
 
-                var results = _mapper.Map<List<ApotekaDto>>(apoteke);
+            var results = _mapper.Map<List<ApotekaDto>>(apoteke);
 
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(results);
         }
 
         /// <summary>
@@ -51,20 +47,14 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name ="GetApoteka")]
         public async Task<IActionResult> GetApoteka(int id)
         {
-            try
-            {
-                var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
+            var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
 
-                if(apoteka == null) return NotFound("Apoteka nije pronadjena.");
+            if (apoteka == null)
+                throw new NotFoundException("Apoteka", id);
 
-                var result = _mapper.Map<ApotekaDto>(apoteka);
+            var result = _mapper.Map<ApotekaDto>(apoteka);
 
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -74,25 +64,20 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateApoteka([FromBody] ApotekaCreateDto apotekaDTO)
         {
+            var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
 
-            try
-            {
-                var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
+            if (existingApoteka != null)
+                throw new BadRequestException("Apoteka sa datim nazivom vec postoji u bazi.");
 
-                if (existingApoteka != null) return BadRequest("Apoteka sa datim nazivom vec postoji u bazi.");
+            var apoteka = _mapper.Map<Apoteka>(apotekaDTO);
 
-                var apoteka = _mapper.Map<Apoteka>(apotekaDTO);
+            await _unitOfWork.Apoteka.CreateAsync(apoteka);
 
-                await _unitOfWork.Apoteka.CreateAsync(apoteka);
+            await _unitOfWork.Save();
 
-                await _unitOfWork.Save();
+            _logger.LogInformation("Created new Apoteka with ID: {ApotekaId}", apoteka.ApotekaId);
 
-                return CreatedAtRoute("GetApoteka", new { id = apoteka.ApotekaId }, apoteka);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return CreatedAtRoute("GetApoteka", new { id = apoteka.ApotekaId }, apoteka);
         }
 
         /// <summary>
@@ -102,30 +87,25 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateApoteka([FromBody] ApotekaUpdateDto apotekaDTO)
         {
+            var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == apotekaDTO.ApotekaId);
 
-            try
-            {
+            if (apoteka == null)
+                throw new NotFoundException("Apoteka", apotekaDTO.ApotekaId);
 
-                var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == apotekaDTO.ApotekaId);
+            var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
 
-                if (apoteka == null) return NotFound("Apoteka nije pronadjena.");
+            if (existingApoteka != null)
+                throw new BadRequestException("Apoteka sa datim nazivom vec postoji u bazi.");
 
-                var existingApoteka = await _unitOfWork.Apoteka.GetAsync(q => q.NazivApoteke == apotekaDTO.NazivApoteke);
+            _mapper.Map(apotekaDTO, apoteka);
 
-                if (existingApoteka != null) return BadRequest("Apoteka sa datim nazivom vec postoji u bazi.");
+            _unitOfWork.Apoteka.UpdateAsync(apoteka);
 
-                _mapper.Map(apotekaDTO, apoteka);
+            await _unitOfWork.Save();
 
-                _unitOfWork.Apoteka.UpdateAsync(apoteka);
+            _logger.LogInformation("Updated Apoteka with ID: {ApotekaId}", apotekaDTO.ApotekaId);
 
-                await _unitOfWork.Save();
-
-                return Ok("Uspesna izmena");
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok("Uspesna izmena");
         }
 
         /// <summary>
@@ -135,22 +115,18 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteApoteka(int id)
         {
-            try
-            {
-                var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
+            var apoteka = await _unitOfWork.Apoteka.GetAsync(q => q.ApotekaId == id);
 
-                if (apoteka== null) return NotFound("Apoteka nije pronadjena.");
+            if (apoteka == null)
+                throw new NotFoundException("Apoteka", id);
 
-                await _unitOfWork.Apoteka.DeleteAsync(id);
+            await _unitOfWork.Apoteka.DeleteAsync(id);
 
-                await _unitOfWork.Save();
+            await _unitOfWork.Save();
 
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            _logger.LogInformation("Deleted Apoteka with ID: {ApotekaId}", id);
+
+            return NoContent();
         }
     }
 }

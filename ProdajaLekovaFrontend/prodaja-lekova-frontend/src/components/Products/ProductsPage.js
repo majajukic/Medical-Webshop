@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useCallback, useState } from 'react'
+import React, { Fragment, useEffect, useCallback, useMemo, memo } from 'react'
 import ProductCard from './ProductCard'
 import ProductCategories from './ProductCategories'
 import ProductSorting from './ProductSorting'
@@ -49,7 +49,12 @@ const ProductsPage = () => {
         paginationDispatch({ type: 'SET_CURRENT_PAGE', payload: page })
       }
     },
-    [paginationState, paginationDispatch],
+    [paginationState.totalRecords, paginationState.pageSize, paginationDispatch],
+  )
+
+  const pageCount = useMemo(
+    () => Math.ceil(paginationState.totalRecords / paginationState.pageSize),
+    [paginationState.totalRecords, paginationState.pageSize]
   )
 
   useEffect(() => {
@@ -128,7 +133,7 @@ const ProductsPage = () => {
     terminPretrage,
     location.pathname,
     proizvodiDispatch,
-    paginationState,
+    paginationState.currentPage,
   ])
 
   useEffect(() => {
@@ -168,8 +173,6 @@ const ProductsPage = () => {
     terminPretrage,
     location.pathname,
     paginationDispatch,
-    proizvodiDispatch,
-    paginationState.currentPage,
   ])
 
   return (
@@ -193,9 +196,7 @@ const ProductsPage = () => {
         </Grid>
         <Pagination
           sx={{ marginTop: '30px' }}
-          count={Math.ceil(
-            paginationState.totalRecords / paginationState.pageSize,
-          )}
+          count={pageCount}
           page={paginationState.currentPage}
           onChange={handlePageChange}
         />
@@ -204,4 +205,4 @@ const ProductsPage = () => {
   )
 }
 
-export default ProductsPage
+export default memo(ProductsPage)

@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect, memo } from 'react'
 import { format } from 'date-fns'
 import { getUserRole } from '../../utilities/authUtilities'
 import {
@@ -203,4 +203,4 @@ const Orders = () => {
   )
 }
 
-export default Orders
+export default memo(Orders)

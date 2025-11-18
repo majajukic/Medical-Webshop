@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.StavkaPorudzbineDTOs;
+using ProdajaLekovaBackend.Exceptions;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 using System.Data;
@@ -15,11 +16,13 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<StavkaPorudzbineController> _logger;
 
-        public StavkaPorudzbineController(IUnitOfWork unitOfWork, IMapper mapper)
+        public StavkaPorudzbineController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<StavkaPorudzbineController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -29,20 +32,14 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetStavkaPorudzbine")]
         public async Task<IActionResult> GetStavkaPorudzbine(int id)
         {
-            try
-            {
-                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
+            var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
 
-                if (stavka == null) return NotFound();
+            if (stavka == null)
+                throw new NotFoundException("Stavka porudzbine", id);
 
-                var result = _mapper.Map<StavkaDto>(stavka);
+            var result = _mapper.Map<StavkaDto>(stavka);
 
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serveska greska.");
-            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -52,28 +49,23 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> AddStavkaToPorudzbina([FromBody] StavkaCreateDto stavkaDTO)
         {
+            //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
+            ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavkaDTO.ApotekaProizvodId);
 
-            try
-            {
-                //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
-                ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavkaDTO.ApotekaProizvodId);
+            if (stavkaDTO.Kolicina > proizvod.StanjeZaliha)
+                throw new BadRequestException("Trenutno na stanju nema dovoljno trazenog proizvoda.");
 
-                if (stavkaDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
+            stavkaDTO.Popust ??= 0;
 
-                stavkaDTO.Popust ??= 0;
+            var stavka = _mapper.Map<StavkaPorudzbine>(stavkaDTO);
 
-                var stavka = _mapper.Map<StavkaPorudzbine>(stavkaDTO);
+            await _unitOfWork.StavkaPorudzbine.CreateAsync(stavka);
 
-                await _unitOfWork.StavkaPorudzbine.CreateAsync(stavka);
+            await _unitOfWork.Save();
 
-                await _unitOfWork.Save();
+            _logger.LogInformation("Created new StavkaPorudzbine with ID: {StavkaId}", stavka.StavkaId);
 
-                return CreatedAtRoute("GetStavkaPorudzbine", new { id = stavka.StavkaId }, stavka);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serveska greska.");
-            }
+            return CreatedAtRoute("GetStavkaPorudzbine", new { id = stavka.StavkaId }, stavka);
         }
 
         /// <summary>
@@ -83,30 +75,26 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateStavkaPorudzbine([FromBody] StavkaUpdateDto stavkaDTO)
         {
+            var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == stavkaDTO.StavkaId);
 
-            try
-            {
-                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == stavkaDTO.StavkaId);
+            if (stavka == null)
+                throw new NotFoundException("Stavka porudzbine", stavkaDTO.StavkaId);
 
-                if (stavka == null) return NotFound();
+            //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
+            ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavka.ApotekaProizvodId);
 
-                //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
-                ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavka.ApotekaProizvodId);
+            if (stavkaDTO.Kolicina > proizvod.StanjeZaliha)
+                throw new BadRequestException("Trenutno na stanju nema dovoljno trazenog proizvoda.");
 
-                if (stavkaDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
+            _mapper.Map(stavkaDTO, stavka);
 
-                _mapper.Map(stavkaDTO, stavka);
+            _unitOfWork.StavkaPorudzbine.UpdateAsync(stavka);
 
-                _unitOfWork.StavkaPorudzbine.UpdateAsync(stavka);
+            await _unitOfWork.Save();
 
-                await _unitOfWork.Save();
+            _logger.LogInformation("Updated StavkaPorudzbine with ID: {StavkaId}", stavkaDTO.StavkaId);
 
-                return Ok("Uspesna izmena.");
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serveska greska.");
-            }
+            return Ok("Uspesna izmena.");
         }
 
         /// <summary>
@@ -116,24 +104,18 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteStavkaPorudzbine(int id)
         {
-            try
-            {
-                var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
+            var stavka = await _unitOfWork.StavkaPorudzbine.GetAsync(q => q.StavkaId == id);
 
-                if (stavka == null) return NotFound();
+            if (stavka == null)
+                throw new NotFoundException("Stavka porudzbine", id);
 
-                await _unitOfWork.StavkaPorudzbine.DeleteAsync(id);
+            await _unitOfWork.StavkaPorudzbine.DeleteAsync(id);
 
-                await _unitOfWork.Save();
+            await _unitOfWork.Save();
 
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serveska greska.");
-            }
+            _logger.LogInformation("Deleted StavkaPorudzbine with ID: {StavkaId}", id);
+
+            return NoContent();
         }
     }
-
-  
 }

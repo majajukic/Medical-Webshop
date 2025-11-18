@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  TextField,
-  Select,
-  MenuItem,
-  Box,
-} from '@mui/material'
+import { Button, Box } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
 import {
   createKorisnik,
@@ -17,6 +8,13 @@ import {
   updateKorisnik,
 } from '../../services/korisnikService'
 import { toast } from 'react-toastify'
+import DialogWrapper from '../Common/DialogWrapper'
+import {
+  PersonalInfoFields,
+  ContactFields,
+  AddressFields,
+  UserTypeField,
+} from '../Common/UserFormFields'
 
 const initialState = {
   korisnikId: null,
@@ -152,120 +150,24 @@ const UserDialog = ({
   }
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
+    <DialogWrapper
+      open={dialogOpen}
+      onClose={handleClose}
+      title={isEdit || isEditProfile ? 'Izmeni korisnika' : 'Dodaj novog korisnika'}
+      showDefaultActions={true}
+      onSubmit={handleSubmit}
+      submitText={isEdit || isEditProfile ? 'Sačuvaj' : 'Kreiraj'}
+      cancelText="Odustani"
+    >
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent>
-          <TextField
-            autoComplete="given-name"
-            name="ime"
-            fullWidth
-            id="firstName"
-            label="Ime"
-            autoFocus
-            value={input.ime}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            fullWidth
-            id="lastName"
-            label="Prezime"
-            name="prezime"
-            autoComplete="family-name"
-            value={input.prezime}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            required
-            fullWidth
-            id="email"
-            label="Email adresa"
-            name="email"
-            autoComplete="email"
-            type="email"
-            value={input.email}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            required
-            fullWidth
-            name="lozinka"
-            label="Lozinka"
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            value={input.lozinka}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            fullWidth
-            id="phoneNumber"
-            label="Broj telefona"
-            name="brojTelefona"
-            autoComplete="phone-number"
-            value={input.brojTelefona}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            fullWidth
-            id="street"
-            label="Ulica"
-            name="ulica"
-            autoComplete="street"
-            value={input.ulica}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            fullWidth
-            id="houseNumber"
-            label="Broj kuće/stana"
-            name="broj"
-            autoComplete="house-number"
-            value={input.broj}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            fullWidth
-            id="city"
-            label="Mesto stanovanja"
-            name="mesto"
-            autoComplete="city"
-            value={input.mesto}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          {!isEditProfile && (
-            <Select
-              labelId="Tip korisnika"
-              id="user-type"
-              name="tipKorisnika"
-              value={input.tipKorisnika}
-              onChange={handleSelectChange}
-              sx={{ marginBottom: '20px' }}
-              fullWidth
-              required
-            >
-              <MenuItem value={0}>Admin</MenuItem>
-              <MenuItem value={1}>Kupac</MenuItem>
-            </Select>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} variant="outlined">
-            Odustani
-          </Button>
-          <Button variant="contained" type="submit">
-            {isEdit || isEditProfile ? 'Sačuvaj' : 'Kreiraj'}
-          </Button>
-        </DialogActions>
+        <PersonalInfoFields input={input} onChange={handleInputChange} />
+        <ContactFields input={input} onChange={handleInputChange} />
+        <AddressFields input={input} onChange={handleInputChange} />
+        {!isEditProfile && (
+          <UserTypeField value={input.tipKorisnika} onChange={handleSelectChange} />
+        )}
       </Box>
-    </Dialog>
+    </DialogWrapper>
   )
 }
 

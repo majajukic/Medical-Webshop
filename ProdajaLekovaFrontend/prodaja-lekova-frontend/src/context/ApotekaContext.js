@@ -1,20 +1,15 @@
-import React, { createContext, useReducer, useContext } from 'react'
-import apotekaReducer from '../reducers/apotekaReducer'
+import apotekaReducer from '../reducers/apotekaReducer';
+import { createGenericContext } from './createGenericContext';
 
 const initialState = {
   apoteke: []
-}
+};
 
-const ApotekaContext = createContext()
+const { Provider, useContextHook } = createGenericContext(
+  apotekaReducer,
+  initialState,
+  'Apoteka'
+);
 
-export const ApotekaProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(apotekaReducer, initialState)
-
-  return (
-    <ApotekaContext.Provider value={{ state, dispatch }}>
-      {children}
-    </ApotekaContext.Provider>
-  )
-}
-
-export const useApoteka = () => useContext(ApotekaContext)
+export const ApotekaProvider = Provider;
+export const useApoteka = useContextHook;

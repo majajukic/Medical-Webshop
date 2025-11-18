@@ -1,24 +1,16 @@
 import * as api from './api'
+import { handleServiceError } from './serviceErrorHandler'
 
 export const login = async (formData) => {
-  try {
+  return handleServiceError(async () => {
     const data = await api.login(formData)
 
     return data
-
-  } catch (error) {
-    
-    return error.response.status
-  }
+  })
 }
 
 export const register = async (formData) => {
-  try {
-
+  return handleServiceError(async () => {
     await api.register(formData)
-
-  } catch (error) {
-
-    return error.response.status
-  }
+  })
 }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { memo } from 'react'
 import { Card, CardContent, CardMedia, Typography, Button } from '@mui/material'
 import { useKorpa } from '../../context/KorpaContext'
 import { useAuth } from '../../context/AuthContext'
@@ -97,4 +97,4 @@ const CartItem = ({ item }) => {
   )
 }
 
-export default CartItem
+export default memo(CartItem)

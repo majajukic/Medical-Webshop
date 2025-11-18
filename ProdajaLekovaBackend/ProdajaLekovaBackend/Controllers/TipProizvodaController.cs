@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ApotekaDTOs;
 using ProdajaLekovaBackend.DTOs.TipProizvodaDTOs;
+using ProdajaLekovaBackend.Exceptions;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 
@@ -15,11 +16,13 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<TipProizvodaController> _logger;
 
-        public TipProizvodaController(IUnitOfWork unitOfWork, IMapper mapper)
+        public TipProizvodaController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<TipProizvodaController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -29,20 +32,13 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTipoviProizvoda()
         {
-            try
-            {
-                var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivTipaProizvoda));
+            var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivTipaProizvoda));
 
-                if (tipoviProizvoda == null) return NoContent();
+            if (tipoviProizvoda == null) return NoContent();
 
-                var results = _mapper.Map<List<TipProizvodaDto>>(tipoviProizvoda);
+            var results = _mapper.Map<List<TipProizvodaDto>>(tipoviProizvoda);
 
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(results);
         }
 
         /// <summary>
@@ -52,20 +48,14 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetTipProizvoda")]
         public async Task<IActionResult> GetTipProizvoda(int id)
         {
-            try
-            {
-                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == id);
+            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == id);
 
-                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+            if (tipProizvoda == null)
+                throw new NotFoundException("Tip proizvoda", id);
 
-                var result = _mapper.Map<TipProizvodaDto>(tipProizvoda);
+            var result = _mapper.Map<TipProizvodaDto>(tipProizvoda);
 
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -75,25 +65,20 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTipProizvoda([FromBody] TipProizvodaCreateDto tipProizvodaDTO)
         {
+            var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
 
-            try
-            {
-                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+            if (existingTip != null)
+                throw new BadRequestException("Tip proizvoda sa datim nazivom vec postoji u bazi.");
 
-                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+            var tipProizvoda = _mapper.Map<TipProizvoda>(tipProizvodaDTO);
 
-                var tipProizvoda = _mapper.Map<TipProizvoda>(tipProizvodaDTO);
+            await _unitOfWork.TipProizvoda.CreateAsync(tipProizvoda);
 
-                await _unitOfWork.TipProizvoda.CreateAsync(tipProizvoda);
+            await _unitOfWork.Save();
 
-                await _unitOfWork.Save();
+            _logger.LogInformation("Created new TipProizvoda with ID: {TipProizvodaId}", tipProizvoda.TipProizvodaId);
 
-                return CreatedAtRoute("GetTipProizvoda", new { id = tipProizvoda.TipProizvodaId }, tipProizvoda);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return CreatedAtRoute("GetTipProizvoda", new { id = tipProizvoda.TipProizvodaId }, tipProizvoda);
         }
 
         /// <summary>
@@ -103,30 +88,25 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateTipProizvoda([FromBody] TipProizvodaUpdateDto tipProizvodaDTO)
         {
+            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
 
-            try
-            {
+            if (tipProizvoda == null)
+                throw new NotFoundException("Tip proizvoda", tipProizvodaDTO.TipProizvodaId);
 
-                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
+            var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
 
-                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+            if (existingTip != null)
+                throw new BadRequestException("Tip proizvoda sa datim nazivom vec postoji u bazi.");
 
-                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+            _mapper.Map(tipProizvodaDTO, tipProizvoda);
 
-                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+            _unitOfWork.TipProizvoda.UpdateAsync(tipProizvoda);
 
-                _mapper.Map(tipProizvodaDTO, tipProizvoda);
+            await _unitOfWork.Save();
 
-                _unitOfWork.TipProizvoda.UpdateAsync(tipProizvoda);
+            _logger.LogInformation("Updated TipProizvoda with ID: {TipProizvodaId}", tipProizvodaDTO.TipProizvodaId);
 
-                await _unitOfWork.Save();
-
-                return Ok("Uspesna izmena");
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok("Uspesna izmena");
         }
 
         /// <summary>
@@ -136,22 +116,18 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteTipProizvoda(int id)
         {
-            try
-            {
-                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId  == id);
+            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId  == id);
 
-                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+            if (tipProizvoda == null)
+                throw new NotFoundException("Tip proizvoda", id);
 
-                await _unitOfWork.TipProizvoda.DeleteAsync(id);
+            await _unitOfWork.TipProizvoda.DeleteAsync(id);
 
-                await _unitOfWork.Save();
+            await _unitOfWork.Save();
 
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            _logger.LogInformation("Deleted TipProizvoda with ID: {TipProizvodaId}", id);
+
+            return NoContent();
         }
     }
 }

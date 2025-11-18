@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs;
+using ProdajaLekovaBackend.Exceptions;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 
@@ -14,11 +15,13 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<ApotekaProizvodController> _logger;
 
-        public ApotekaProizvodController(IUnitOfWork unitOfWork, IMapper mapper)
+        public ApotekaProizvodController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ApotekaProizvodController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -28,48 +31,41 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetApotekaProizvodi([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId, [FromQuery] string? searchTerm)
         {
-            try
+            List<ApotekaProizvodDto> results;
+
+            if (apotekaId == null)
             {
-                List<ApotekaProizvodDto> results;
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
 
-                if (apotekaId == null)
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-                }
-                else
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.ApotekaId == apotekaId,
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
-
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-                }
-
-                if (string.IsNullOrEmpty(searchTerm))
-                {
-                    return Ok(results);
-                }
-                else
-                {
-                    var allApotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllAsync(include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
-
-                    var allResults = _mapper.Map<List<ApotekaProizvodDto>>(allApotekaProizvodi);
-
-                    var filteredResults = allResults.Where(q => q.Proizvod.NazivProizvoda.ToLower().Contains(searchTerm));
-
-                    return Ok(filteredResults);
-                }
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
             }
-            catch (Exception ex)
+            else
             {
-                return StatusCode(500, ex.Message);
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.ApotekaId == apotekaId,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+
+                if (apotekaProizvodi == null) return NoContent();
+
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
+            }
+
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                return Ok(results);
+            }
+            else
+            {
+                var allApotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllAsync(include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+
+                var allResults = _mapper.Map<List<ApotekaProizvodDto>>(allApotekaProizvodi);
+
+                var filteredResults = allResults.Where(q => q.Proizvod.NazivProizvoda.ToLower().Contains(searchTerm));
+
+                return Ok(filteredResults);
             }
         }
 
@@ -80,41 +76,33 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("byTipProizvoda")]
         public async Task<IActionResult> GetApotekaProizvodiByTipProizvoda([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId, [FromQuery] int tipProizvodaId)
         {
-            try
+            List<ApotekaProizvodDto> results;
+
+            if (apotekaId == null)
             {
-                List<ApotekaProizvodDto> results;
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.Proizvod.TipProizvodaId == tipProizvodaId,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
 
-                if (apotekaId == null)
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.Proizvod.TipProizvodaId == tipProizvodaId, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                }
-                else
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.ApotekaId == apotekaId && q.Proizvod.TipProizvodaId == tipProizvodaId, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
-
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                    
-                }
-
-                return Ok(results);
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
 
             }
-            catch (Exception)
+            else
             {
-                return StatusCode(500, "Serverska greska.");
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.ApotekaId == apotekaId && q.Proizvod.TipProizvodaId == tipProizvodaId,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+
+                if (apotekaProizvodi == null) return NoContent();
+
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
+
+
             }
+
+            return Ok(results);
         }
 
         /// <summary>
@@ -124,41 +112,33 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("naPopustu")]
         public async Task<IActionResult> GetApotekaProizvodiNaPopustu([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
-            try
+            List<ApotekaProizvodDto> results;
+
+            if (apotekaId == null)
             {
-                List<ApotekaProizvodDto> results;
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.PopustUprocentima != null,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
 
-                if (apotekaId == null)
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.PopustUprocentima != null, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                }
-                else
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.ApotekaId == apotekaId && q.PopustUprocentima != null, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
-
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                    
-                }
-
-                return Ok(results);
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
 
             }
-            catch (Exception)
+            else
             {
-                return StatusCode(500, "Serverska greska.");
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.ApotekaId == apotekaId && q.PopustUprocentima != null,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda));
+
+                if (apotekaProizvodi == null) return NoContent();
+
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
+
+
             }
+
+            return Ok(results);
         }
 
         /// <summary>
@@ -168,40 +148,32 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("byCenaRastuce")]
         public async Task<IActionResult> GetApotekaProizvodiByCenaAscending([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
-            try
+            List<ApotekaProizvodDto> results;
+
+            if (apotekaId == null)
             {
-                List<ApotekaProizvodDto> results;
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda),
+                    orderBy: q => q.OrderBy(x => x.CenaSaPopustom));
 
-                if (apotekaId == null)
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda), 
-                        orderBy: q => q.OrderBy(x => x.CenaSaPopustom));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                }
-                else
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams, 
-                        q => q.ApotekaId == apotekaId, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda), 
-                        orderBy: q => q.OrderBy(x => x.CenaSaPopustom));
-
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-                }
-
-                return Ok(results);
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
 
             }
-            catch (Exception)
+            else
             {
-                return StatusCode(500, "Serverska greska.");
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.ApotekaId == apotekaId,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda),
+                    orderBy: q => q.OrderBy(x => x.CenaSaPopustom));
+
+                if (apotekaProizvodi == null) return NoContent();
+
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
             }
+
+            return Ok(results);
         }
 
         /// <summary>
@@ -211,42 +183,34 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("byCenaOpadajuce")]
         public async Task<IActionResult> GetApotekaProizvodiByCenaDescending([FromQuery] RequestParams requestParams, [FromQuery] int? apotekaId)
         {
-            try
+            List<ApotekaProizvodDto> results;
+
+            if (apotekaId == null)
             {
-                List<ApotekaProizvodDto> results;
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda),
+                    orderBy: q => q.OrderByDescending(x => x.CenaSaPopustom));
 
-                if (apotekaId == null)
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda), 
-                        orderBy: q => q.OrderByDescending(x => x.CenaSaPopustom));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
 
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
+            }
+            else
+            {
+                var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
+                    q => q.ApotekaId == apotekaId,
+                    include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda),
+                    orderBy: q => q.OrderByDescending(x => x.CenaSaPopustom));
 
-                }
-                else
-                {
-                    var apotekaProizvodi = await _unitOfWork.ApotekaProizvod.GetAllPagedListAsync(requestParams,
-                        q => q.ApotekaId == apotekaId, 
-                        include: q => q.Include(x => x.Proizvod).Include(x => x.Apoteka).Include(x => x.Proizvod.TipProizvoda), 
-                        orderBy: q => q.OrderByDescending(x => x.CenaSaPopustom));
+                if (apotekaProizvodi == null) return NoContent();
 
-                    if (apotekaProizvodi == null) return NoContent();
-
-                    results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
-
-                    return Ok(results);
-                }
+                results = _mapper.Map<List<ApotekaProizvodDto>>(apotekaProizvodi);
 
                 return Ok(results);
+            }
 
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(results);
         }
 
         /// <summary>
@@ -256,20 +220,13 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetApotekaProizvod")]
         public async Task<IActionResult> GetApotekaProizvod(int id)
         {
-            try
-            {
-                var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id, include: q => q.Include(x => x.Proizvod.TipProizvoda).Include(x => x.Apoteka));
+            var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id, include: q => q.Include(x => x.Proizvod.TipProizvoda).Include(x => x.Apoteka));
 
-                if (apotekaProizvod == null) return NotFound("Proizvod nije pronadjen.");
+            if (apotekaProizvod == null) throw new NotFoundException("ApotekaProizvod", id);
 
-                var result = _mapper.Map<ApotekaProizvodDto>(apotekaProizvod);
+            var result = _mapper.Map<ApotekaProizvodDto>(apotekaProizvod);
 
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -279,32 +236,25 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateApotekaProizvod([FromBody] ApotekaProizvodCreateDto apotekaProizvodDTO)
         {
-
-            try
+            //dodavanje popusta na cenu proizvoda, ako popust nije null
+            if(apotekaProizvodDTO.PopustUprocentima == null)
             {
-                //dodavanje popusta na cenu proizvoda, ako popust nije null
-                if(apotekaProizvodDTO.PopustUprocentima == null)
-                {
-                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta;
-                } 
-                else
-                {
-                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta - (apotekaProizvodDTO.CenaBezPopusta * apotekaProizvodDTO.PopustUprocentima / 100);
-                }
-
-                var apotekaProizvod = _mapper.Map<ApotekaProizvod>(apotekaProizvodDTO);
-
-                await _unitOfWork.ApotekaProizvod.CreateAsync(apotekaProizvod);
-
-                await _unitOfWork.Save();
-
-                return CreatedAtRoute("GetApotekaProizvod", new { id = apotekaProizvod.ApotekaProizvodId }, apotekaProizvod);
+                apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta;
             }
-            catch (Exception)
+            else
             {
-
-                return StatusCode(500, "Serverska greska.");
+                apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta - (apotekaProizvodDTO.CenaBezPopusta * apotekaProizvodDTO.PopustUprocentima / 100);
             }
+
+            var apotekaProizvod = _mapper.Map<ApotekaProizvod>(apotekaProizvodDTO);
+
+            await _unitOfWork.ApotekaProizvod.CreateAsync(apotekaProizvod);
+
+            await _unitOfWork.Save();
+
+            _logger.LogInformation("Kreiran novi proizvod u apoteci sa ID-jem: {ApotekaProizvodId}", apotekaProizvod.ApotekaProizvodId);
+
+            return CreatedAtRoute("GetApotekaProizvod", new { id = apotekaProizvod.ApotekaProizvodId }, apotekaProizvod);
         }
 
         /// <summary>
@@ -314,36 +264,29 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateApotekaProizvod([FromBody] ApotekaProizvodUpdateDto apotekaProizvodDTO)
         {
+            var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == apotekaProizvodDTO.ApotekaProizvodId);
 
-            try
+            if (apotekaProizvod == null) throw new NotFoundException("ApotekaProizvod", apotekaProizvodDTO.ApotekaProizvodId);
+
+            //dodavanje popusta na cenu proizvoda, ako popust nije null prilikom izmene
+            if (apotekaProizvodDTO.PopustUprocentima == null)
             {
-                var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == apotekaProizvodDTO.ApotekaProizvodId);
-
-                if (apotekaProizvod == null) return NotFound("Proizvod nije pronadjen");
-
-                //dodavanje popusta na cenu proizvoda, ako popust nije null prilikom izmene
-                if (apotekaProizvodDTO.PopustUprocentima == null)
-                {
-                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta;
-                }
-                else
-                {
-                    apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta - (apotekaProizvodDTO.CenaBezPopusta * apotekaProizvodDTO.PopustUprocentima / 100);
-                }
-
-                _mapper.Map(apotekaProizvodDTO, apotekaProizvod);
-
-                _unitOfWork.ApotekaProizvod.UpdateAsync(apotekaProizvod);
-
-                await _unitOfWork.Save();
-
-                return Ok("Uspesna izmena.");
+                apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta;
             }
-            catch (Exception)
+            else
             {
-
-                return StatusCode(500, "Serverska greska.");
+                apotekaProizvodDTO.CenaSaPopustom = apotekaProizvodDTO.CenaBezPopusta - (apotekaProizvodDTO.CenaBezPopusta * apotekaProizvodDTO.PopustUprocentima / 100);
             }
+
+            _mapper.Map(apotekaProizvodDTO, apotekaProizvod);
+
+            _unitOfWork.ApotekaProizvod.UpdateAsync(apotekaProizvod);
+
+            await _unitOfWork.Save();
+
+            _logger.LogInformation("Azuriran proizvod u apoteci sa ID-jem: {ApotekaProizvodId}", apotekaProizvod.ApotekaProizvodId);
+
+            return Ok("Uspesna izmena.");
         }
 
         /// <summary>
@@ -353,23 +296,17 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteApotekaProizvod(int id)
         {
-            try
-            {
-                var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id);
+            var apotekaProizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == id);
 
-                if (apotekaProizvod == null) return NotFound("Proizvod nije pronadjen.");
+            if (apotekaProizvod == null) throw new NotFoundException("ApotekaProizvod", id);
 
-                await _unitOfWork.ApotekaProizvod.DeleteAsync(id);
+            await _unitOfWork.ApotekaProizvod.DeleteAsync(id);
 
-                await _unitOfWork.Save();
+            await _unitOfWork.Save();
 
-                return NoContent();
-            }
-            catch (Exception)
-            { 
+            _logger.LogInformation("Obrisan proizvod iz apoteke sa ID-jem: {ApotekaProizvodId}", id);
 
-                return StatusCode(500, "Serverska greska.");
-            }
+            return NoContent();
         }
 
         [AllowAnonymous]

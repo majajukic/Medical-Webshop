@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, memo } from 'react'
 import { getApoteke, deleteApoteka } from '../../services/apotekaService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -158,4 +158,4 @@ const PharmacyTable = () => {
   )
 }
 
-export default PharmacyTable
+export default memo(PharmacyTable)

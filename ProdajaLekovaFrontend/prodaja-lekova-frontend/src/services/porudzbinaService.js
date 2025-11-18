@@ -1,104 +1,87 @@
 import * as api from './api'
 import { bearerConfig } from '../utilities/authUtilities'
+import { handleServiceError } from './serviceErrorHandler'
 
 export const getPorudzbine = async (token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.getPorudzbine(authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const getPorudzbineByKupac = async (token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.getPorudzbineByKupac(authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const getKorpa = async (token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.getKorpa(authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const getStavkePorudzbine = async (id, token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.getStavkePorudzbine(id, authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const getStripeSessionId = async (total) => {
-  try {
+  return handleServiceError(async () => {
     const data = await api.getStripeSessionId(total)
 
     return data
-  } catch (error) {
-    return error
-  }
+  })
 }
 
 export const createPorudzbina = async (newOrder, token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.createPorudzbina(newOrder, authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const addStavkaToPorudzbina = async (itemToAdd, token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     const data = await api.addStavkaToPorudzbina(itemToAdd, authConfig)
 
     return data
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const deletePorudzbina = async (id, token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     await api.deletePorudzbina(id, authConfig)
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }
 
 export const deleteStavka = async (id, token) => {
-  try {
+  return handleServiceError(async () => {
     const authConfig = bearerConfig(token)
 
     await api.deleteStavka(id, authConfig)
-  } catch (error) {
-    return error.response.status
-  }
+  })
 }

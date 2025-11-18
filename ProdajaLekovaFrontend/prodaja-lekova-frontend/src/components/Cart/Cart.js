@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from 'react'
+import React, { Fragment, useEffect, memo, useCallback } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { getUserRole } from '../../utilities/authUtilities'
 import { useAuth } from '../../context/AuthContext'
@@ -30,7 +30,7 @@ const Cart = () => {
     return <Navigate to="/notFound" />
   }
 
-  const handleCheckout = async (total, orderId) => {
+  const handleCheckout = useCallback(async (total, orderId) => {
     try {
       const payload = { ukupanIznos: total, porudzbinaId: orderId }
       const response = await getStripeSessionId(payload)
@@ -44,7 +44,7 @@ const Cart = () => {
     } catch (error) {
       console.error(error)
     }
-  }
+  }, [])
 
   return (
     <Box sx={{ marginTop: '100px' }}>
@@ -83,4 +83,4 @@ const Cart = () => {
   )
 }
 
-export default Cart
+export default memo(Cart)

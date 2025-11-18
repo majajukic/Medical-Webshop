@@ -1,21 +1,15 @@
-import React, { createContext, useReducer, useContext } from 'react'
-import korpaReducer from '../reducers/korpaReducer'
-
+import korpaReducer from '../reducers/korpaReducer';
+import { createGenericContext } from './createGenericContext';
 
 const initialState = {
   porudzbina: {}
-}
+};
 
-const KorpaContext = createContext()
+const { Provider, useContextHook } = createGenericContext(
+  korpaReducer,
+  initialState,
+  'Korpa'
+);
 
-export const KorpaProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(korpaReducer, initialState)
-
-  return (
-    <KorpaContext.Provider value={{ state, dispatch }}>
-      {children}
-    </KorpaContext.Provider>
-  )
-}
-
-export const useKorpa = () => useContext(KorpaContext)
+export const KorpaProvider = Provider;
+export const useKorpa = useContextHook;

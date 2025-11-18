@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import { getProizvodi, deleteProizvod } from '../../services/proizvodService'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
@@ -196,4 +196,4 @@ const ProductTable = () => {
   )
 }
 
-export default ProductTable
+export default memo(ProductTable)

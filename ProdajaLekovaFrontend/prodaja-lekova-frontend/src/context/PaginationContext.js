@@ -1,22 +1,17 @@
-import React, { createContext, useReducer, useContext } from 'react'
-import paginationReducer from '../reducers/PaginationReducer'
-
-const PaginationContext = createContext()
+import paginationReducer from '../reducers/PaginationReducer';
+import { createGenericContext } from './createGenericContext';
 
 const initialState = {
   currentPage: 1,
   totalRecords: 0,
   pageSize: 9
-}
+};
 
-export const PaginationProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(paginationReducer, initialState)
+const { Provider, useContextHook } = createGenericContext(
+  paginationReducer,
+  initialState,
+  'Pagination'
+);
 
-  return (
-    <PaginationContext.Provider value={{ state, dispatch }}>
-      {children}
-    </PaginationContext.Provider>
-  )
-}
-
-export const usePagination = () => useContext(PaginationContext)
+export const PaginationProvider = Provider;
+export const usePagination = useContextHook;

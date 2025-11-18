@@ -1,16 +1,9 @@
-import React, { Fragment, useState } from 'react'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
+import React, { Fragment, useState, memo, useCallback } from 'react'
 import { getUserRole } from '../../utilities/authUtilities'
 import {
   Card,
   CardMedia,
-  CardContent,
-  Typography,
   CardActions,
-  Button,
-  TextField,
-  useTheme,
 } from '@mui/material'
 import { useProizvod } from '../../context/ProizvodContext'
 import { deleteProizvodFromApoteka } from '../../services/proizvodService'
@@ -24,10 +17,13 @@ import { DELETE_PRODUCT, GET_CART } from '../../constants/actionTypes'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
 import { useKorpa } from '../../context/KorpaContext'
 import defaultImage from '../../assets/defaultImage.jpg'
-import { toast } from 'react-toastify';
+import { toast } from 'react-toastify'
+import ProductInfo from './ProductInfo'
+import AddToCartSection from './AddToCartSection'
+import ProductAdminActions from './ProductAdminActions'
+import { SPACING } from '../../constants/themeConstants'
 
 const ProductCard = ({ proizvodProp }) => {
-  const theme = useTheme()
   const [quantity, setQuantity] = useState(1)
   const [isEdit, setIsEdit] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -36,16 +32,16 @@ const ProductCard = ({ proizvodProp }) => {
   const { state } = useAuth()
   const role = getUserRole()
 
-  const handleQuantityChange = (event) => {
+  const handleQuantityChange = useCallback((event) => {
     setQuantity(event.target.value)
-  }
+  }, [])
 
-  const handleIsEdit = () => {
+  const handleIsEdit = useCallback(() => {
     setIsEdit(true)
     setDialogOpen(true)
-  }
+  }, [])
 
-  const handleDelete = (apotekaId) => {
+  const handleDelete = useCallback((apotekaId) => {
     if (
       window.confirm(
         'Da li ste sigurni da želite da obrišete ovaj proizvod iz date apoteke?',
@@ -61,9 +57,14 @@ const ProductCard = ({ proizvodProp }) => {
           console.error(error)
         })
     }
-  }
+  }, [proizvodiDispatch, state.token])
 
-  const handleAddToCart = (kolicina, cena, popust, apotekaProizvodId) => {
+  const handleAddToCart = useCallback(() => {
+    const kolicina = quantity
+    const cena = proizvodProp.cenaBezPopusta
+    const popust = proizvodProp.popustUprocentima
+    const apotekaProizvodId = proizvodProp.apotekaProizvodId
+
     if (
       !korpaState?.porudzbina || 
       Object.keys(korpaState?.porudzbina)?.length === 0 || 
@@ -130,7 +131,7 @@ const ProductCard = ({ proizvodProp }) => {
           console.error(error)
         })
     }
-  }
+  }, [quantity, proizvodProp, korpaState.porudzbina, state.token, korpaDispatch])
 
   return (
     <Card
@@ -144,75 +145,26 @@ const ProductCard = ({ proizvodProp }) => {
     >
       <CardMedia
         component="img"
-        sx={{
-          pt: '5%',
-        }}
+        sx={{ pt: SPACING.TINY }}
         src={proizvodProp.slika ? proizvodProp.slika : defaultImage }
         alt="slika proizvoda"
       />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h5" component="h2">
-          {proizvodProp.proizvod.nazivProizvoda}
-        </Typography>
-        <Typography>
-          <strong>Tip: </strong>
-          {proizvodProp.proizvod.tipProizvoda.nazivTipaProizvoda}
-        </Typography>
-        <Typography>
-          <strong>Proizvodjač: </strong>
-          {proizvodProp.proizvod.proizvodjac}
-        </Typography>
-        <Typography>
-          <strong>Cena: </strong>{' '}
-          {proizvodProp.cenaBezPopusta.toLocaleString('sr-RS', {
-            style: 'currency',
-            currency: 'RSD',
-          })}
-        </Typography>
-        {proizvodProp.popustUprocentima && (
-          <Typography sx={{ color: 'red' }}>
-            <strong>Cena sa popustom: </strong>{' '}
-            {proizvodProp.cenaSaPopustom.toLocaleString('sr-RS', {
-              style: 'currency',
-              currency: 'RSD',
-            })}
-          </Typography>
-        )}
-        <Typography>
-          <strong>Apoteka: </strong>
-          {proizvodProp.apoteka.nazivApoteke}
-        </Typography>
-        <Typography>
-          <strong>Na stanju: </strong>
-          {proizvodProp.stanjeZaliha > 0
-            ? proizvodProp.stanjeZaliha
-            : 'Trenutno nema na stanju'}
-        </Typography>
-        {role === 'Kupac' && proizvodProp.stanjeZaliha > 0 &&  (
-          <TextField
-            label="Količina"
-            type="number"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            inputProps={{
-              min: 1,
-              max: proizvodProp.stanjeZaliha,
-            }}
-            value={quantity}
-            onChange={handleQuantityChange}
-            sx={{ mt: 2, width: '50%' }}
-          />
-        )}
-      </CardContent>
+      <ProductInfo product={proizvodProp} />
+      {role === 'Kupac' && proizvodProp.stanjeZaliha > 0 && (
+        <AddToCartSection
+          quantity={quantity}
+          onQuantityChange={handleQuantityChange}
+          onAddToCart={handleAddToCart}
+          maxQuantity={proizvodProp.stanjeZaliha}
+        />
+      )}
       <CardActions sx={{ mt: 1 }}>
         {role === 'Admin' && (
           <Fragment>
-            <Button size="small" onClick={handleIsEdit}>
-              <EditIcon
-                sx={{ marginRight: 1, color: theme.palette.primary.main }}
-              />
-            </Button>
+            <ProductAdminActions
+              onEdit={handleIsEdit}
+              onDelete={() => handleDelete(proizvodProp.apotekaProizvodId)}
+            />
             {dialogOpen && isEdit && (
               <ProductPharmacyDialog
                 dialogOpen={dialogOpen}
@@ -222,36 +174,11 @@ const ProductCard = ({ proizvodProp }) => {
                 setIsEdit={setIsEdit}
               />
             )}
-            <Button
-              size="small"
-              onClick={() => handleDelete(proizvodProp.apotekaProizvodId)}
-            >
-              <DeleteIcon
-                sx={{ marginRight: 1, color: theme.palette.primary.main }}
-              />
-            </Button>
           </Fragment>
         )}
-        {role === 'Kupac' &&
-          proizvodProp.stanjeZaliha > 0 && (
-            <Button
-              size="medium"
-              variant="contained"
-              onClick={() =>
-                handleAddToCart(
-                  quantity,
-                  proizvodProp.cenaBezPopusta,
-                  proizvodProp.popustUprocentima,
-                  proizvodProp.apotekaProizvodId,
-                )
-              }
-            >
-              Dodaj u korpu
-            </Button>
-          )}
       </CardActions>
     </Card>
   )
 }
 
-export default ProductCard
+export default memo(ProductCard)

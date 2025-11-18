@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import React, { useEffect, memo, useCallback } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useApoteka } from '../context/ApotekaContext'
 import { getUserRole } from '../utilities/authUtilities'
@@ -14,16 +14,11 @@ import {
   Toolbar,
   Typography,
   Button,
-  MenuItem,
-  Menu,
   Link,
   Box,
-  Badge,
 } from '@mui/material'
 import { useTheme } from '@mui/material'
-import { Link as RouteLink, useNavigate } from 'react-router-dom'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import { useNavigate } from 'react-router-dom'
 import { getApoteke } from '../services/apotekaService'
 import { useProizvod } from '../context/ProizvodContext'
 import {
@@ -34,9 +29,12 @@ import { usePagination } from '../context/PaginationContext'
 import { getProizvodiCount } from '../services/api'
 import { useKorpa } from '../context/KorpaContext'
 import { getKorpa } from '../services/porudzbinaService'
+import PharmacyMenu from './PharmacyMenu'
+import AdminNavButtons from './AdminNavButtons'
+import CustomerNavButtons from './CustomerNavButtons'
+import { SPACING } from '../constants/themeConstants'
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
   const { state, dispatch } = useAuth()
   const { state: apotekaState, dispatch: apotekaDispatch } = useApoteka()
@@ -70,7 +68,7 @@ const Navbar = () => {
         }
   }, [apotekaDispatch, role, state.token, korpaDispatch, cartItemCount])
 
-  const handleMenuItemClick = (apotekaId) => {
+  const handlePharmacySelect = useCallback((apotekaId) => {
     navigate(`/apoteka/${apotekaId}`)
     getProizvodiByApoteka(apotekaId, paginationState.currentPage)
       .then((response) => {
@@ -78,14 +76,13 @@ const Navbar = () => {
           type: GET_PRODUCTS_BY_PHARMACY,
           payload: response.data,
         })
-        handleMenuClose()
       })
       .catch((error) => {
         console.error(error)
       })
-  }
+  }, [navigate, paginationState.currentPage, proizvodiDispatch])
 
-  const handleDisplayAll = () => {
+  const handleDisplayAll = useCallback(() => {
     getProizvodiCount()
       .then((response) => {
         paginationDispatch({
@@ -100,29 +97,19 @@ const Navbar = () => {
     getProizvodiHomePage(paginationState.currentPage)
       .then((response) => {
         proizvodiDispatch({ type: GET_PRODUCTS, payload: response.data })
-
         navigate('/')
       })
       .catch((error) => {
         console.error(error)
       })
-  }
+  }, [paginationState.currentPage, paginationDispatch, proizvodiDispatch, navigate])
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleAuth = () => {
+  const handleAuth = useCallback(() => {
     if (state.token) {
       dispatch({ type: LOGOUT })
     }
-
     navigate('/prijaviSe')
-  }
+  }, [state.token, dispatch, navigate])
 
   return (
     <AppBar position="fixed">
@@ -142,85 +129,19 @@ const Navbar = () => {
           </Typography>
         </Link>
         <Box>
-          <Button
-            color="inherit"
-            onClick={handleMenuOpen}
-            sx={{ marginX: '10px' }}
-          >
-            Apoteke
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            {apotekaState.apoteke.length > 0 &&
-              apotekaState.apoteke.map((apoteka) => (
-                <MenuItem
-                  key={apoteka.apotekaId}
-                  onClick={() => handleMenuItemClick(apoteka.apotekaId)}
-                >
-                  {apoteka.nazivApoteke}
-                </MenuItem>
-              ))}
-          </Menu>
+          <PharmacyMenu
+            pharmacies={apotekaState.apoteke}
+            onPharmacySelect={handlePharmacySelect}
+          />
         </Box>
-        {role === 'Admin' && (
-          <Fragment>
-            <Button
-              component={RouteLink}
-              to="/upravljajApotekama"
-              color="inherit"
-              sx={{ marginX: '10px' }}
-            >
-              Upravljaj apotekama
-            </Button>
-            <Button
-              component={RouteLink}
-              to="/upravljajProizvodima"
-              color="inherit"
-              sx={{ marginX: '10px' }}
-            >
-              Upravljaj proizvodima
-            </Button>
-            <Button
-              component={RouteLink}
-              to="/upravljajNalozima"
-              color="inherit"
-              sx={{ marginX: '10px' }}
-            >
-              Upravljaj nalozima
-            </Button>
-          </Fragment>
-        )}
-        {role === 'Kupac' && (
-          <Button
-            component={RouteLink}
-            to="/korpa"
-            variant="contained"
-            sx={{ marginX: '10px' }}
-          >
-            <Badge badgeContent={cartItemCount} color="error">
-              <ShoppingCartIcon color="white" sx={{ fontSize: '2rem' }} />
-            </Badge>
-          </Button>
-        )}
-        {(role === 'Kupac' || role === 'Admin') && (
-          <Button
-            component={RouteLink}
-            to="/profil"
-            variant="contained"
-            sx={{ marginX: '10px' }}
-          >
-            <AccountCircleIcon color="white" sx={{ fontSize: '2rem' }} />
-          </Button>
-        )}
+        {role === 'Admin' && <AdminNavButtons />}
+        {role === 'Kupac' && <CustomerNavButtons cartItemCount={cartItemCount} />}
         <Button
           onClick={handleAuth}
           variant="contained"
           color="inherit"
           sx={{
-            marginX: '10px',
+            marginX: SPACING.SMALL,
             backgroundColor: 'white',
             color: theme.palette.primary.main,
           }}
@@ -232,4 +153,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+export default memo(Navbar)

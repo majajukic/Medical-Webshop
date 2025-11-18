@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import {
   Box,
   Button,
@@ -183,4 +183,4 @@ const UserTable = () => {
   )
 }
 
-export default UserTable
+export default memo(UserTable)

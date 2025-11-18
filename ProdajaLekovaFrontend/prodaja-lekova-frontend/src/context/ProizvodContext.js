@@ -1,20 +1,15 @@
-import React, { createContext, useReducer, useContext } from 'react'
-import proizvodReducer from '../reducers/proizvodReducer'
+import proizvodReducer from '../reducers/proizvodReducer';
+import { createGenericContext } from './createGenericContext';
 
 const initialState = {
   proizvodi: []
-}
+};
 
-const ProizvodContext = createContext()
+const { Provider, useContextHook } = createGenericContext(
+  proizvodReducer,
+  initialState,
+  'Proizvod'
+);
 
-export const ProizvodProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(proizvodReducer, initialState)
-
-  return (
-    <ProizvodContext.Provider value={{ state, dispatch }}>
-      {children}
-    </ProizvodContext.Provider>
-  )
-}
-
-export const useProizvod = () => useContext(ProizvodContext)
+export const ProizvodProvider = Provider;
+export const useProizvod = useContextHook;

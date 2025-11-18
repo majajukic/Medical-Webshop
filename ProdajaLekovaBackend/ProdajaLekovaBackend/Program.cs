@@ -13,8 +13,20 @@ using System.Text;
 using ProdajaLekovaBackend.Services;
 using Microsoft.OpenApi.Models;
 using Stripe;
+using ProdajaLekovaBackend.Middleware;
+using Serilog;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File("logs/prodaja-lekova-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Serilog
+builder.Host.UseSerilog();
 
 //DbContext
 builder.Services.AddDbContext<ApotekaDbContext>(options =>
@@ -57,11 +69,12 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 
 //CORS policy
+var frontendUrl = builder.Configuration.GetValue<string>("FrontendUrl") ?? "http://localhost:3000";
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddDefaultPolicy(corsBuilder =>
     {
-        builder.WithOrigins("http://localhost:3000")
+        corsBuilder.WithOrigins(frontendUrl)
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
@@ -164,6 +177,8 @@ builder.Services.AddSwaggerGen(setupAction =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

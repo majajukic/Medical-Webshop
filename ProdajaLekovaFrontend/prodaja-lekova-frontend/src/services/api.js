@@ -1,6 +1,8 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const BASE_URL = axios.create({ baseURL: 'https://localhost:7156' })
+const BASE_URL = axios.create({
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://localhost:7156'
+});
 
 //API endpointi za auth:
 export const login = (formData) => BASE_URL.post('/api/account/login', formData)

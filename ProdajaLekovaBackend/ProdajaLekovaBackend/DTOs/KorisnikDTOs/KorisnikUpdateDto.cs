@@ -1,6 +1,7 @@
 ﻿using ProdajaLekovaBackend.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
+using ProdajaLekovaBackend.Constants;
+using ProdajaLekovaBackend.Validators;
 
 namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
 {
@@ -9,17 +10,17 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         [Required(ErrorMessage = "Obavezno je uneti id korisnika.")]
         public int KorisnikId { get; set; }
 
-        [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
+        [StringLength(ApplicationConstants.Validation.MaxImeLength, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Ime { get; set; }
 
-        [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
+        [StringLength(ApplicationConstants.Validation.MaxPrezimeLength, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Prezime { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti lozinku.")]
         public string Lozinka { get; set; } = null!;
 
         [Required(ErrorMessage = "Obavezno je uneti email.")]
-        [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
+        [StringLength(ApplicationConstants.Validation.MaxEmailLength, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string Email { get; set; } = null!;
 
         [StringLength(15, ErrorMessage = "Maximum 15 karaktera prekoračeno")]
@@ -38,27 +39,18 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (!Regex.IsMatch(Email, @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
-                     @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
-                     RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)))
+            if (!EmailValidator.IsValid(Email))
             {
                 yield return new ValidationResult(
-                  "Pogresan format email adrese (primer: email@gmail.com).",
-                  new[] { "KorisnikdpdateDTO" });
+                    EmailValidator.GetErrorMessage(),
+                    new[] { nameof(Email) });
             }
 
-            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
+            if (!PasswordValidator.IsValid(Lozinka))
             {
                 yield return new ValidationResult(
-                  "Lozinka mora sadrzati i brojeve i karaktere.",
-                  new[] { "KorisnikUpdateDTO" });
-            }
-
-            if (Lozinka.Length < 8)
-            {
-                yield return new ValidationResult(
-                  "Lozinka mora imati minimum 8 karaktera.",
-                  new[] { "KorisnikUpdateDTO" });
+                    PasswordValidator.GetErrorMessage(),
+                    new[] { nameof(Lozinka) });
             }
         }
 
