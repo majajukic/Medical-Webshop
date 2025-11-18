@@ -26,10 +26,6 @@ const Cart = () => {
     }
   }, [korpaDispatch, state.token, role])
 
-  if (role !== 'Kupac' || state?.token === null) {
-    return <Navigate to="/notFound" />
-  }
-
   const handleCheckout = useCallback(async (total, orderId) => {
     try {
       const payload = { ukupanIznos: total, porudzbinaId: orderId }
@@ -45,6 +41,10 @@ const Cart = () => {
       console.error(error)
     }
   }, [])
+
+  if (role !== 'Kupac' || state?.token === null) {
+    return <Navigate to="/notFound" />
+  }
 
   return (
     <Box sx={{ marginTop: '100px' }}>
