@@ -8,15 +8,12 @@ import {
   updateProizvodInApoteka,
 } from '../../services/proizvodService'
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
   TextField,
   Select,
   MenuItem,
   Box,
 } from '@mui/material'
+import DialogWrapper from '../Common/DialogWrapper'
 import {
   ADD_PRODUCT_TO_PHARMACY,
   GET_PRODUCTS_BY_PHARMACY,
@@ -153,104 +150,102 @@ const ProductPharmacyDialog = ({
   }
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
+    <DialogWrapper
+      open={dialogOpen}
+      onClose={handleClose}
+      title={isEdit ? 'Izmeni proizvod u apoteci' : 'Dodaj proizvod u apoteku'}
+      showDefaultActions={true}
+      onSubmit={handleSubmit}
+      submitText={isEdit ? 'Sačuvaj' : 'Kreiraj'}
+      cancelText="Odustani"
+    >
       <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="stock"
-            label="Stanje zaliha"
-            name="stanjeZaliha"
-            type="text"
-            fullWidth
-            required
-            value={input.stanjeZaliha}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="image"
-            label="Slika proizvoda (URL)"
-            name="slika"
-            type="text"
-            fullWidth
-            value={input.slika}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="discount"
-            label="Popust (u procentima)"
-            name="popustUprocentima"
-            type="text"
-            fullWidth
-            value={input.popustUprocentima}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="price"
-            label="Cena bez popusta"
-            name="cenaBezPopusta"
-            type="text"
-            fullWidth
-            required
-            value={input.cenaBezPopusta}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <Select
-            labelId="Proizvodi"
-            id="products"
-            name="proizvodId"
-            value={input.proizvodId}
-            onChange={handleSelectChange}
-            sx={{ marginBottom: '20px' }}
-            fullWidth
-            required
-          >
-            <MenuItem value={0}>Izaberite proizvod</MenuItem>
-            {proizvodi.map((proizvod) => (
-              <MenuItem key={proizvod.proizvodId} value={proizvod.proizvodId}>
-                {proizvod.nazivProizvoda}
-              </MenuItem>
-            ))}
-          </Select>
-          <Select
-            labelId="Apoteka"
-            id="pharmacies"
-            name="apotekaId"
-            value={input.apotekaId}
-            onChange={handleSelectChange}
-            sx={{ marginBottom: '20px' }}
-            fullWidth
-            required
-          >
-            <MenuItem value={0}>Izaberite apoteku</MenuItem>
-            {apotekaState.apoteke.map((apoteka) => (
-              <MenuItem key={apoteka.apotekaId} value={apoteka.apotekaId}>
-                {apoteka.nazivApoteke}
-              </MenuItem>
-            ))}
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} variant="outlined">
-            Odustani
-          </Button>
-          <Button variant="contained" type="submit">
-            {isEdit ? 'Sačuvaj' : 'Kreiraj'}
-          </Button>
-        </DialogActions>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="stock"
+          label="Stanje zaliha"
+          name="stanjeZaliha"
+          type="text"
+          fullWidth
+          required
+          value={input.stanjeZaliha}
+          onChange={handleInputChange}
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          autoFocus
+          margin="dense"
+          id="image"
+          label="Slika proizvoda (URL)"
+          name="slika"
+          type="text"
+          fullWidth
+          value={input.slika}
+          onChange={handleInputChange}
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          autoFocus
+          margin="dense"
+          id="discount"
+          label="Popust (u procentima)"
+          name="popustUprocentima"
+          type="text"
+          fullWidth
+          value={input.popustUprocentima}
+          onChange={handleInputChange}
+          sx={{ marginBottom: '20px' }}
+        />
+        <TextField
+          autoFocus
+          margin="dense"
+          id="price"
+          label="Cena bez popusta"
+          name="cenaBezPopusta"
+          type="text"
+          fullWidth
+          required
+          value={input.cenaBezPopusta}
+          onChange={handleInputChange}
+          sx={{ marginBottom: '20px' }}
+        />
+        <Select
+          labelId="Proizvodi"
+          id="products"
+          name="proizvodId"
+          value={input.proizvodId}
+          onChange={handleSelectChange}
+          sx={{ marginBottom: '20px' }}
+          fullWidth
+          required
+        >
+          <MenuItem value={0}>Izaberite proizvod</MenuItem>
+          {proizvodi.map((proizvod) => (
+            <MenuItem key={proizvod.proizvodId} value={proizvod.proizvodId}>
+              {proizvod.nazivProizvoda}
+            </MenuItem>
+          ))}
+        </Select>
+        <Select
+          labelId="Apoteka"
+          id="pharmacies"
+          name="apotekaId"
+          value={input.apotekaId}
+          onChange={handleSelectChange}
+          sx={{ marginBottom: '20px' }}
+          fullWidth
+          required
+        >
+          <MenuItem value={0}>Izaberite apoteku</MenuItem>
+          {apotekaState.apoteke.map((apoteka) => (
+            <MenuItem key={apoteka.apotekaId} value={apoteka.apotekaId}>
+              {apoteka.nazivApoteke}
+            </MenuItem>
+          ))}
+        </Select>
       </Box>
-    </Dialog>
+    </DialogWrapper>
   )
 }
 

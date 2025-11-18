@@ -4,10 +4,17 @@ export const SPACING = {
   NONE: 0,
   TINY: '4px',
   SMALL: '8px',
+  SMALL_PLUS: '10px',
+  SMALL_MEDIUM: '15px',
   MEDIUM: '16px',
   LARGE: '20px',
   XLARGE: '24px',
   XXLARGE: '32px',
+  HUGE: '40px',
+  VERY_LARGE: '50px',
+  EXTRA_LARGE: '100px',
+  MASSIVE: '120px',
+  ENORMOUS: '200px',
 };
 
 export const FONT_SIZE = {
@@ -32,6 +39,7 @@ export const DIMENSIONS = {
   CONTAINER_MAX_WIDTH: '1200px',
   DIALOG_MAX_WIDTH: '600px',
   DIALOG_MIN_WIDTH: '300px',
+  TABLE_MIN_WIDTH: 650,
 
   // Images
   LOGO_WIDTH: '150px',
@@ -53,6 +61,11 @@ export const PERCENTAGES = {
   SEVENTY: '70%',
   FULL: '100%',
   DISCOUNT_MAX: 150,
+};
+
+export const MISC = {
+  MARGIN_BOTTOM_CART: '30px',
+  TABLE_COL_SPAN_DEFAULT: 4,
 };
 
 export const COLORS = {

@@ -34,4 +34,16 @@ public static class ApplicationConstants
     {
         public const int ExpirationDays = 1;
     }
+
+    public static class HttpStatusCodes
+    {
+        public const int BadRequest = 400;
+        public const int NotFound = 404;
+    }
+
+    public static class ErrorCodes
+    {
+        public const string BadRequest = "BAD_REQUEST";
+        public const string NotFound = "NOT_FOUND";
+    }
 }

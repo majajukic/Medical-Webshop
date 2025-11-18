@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  TextField,
-  Box,
-} from '@mui/material'
+import { TextField } from '@mui/material'
 import { useApoteka } from '../../context/ApotekaContext'
 import { useAuth } from '../../context/AuthContext'
+import DialogWrapper from '../Common/DialogWrapper'
 import {
   createApoteka,
   getApoteke,
@@ -55,13 +49,8 @@ const PharmacyDialog = ({
     setInput({ ...input, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    //const requestBody = { ...input }
-
+  const handleSubmit = async () => {
     if (isEdit) {
-      //requestBody.apotekaId = pharmacyToEdit.apotekaId
       const response = await updateApoteka(state.token, input)
       if (response.status === 200) {
         setInput(initialState)
@@ -90,32 +79,28 @@ const PharmacyDialog = ({
   }
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
-      <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="pharmacy-name"
-            label="Naziv apoteke"
-            name="nazivApoteke"
-            type="text"
-            fullWidth
-            required
-            value={input.nazivApoteke}
-            onChange={handleInputChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} variant="outlined">
-            Odustani
-          </Button>
-          <Button variant="contained" type="submit">
-            {isEdit ? 'Sačuvaj' : 'Dodaj'}
-          </Button>
-        </DialogActions>
-      </Box>
-    </Dialog>
+    <DialogWrapper
+      open={dialogOpen}
+      onClose={handleClose}
+      title={isEdit ? 'Izmeni apoteku' : 'Dodaj novu apoteku'}
+      onSubmit={handleSubmit}
+      showDefaultActions={true}
+      submitText={isEdit ? 'Sačuvaj' : 'Dodaj'}
+      cancelText="Odustani"
+    >
+      <TextField
+        autoFocus
+        margin="dense"
+        id="pharmacy-name"
+        label="Naziv apoteke"
+        name="nazivApoteke"
+        type="text"
+        fullWidth
+        required
+        value={input.nazivApoteke}
+        onChange={handleInputChange}
+      />
+    </DialogWrapper>
   )
 }
 

@@ -1,21 +1,12 @@
 import React, { useState, useEffect, memo } from 'react'
 import { getProizvodi, deleteProizvod } from '../../services/proizvodService'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import {
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Button,
-  useTheme,
-  Box,
-  Table,
-} from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
 import ProductDialog from '../Dialogs/ProductDialog'
 import ProductPharmacyDialog from '../Dialogs/ProductPharmacyDialog'
+import GenericTable from '../Common/GenericTable'
 import { toast } from 'react-toastify'
+import { SPACING, DIMENSIONS } from '../../constants/themeConstants'
 
 const columns = [
   { id: 'proizvodId', label: 'ID', minWidth: 50 },
@@ -25,7 +16,6 @@ const columns = [
 ]
 
 const ProductTable = () => {
-  const theme = useTheme()
   const { state } = useAuth()
   const [proizvodi, setProizvodi] = useState([])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -43,12 +33,12 @@ const ProductTable = () => {
       })
   }, [])
 
-  const handleDelete = (id) => {
+  const handleDelete = (proizvod) => {
     if (window.confirm('Da li ste sigurni da želite da obrišete ovu stavku?')) {
-      deleteProizvod(id, state.token)
+      deleteProizvod(proizvod.proizvodId, state.token)
         .then(() => {
           setProizvodi(
-            proizvodi.filter((proizvod) => proizvod.proizvodId !== id),
+            proizvodi.filter((p) => p.proizvodId !== proizvod.proizvodId),
           )
           toast.success('Proizvod uspesno obrisan!')
         })
@@ -66,7 +56,7 @@ const ProductTable = () => {
     setSecondDialogOpen(true)
   }
 
-  const handleIsEdit = (proizvod) => {
+  const handleEdit = (proizvod) => {
     setIsEdit(true)
     setSelectedProduct(proizvod)
     setDialogOpen(true)
@@ -80,119 +70,74 @@ const ProductTable = () => {
     setProizvodi(proizvodi)
   }
 
+  const renderCell = (item, column) => {
+    if (column.id === 'tipProizvoda') {
+      return item.tipProizvoda.nazivTipaProizvoda
+    }
+    return item[column.id]
+  }
+
   return (
-    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      {proizvodi.length > 0 && (
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell
-                key={column.id}
-                align="left"
-                style={{ minWidth: column.minWidth }}
-              >
-                {column.label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+    <>
+      <GenericTable
+        columns={columns}
+        data={proizvodi}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        emptyMessage="Nema proizvoda"
+        getRowKey={(item) => item.proizvodId}
+        renderCell={renderCell}
+        minWidth={DIMENSIONS.TABLE_MIN_WIDTH}
+      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          marginBottom: SPACING.VERY_LARGE,
+          marginTop: SPACING.VERY_LARGE,
+          marginLeft: SPACING.SMALL_PLUS,
+        }}
+      >
+        <Button
+          variant="contained"
+          sx={{ marginRight: SPACING.SMALL_PLUS }}
+          onClick={handleOpen}
+        >
+          Dodaj novi proizvod
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ marginRight: SPACING.SMALL_PLUS }}
+          onClick={handleSecondOpen}
+        >
+          Dodaj proizvod u apoteku
+        </Button>
+      </Box>
+      {dialogOpen && !isEdit && (
+        <ProductDialog
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+          onAddNew={handleAddNewProizvod}
+        />
       )}
-      <TableBody>
-        {proizvodi.length > 0 ? (
-          proizvodi.map((proizvod) => (
-            <TableRow key={proizvod.proizvodId}>
-              <TableCell align="left">{proizvod.proizvodId}</TableCell>
-              <TableCell align="left">{proizvod.nazivProizvoda}</TableCell>
-              <TableCell align="left">{proizvod.proizvodjac}</TableCell>
-              <TableCell align="left">
-                {proizvod.tipProizvoda.nazivTipaProizvoda}
-              </TableCell>
-              <TableCell>
-                <Button size="small" onClick={() => handleIsEdit(proizvod)}>
-                  <EditIcon
-                    sx={{
-                      marginRight: 1,
-                      color: theme.palette.primary.main,
-                      fontSize: '2rem',
-                    }}
-                  />
-                </Button>
-              </TableCell>
-              <TableCell>
-                <Button
-                  size="small"
-                  onClick={() => handleDelete(proizvod.proizvodId)}
-                >
-                  <DeleteIcon
-                    sx={{
-                      marginRight: 1,
-                      color: theme.palette.primary.main,
-                      fontSize: '2rem',
-                    }}
-                  />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow variant="subtitle2">
-            <TableCell>Nema proizvoda</TableCell>
-          </TableRow>
-        )}
-        <TableRow>
-          <TableCell colSpan={4}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-                marginBottom: '50px',
-                marginTop: '50px',
-                marginLeft: '10px',
-              }}
-            >
-              <Button
-                variant="contained"
-                sx={{ marginRight: '10px' }}
-                onClick={handleOpen}
-              >
-                Dodaj novi proizvod
-              </Button>
-              {dialogOpen && !isEdit && (
-                <ProductDialog
-                  dialogOpen={dialogOpen}
-                  setDialogOpen={setDialogOpen}
-                  onAddNew={handleAddNewProizvod}
-                />
-              )}
-              <Button
-                variant="contained"
-                sx={{ marginRight: '10px' }}
-                onClick={handleSecondOpen}
-              >
-                Dodaj proizvod u apoteku
-              </Button>
-              {secondDialogOpen && (
-                <ProductPharmacyDialog
-                  dialogOpen={secondDialogOpen}
-                  setDialogOpen={setSecondDialogOpen}
-                />
-              )}
-            </Box>
-            {dialogOpen && isEdit && (
-              <ProductDialog
-                dialogOpen={dialogOpen}
-                setDialogOpen={setDialogOpen}
-                productToEdit={selectedProduct}
-                isEdit={isEdit}
-                setIsEdit={setIsEdit}
-                onEdit={handleEditProizvod}
-              />
-            )}
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+      {dialogOpen && isEdit && (
+        <ProductDialog
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+          productToEdit={selectedProduct}
+          isEdit={isEdit}
+          setIsEdit={setIsEdit}
+          onEdit={handleEditProizvod}
+        />
+      )}
+      {secondDialogOpen && (
+        <ProductPharmacyDialog
+          dialogOpen={secondDialogOpen}
+          setDialogOpen={setSecondDialogOpen}
+        />
+      )}
+    </>
   )
 }
 

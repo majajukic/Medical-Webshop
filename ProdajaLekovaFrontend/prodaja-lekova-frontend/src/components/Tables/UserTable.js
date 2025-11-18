@@ -1,20 +1,11 @@
 import React, { useState, useEffect, memo } from 'react'
-import {
-  Box,
-  Button,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  useTheme,
-  Table,
-} from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { getKorisnici, deleteKorisnik } from '../../services/korisnikService'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
 import { useAuth } from '../../context/AuthContext'
 import UserDialog from '../Dialogs/UserDialog'
+import GenericTable from '../Common/GenericTable'
 import { toast } from 'react-toastify'
+import { SPACING, DIMENSIONS } from '../../constants/themeConstants'
 
 const columns = [
   { id: 'korisnikId', label: 'ID', minWidth: 50 },
@@ -29,7 +20,6 @@ const columns = [
 ]
 
 const UserTable = () => {
-  const theme = useTheme()
   const { state } = useAuth()
   const [korisnici, setKorisnici] = useState([])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -46,14 +36,13 @@ const UserTable = () => {
       })
   }, [state.token])
 
-  const handleDelete = (id) => {
+  const handleDelete = (korisnik) => {
     if (window.confirm('Da li ste sigurni da želite da obrišete ovog korisnika?')) {
-      deleteKorisnik(id, state.token)
+      deleteKorisnik(korisnik.korisnikId, state.token)
         .then(() => {
           setKorisnici(
-            korisnici.filter((korisnik) => korisnik.korisnikId !== id),
+            korisnici.filter((k) => k.korisnikId !== korisnik.korisnikId),
           )
-
           toast.success('Korisnik uspesno obrisan')
         })
         .catch((error) => {
@@ -66,7 +55,7 @@ const UserTable = () => {
     setDialogOpen(true)
   }
 
-  const handleIsEdit = (korisnik) => {
+  const handleEdit = (korisnik) => {
     setIsEdit(true)
     setSelectedUser(korisnik)
     setDialogOpen(true)
@@ -80,106 +69,56 @@ const UserTable = () => {
     setKorisnici(korisnici)
   }
 
+  const renderCell = (item, column) => {
+    if (column.id === 'tipKorisnika') {
+      return item.tipKorisnika === 0 ? 'Admin' : 'Kupac'
+    }
+    return item[column.id]
+  }
+
   return (
-    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-      {korisnici.length > 0 && (
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell
-                key={column.id}
-                align="left"
-                style={{ minWidth: column.minWidth }}
-              >
-                {column.label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+    <>
+      <GenericTable
+        columns={columns}
+        data={korisnici}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        emptyMessage="Nema korisnika"
+        getRowKey={(item) => item.korisnikId}
+        renderCell={renderCell}
+        minWidth={DIMENSIONS.TABLE_MIN_WIDTH}
+      />
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'flex-start',
+          marginBottom: SPACING.VERY_LARGE,
+          marginTop: SPACING.VERY_LARGE,
+          marginInlineStart: SPACING.SMALL_PLUS,
+        }}
+      >
+        <Button variant="contained" onClick={handleOpen}>
+          Dodaj novog korisnika
+        </Button>
+      </Box>
+      {dialogOpen && !isEdit && (
+        <UserDialog
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+          onAddNew={handleAddNewKorisnik}
+        />
       )}
-      <TableBody>
-        {korisnici.length > 0 ? (
-          korisnici.map((korisnik) => (
-            <TableRow key={korisnik.korisnikId}>
-              <TableCell align="left">{korisnik.korisnikId}</TableCell>
-              <TableCell align="left">{korisnik.ime}</TableCell>
-              <TableCell align="left">{korisnik.prezime}</TableCell>
-              <TableCell align="left">{korisnik.email}</TableCell>
-              <TableCell align="left">{korisnik.brojTelefona}</TableCell>
-              <TableCell align="left">{korisnik.ulica}</TableCell>
-              <TableCell align="left">{korisnik.broj}</TableCell>
-              <TableCell align="left">{korisnik.mesto}</TableCell>
-              <TableCell align="left">
-                {korisnik.tipKorisnika === 0 ? 'Admin' : 'Kupac'}
-              </TableCell>
-              <TableCell>
-                <Button size="small" onClick={() => handleIsEdit(korisnik)}>
-                  <EditIcon
-                    sx={{
-                      marginRight: 1,
-                      color: theme.palette.primary.main,
-                      fontSize: '2rem',
-                    }}
-                  />
-                </Button>
-              </TableCell>
-              <TableCell>
-                <Button
-                  size="small"
-                  onClick={() => handleDelete(korisnik.korisnikId)}
-                >
-                  <DeleteIcon
-                    sx={{
-                      marginRight: 1,
-                      color: theme.palette.primary.main,
-                      fontSize: '2rem',
-                    }}
-                  />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))
-        ) : (
-          <TableRow variant="subtitle2">
-            <TableCell>Nema korisnika</TableCell>
-          </TableRow>
-        )}
-        <TableRow>
-          <TableCell colSpan={4}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'flex-start',
-                marginBottom: '50px',
-                marginTop: '50px',
-                marginInlineStart: '10px',
-              }}
-            >
-              <Button variant="contained" onClick={handleOpen}>
-                Dodaj novog korisnika
-              </Button>
-              {dialogOpen && !isEdit && (
-                <UserDialog
-                  dialogOpen={dialogOpen}
-                  setDialogOpen={setDialogOpen}
-                  onAddNew={handleAddNewKorisnik}
-                />
-              )}
-              {dialogOpen && isEdit && (
-                <UserDialog
-                  dialogOpen={dialogOpen}
-                  setDialogOpen={setDialogOpen}
-                  userToEdit={selectedUser}
-                  isEdit={isEdit}
-                  setIsEdit={setIsEdit}
-                  onEdit={handleEditKorisnik}
-                />
-              )}
-            </Box>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+      {dialogOpen && isEdit && (
+        <UserDialog
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+          userToEdit={selectedUser}
+          isEdit={isEdit}
+          setIsEdit={setIsEdit}
+          onEdit={handleEditKorisnik}
+        />
+      )}
+    </>
   )
 }
 

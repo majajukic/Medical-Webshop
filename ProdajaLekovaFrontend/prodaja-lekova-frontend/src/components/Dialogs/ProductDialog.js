@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  TextField,
-  Select,
-  MenuItem,
-  Box,
-} from '@mui/material'
+import { TextField, Select, MenuItem } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
+import DialogWrapper from '../Common/DialogWrapper'
 import {
   createProizvod,
   getProizvodById,
@@ -17,6 +9,7 @@ import {
   getProizvodi,
   updateProizvod,
 } from '../../services/proizvodService'
+import { SPACING } from '../../constants/themeConstants'
 
 const initialState = {
   proizvodId: null,
@@ -76,9 +69,7 @@ const ProductDialog = ({
     setInput({ ...input, tipProizvodaId: e.target.value })
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
+  const handleSubmit = async () => {
     if (isEdit) {
       try {
         const response = await updateProizvod(state.token, input)
@@ -118,63 +109,59 @@ const ProductDialog = ({
   }
 
   return (
-    <Dialog open={dialogOpen} onClose={handleClose}>
-      <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="product-name"
-            label="Naziv proizvoda"
-            name="nazivProizvoda"
-            type="text"
-            fullWidth
-            required
-            value={input.nazivProizvoda}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <TextField
-            autoFocus
-            margin="dense"
-            id="manufacturer-name"
-            label="Naziv proizvodjaca"
-            name="proizvodjac"
-            type="text"
-            fullWidth
-            required
-            value={input.proizvodjac}
-            onChange={handleInputChange}
-            sx={{ marginBottom: '20px' }}
-          />
-          <Select
-            labelId="Tip proizvoda"
-            id="product-type"
-            name="tipProizvoda"
-            value={input.tipProizvodaId}
-            onChange={handleSelectChange}
-            sx={{ marginBottom: '20px' }}
-            fullWidth
-            required
-          >
-            <MenuItem value={0}>Izaberite tip proizvoda</MenuItem>
-            {tipoviProizvoda.map((tip) => (
-              <MenuItem key={tip.tipProizvodaId} value={tip.tipProizvodaId}>
-                {tip.nazivTipaProizvoda}
-              </MenuItem>
-            ))}
-          </Select>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} variant="outlined">
-            Odustani
-          </Button>
-          <Button variant="contained" type="submit">
-            {isEdit ? 'Sačuvaj' : 'Kreiraj'}
-          </Button>
-        </DialogActions>
-      </Box>
-    </Dialog>
+    <DialogWrapper
+      open={dialogOpen}
+      onClose={handleClose}
+      title={isEdit ? 'Izmeni proizvod' : 'Dodaj novi proizvod'}
+      onSubmit={handleSubmit}
+      showDefaultActions={true}
+      submitText={isEdit ? 'Sačuvaj' : 'Kreiraj'}
+      cancelText="Odustani"
+    >
+      <TextField
+        autoFocus
+        margin="dense"
+        id="product-name"
+        label="Naziv proizvoda"
+        name="nazivProizvoda"
+        type="text"
+        fullWidth
+        required
+        value={input.nazivProizvoda}
+        onChange={handleInputChange}
+        sx={{ marginBottom: SPACING.LARGE }}
+      />
+      <TextField
+        autoFocus
+        margin="dense"
+        id="manufacturer-name"
+        label="Naziv proizvodjaca"
+        name="proizvodjac"
+        type="text"
+        fullWidth
+        required
+        value={input.proizvodjac}
+        onChange={handleInputChange}
+        sx={{ marginBottom: SPACING.LARGE }}
+      />
+      <Select
+        labelId="Tip proizvoda"
+        id="product-type"
+        name="tipProizvoda"
+        value={input.tipProizvodaId}
+        onChange={handleSelectChange}
+        sx={{ marginBottom: SPACING.LARGE }}
+        fullWidth
+        required
+      >
+        <MenuItem value={0}>Izaberite tip proizvoda</MenuItem>
+        {tipoviProizvoda.map((tip) => (
+          <MenuItem key={tip.tipProizvodaId} value={tip.tipProizvodaId}>
+            {tip.nazivTipaProizvoda}
+          </MenuItem>
+        ))}
+      </Select>
+    </DialogWrapper>
   )
 }
 

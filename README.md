@@ -128,6 +128,28 @@ The backend is built using **.NET 6** with Entity Framework Core, following a cl
    - BCrypt.Net critically outdated (security concern)
    - Missing security patches for EF Core and JWT Bearer
 
+**Recommendations:**
+
+**Immediate Actions (Critical):**
+1. Implement structured logging (Serilog/NLog)
+2. Create custom exception types and global exception middleware
+3. Update BCrypt.Net to latest version (security critical)
+4. Extract duplicated validation logic to reusable validators
+5. Update all Microsoft.EntityFrameworkCore packages to 6.0.33
+
+**Short-term (High Priority):**
+1. Refactor ApotekaProizvodController (split into separate query handlers)
+2. Extract magic numbers to constants or configuration files
+3. Move hardcoded URLs to appsettings.json
+4. Add exception logging in all catch blocks
+5. Implement health check endpoints
+
+**Long-term:**
+1. Implement CQRS pattern for complex queries
+2. Add MediatR for request/response handling
+3. Create proper error response DTOs
+4. Add integration tests for controllers
+5. Consider migrating to .NET 8 LTS
 
 **Overall Backend Score**: 7.5/10 (Good foundation with improvement needed)
 
@@ -316,6 +338,41 @@ The frontend is built using **React 18** with Material-UI, React Router, and Con
     - **Zero test coverage**
     - No unit tests
     - No integration tests
+
+**Recommendations:**
+
+**Immediate Actions (Critical):**
+1. **Update axios** to latest version (security patches)
+2. **Remove jsonwebtoken** from frontend (security anti-pattern)
+3. **Replace jwt-decode** with 'jose' library
+4. **Add React.memo** to all pure components (Cards, Tables, List items)
+5. **Fix ProductsPage useEffect** dependencies (split into multiple effects)
+6. **Fix Cart/Navbar** infinite loop risk
+7. **Move API URL** to environment variables
+
+**Short-term (High Priority):**
+1. **Extract duplicate Context** logic into factory function
+2. **Create generic Table** component (eliminate 45% duplication)
+3. **Create generic Dialog** wrapper (eliminate 35% duplication)
+4. **Extract service error handling** into wrapper function
+5. **Split large components**: UserDialog, ProductCard, Navbar, ProductsPage
+6. **Add useMemo** for expensive calculations
+7. **Add useCallback** for event handlers passed as props
+8. **Memoize Context values** to prevent wide re-renders
+9. **Update React, MUI, react-router-dom**
+10. **Create theme constants** for spacing/sizing values
+
+**Long-term:**
+1. **Migrate to TypeScript** for type safety
+2. **Implement React Hook Form** for forms
+3. **Add unit tests** (target 80% coverage)
+4. **Migrate to Zustand or Redux Toolkit** (more efficient than Context)
+5. **Migrate from react-scripts to Vite** (faster builds)
+6. **Implement HttpOnly cookies** for authentication
+7. **Add error boundary** components
+8. **Implement code splitting** for better performance
+9. **Add ESLint rules** for useEffect dependencies
+10. **Implement CI/CD** with automated testing
 
 **Overall Frontend Score**: 5.5/10 (Functional but requires significant refactoring)
 
