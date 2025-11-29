@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.DTOs.StavkaPorudzbineDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
-using System.Data;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -41,7 +39,7 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Serveska greska.");
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -55,6 +53,11 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                if (stavkaDTO.Kolicina <= 0)
+                {
+                    return BadRequest("Kolicina mora biti veca od nule.");
+                }
+
                 //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
                 ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavkaDTO.ApotekaProizvodId);
 
@@ -72,7 +75,7 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Serveska greska.");
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -90,6 +93,11 @@ namespace ProdajaLekovaBackend.Controllers
 
                 if (stavka == null) return NotFound();
 
+                if (stavkaDTO.Kolicina <= 0)
+                {
+                    return BadRequest("Kolicina mora biti veca od nule.");
+                }
+
                 //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
                 ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == stavka.ApotekaProizvodId);
 
@@ -105,7 +113,7 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Serveska greska.");
+                return StatusCode(500, "Serverska greska.");
             }
         }
 
@@ -130,7 +138,7 @@ namespace ProdajaLekovaBackend.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Serveska greska.");
+                return StatusCode(500, "Serverska greska.");
             }
         }
     }

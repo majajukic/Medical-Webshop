@@ -9,7 +9,7 @@ export const getKorisnici = async (token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -21,7 +21,7 @@ export const getProfil = async (token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -33,7 +33,7 @@ export const createKorisnik = async (token, newUser) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -45,7 +45,7 @@ export const updateKorisnik = async (token, updatedUser) => {
 
     return response
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -55,6 +55,6 @@ export const deleteKorisnik = async (id, token) => {
 
     await api.deleteKorisnik(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }

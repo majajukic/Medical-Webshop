@@ -29,7 +29,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         var jwtSection = builder.Configuration.GetSection("Jwt");
         var issuer = jwtSection.GetValue<string>("Issuer");
         var audience = jwtSection.GetValue<string>("Audience");
-        var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
+        var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine)
+            ?? throw new InvalidOperationException("JWT signing key not configured. Set the 'KEY' environment variable.");
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -62,8 +63,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(builder =>
     {
         builder.WithOrigins("http://localhost:3000")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization")
+            .AllowCredentials();
     });
 });
 

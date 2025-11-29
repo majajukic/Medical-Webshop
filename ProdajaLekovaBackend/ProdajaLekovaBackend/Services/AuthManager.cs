@@ -57,7 +57,8 @@ namespace ProdajaLekovaBackend.Services
 
         private static SigningCredentials GetSigningCredentials()
         {
-            var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
+            var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine)
+                ?? throw new InvalidOperationException("JWT signing key not configured. Set the 'KEY' environment variable.");
 
             var secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 

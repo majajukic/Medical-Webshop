@@ -8,7 +8,7 @@ export const login = async (formData) => {
 
   } catch (error) {
     
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -19,6 +19,6 @@ export const register = async (formData) => {
 
   } catch (error) {
 
-    return error.response.status
+    return error.response?.status || 500
   }
 }

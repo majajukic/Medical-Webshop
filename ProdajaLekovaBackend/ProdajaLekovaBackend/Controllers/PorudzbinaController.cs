@@ -6,8 +6,6 @@ using ProdajaLekovaBackend.DTOs.PorudzbinaDTOs;
 using ProdajaLekovaBackend.DTOs.StavkaPorudzbineDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
-using System.Data;
-using System.Security.Claims;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -135,19 +133,17 @@ namespace ProdajaLekovaBackend.Controllers
             {
                 var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
 
+                if (joinedDataDTO.Kolicina <= 0)
+                {
+                    return BadRequest("Kolicina mora biti veca od nule.");
+                }
+
                 //provera da li trazena kolicina proizvoda premasuje stanje zaliha tog proizvoda
                 ApotekaProizvod proizvod = await _unitOfWork.ApotekaProizvod.GetAsync(q => q.ApotekaProizvodId == joinedDataDTO.ApotekaProizvodId);
 
                 if (joinedDataDTO.Kolicina > proizvod.StanjeZaliha) return BadRequest("Trenutno na stanju nema dovoljno trazenog proizvoda.");
+                joinedDataDTO.BrojPorudzbine = $"#{DateTime.UtcNow:yyyyMMddHHmmss}{Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper()}";
 
-                //generisanje random broja porudzbine
-                Random rnd = new();
-
-                int brojPorudzbine = rnd.Next(10000, 99999);
-
-                joinedDataDTO.BrojPorudzbine = "#" + brojPorudzbine.ToString();
-
-                //postavljanje vrednosti za ostala obelezja
                 joinedDataDTO.DatumKreiranja = DateTime.Now;
 
                 joinedDataDTO.PlacenaPorudzbina = false;
