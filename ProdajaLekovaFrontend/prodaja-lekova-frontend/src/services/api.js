@@ -2,17 +2,67 @@ import axios from 'axios'
 
 const BASE_URL = axios.create({ baseURL: 'https://localhost:7156' })
 
-//API endpointi za auth:
+// Global request interceptor
+BASE_URL.interceptors.request.use(
+  (config) => {
+    return config
+  },
+  (error) => {
+    console.error('Request error:', error)
+    return Promise.reject(error)
+  }
+)
+
+// Global response interceptor for error handling
+BASE_URL.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    if (error.response) {
+      const status = error.response.status
+      const message = error.response.data?.detail || error.response.data?.title || 'Internal server error'
+
+      switch (status) {
+        case 400:
+          console.error('Bad request:', message)
+          break
+        case 401:
+          console.error('Unauthorized.')
+          break
+        case 403:
+          console.error('Forbidded access:', message)
+          break
+        case 404:
+          console.error('Resource not found:', message)
+          break
+        case 409:
+          console.error('Conflict:', message)
+          break
+        case 500:
+        default:
+          console.error('Internal server error:', message)
+          break
+      }
+    } else if (error.request) {
+      // Request made but no response received (network error)
+      console.error('Network error. Please check your internet connection.')
+    } else {
+      console.error('Error:', error.message)
+    }
+
+    return Promise.reject(error)
+  }
+)
+
 export const login = (formData) => BASE_URL.post('/api/account/login', formData)
 export const register = (formData) => BASE_URL.post('/api/account/registracija', formData)
 
-//API endpointi za apoteke:
 export const getApoteke = () => BASE_URL.get('/api/apoteka')
 export const deleteApoteka = (id, authConfig) => BASE_URL.delete(`/api/apoteka/${id}`, authConfig)
 export const createApoteka = (newPharmacy, authConfig) => BASE_URL.post(`/api/apoteka`, newPharmacy, authConfig)
 export const updateApoteka = (updatedPharmacy, authConfig) => BASE_URL.put(`/api/apoteka`, updatedPharmacy, authConfig)
 
-//API endpointi za proizvode:
 export const getProizvodi = () => BASE_URL.get('/api/proizvod')
 export const getProizvodById = (id, authConfig) => BASE_URL.get(`/api/proizvod/${id}`, authConfig)
 export const getTipoviProizvoda = () => BASE_URL.get('/api/tipProizvoda')
@@ -36,14 +86,12 @@ export const addProizvodToApoteka = (newProduct, authConfig) => BASE_URL.post(`/
 export const updateProizvod = (updatedProduct, authConfig) => BASE_URL.put(`/api/proizvod`, updatedProduct, authConfig)
 export const updateProizvodInApoteka = (updatedProduct, authConfig) => BASE_URL.put(`/api/apotekaProizvod`, updatedProduct, authConfig)
 
-//API endpointi za korisnike:
 export const getKorisnici = (authConfig) => BASE_URL.get('/api/korisnik', authConfig)
 export const getProfil = (authConfig) => BASE_URL.get('/api/korisnik/profil', authConfig)
 export const deleteKorisnik = (id, authConfig) => BASE_URL.delete(`/api/korisnik/${id}`, authConfig)
 export const createKorisnik = (newUser, authConfig) => BASE_URL.post(`/api/korisnik`, newUser, authConfig)
 export const updateKorisnik = (updatedUser, authConfig) => BASE_URL.put(`/api/korisnik`, updatedUser, authConfig)
 
-//API endpointi za porudzbine:
 export const getPorudzbine = (authConfig) => BASE_URL.get('/api/porudzbina', authConfig)
 export const getPorudzbineByKupac = (authConfig) => BASE_URL.get('/api/porudzbina/porudzbineByKupac', authConfig)
 export const getKorpa = (authConfig) => BASE_URL.get('/api/porudzbina/korpa', authConfig)
