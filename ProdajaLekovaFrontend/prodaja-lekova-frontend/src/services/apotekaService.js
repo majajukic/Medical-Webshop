@@ -7,7 +7,7 @@ export const getApoteke = async () => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -19,7 +19,7 @@ export const createApoteka = async (token, newPharmacy) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -31,7 +31,7 @@ export const updateApoteka = async (token, updatedPharmacy) => {
 
     return response
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -41,6 +41,6 @@ export const deleteApoteka = async (id, token) => {
 
     await api.deleteApoteka(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }

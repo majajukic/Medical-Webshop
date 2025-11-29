@@ -68,7 +68,7 @@ const Navbar = () => {
             console.error(error)
           })
         }
-  }, [apotekaDispatch, role, state.token, korpaDispatch, cartItemCount])
+  }, [apotekaDispatch, role, state.token, korpaDispatch])
 
   const handleMenuItemClick = (apotekaId) => {
     navigate(`/apoteka/${apotekaId}`)
