@@ -94,6 +94,12 @@ namespace ProdajaLekovaBackend.Repositories.Implementations
         public async Task DeleteAsync(int id)
         {
             var entity = await _db.FindAsync(id);
+
+            if (entity == null)
+            {
+                throw new KeyNotFoundException($"Entity with id {id} not found.");
+            }
+            
             _db.Remove(entity);
         }
 

@@ -7,7 +7,7 @@ export const getProizvodi = async () => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -17,7 +17,7 @@ export const getTipoviProizvoda = async () => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -27,7 +27,7 @@ export const getProizvodiHomePage = async (pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -37,7 +37,7 @@ export const getProizvodiBySearch = async (searchTerm) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -47,7 +47,7 @@ export const getProizvodiByTip = async (type, pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -57,7 +57,7 @@ export const getProizvodiByTipCount = async (type) => {
 
     return total
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -69,7 +69,7 @@ export const getProizvodiBySearchCount = async (searchTerm) => {
     return total
 
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -81,7 +81,7 @@ export const getProizvodiByDiscountCount = async () => {
     return total
 
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -91,7 +91,7 @@ export const getProizvodiByApoteka = async (pharmacy, pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -101,7 +101,7 @@ export const getProizvodByApoteka = async (pharmacyId) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -111,7 +111,7 @@ export const getProizvodiCenaRastuce = async (pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -121,7 +121,7 @@ export const getProizvodiPopust = async (pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -131,7 +131,7 @@ export const getProizvodiCenaOpadajuce = async (pageNumber) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -143,7 +143,7 @@ export const getProizvodById = async (token, id) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -153,7 +153,7 @@ export const getProizvodiCountByApoteka = async (pharmacy) => {
 
     return total
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -163,7 +163,7 @@ export const getProizvodiCount = async () => {
 
     return total
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -175,7 +175,7 @@ export const createProizvod = async (token, newProduct) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -187,7 +187,7 @@ export const addProizvodToApoteka = async (token, newProduct) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -199,7 +199,7 @@ export const updateProizvod = async (token, updatedProduct) => {
 
     return response
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -214,7 +214,7 @@ export const updateProizvodInApoteka = async (token, updatedProduct) => {
 
     return response
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -224,7 +224,7 @@ export const deleteProizvod = async (id, token) => {
 
     await api.deleteProizvod(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -234,6 +234,6 @@ export const deleteProizvodFromApoteka = async (id, token) => {
 
     await api.deleteProizvodFromApoteka(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }

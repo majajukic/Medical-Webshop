@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
-using ProdajaLekovaBackend.Services;
+using System.Security.Claims;
 
 namespace ProdajaLekovaBackend.Controllers
 {
@@ -134,17 +134,25 @@ namespace ProdajaLekovaBackend.Controllers
 
             try
             {
+                var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
+                var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (currentUserRole == "Kupac" && currentUserId != korisnikDTO.KorisnikId)
+                {
+                    return Forbid("Mozete azurirati samo svoj nalog.");
+                }
+
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikDTO.KorisnikId);
 
                 if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
 
-                if (korisnikDTO.Lozinka.Equals(korisnik.Lozinka))
+                if (!BCrypt.Net.BCrypt.Verify(korisnikDTO.Lozinka, korisnik.Lozinka))
                 {
-                    korisnikDTO.Lozinka = korisnik.Lozinka;
+                    korisnikDTO.Lozinka = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
                 }
                 else
                 {
-                    korisnikDTO.Lozinka = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
+                    korisnikDTO.Lozinka = korisnik.Lozinka;
                 }
 
                 _mapper.Map(korisnikDTO, korisnik);
@@ -170,6 +178,14 @@ namespace ProdajaLekovaBackend.Controllers
         {
             try
             {
+                var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
+                var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+                if (currentUserRole == "Kupac" && currentUserId != id)
+                {
+                    return Forbid("Mozete obrisati samo svoj nalog.");
+                }
+
                 var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
 
                 if (korisnik == null) return NotFound("Korisnik nije pronadjen.");

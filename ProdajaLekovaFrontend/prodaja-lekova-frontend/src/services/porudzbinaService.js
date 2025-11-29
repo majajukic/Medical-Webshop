@@ -9,7 +9,7 @@ export const getPorudzbine = async (token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -21,7 +21,7 @@ export const getPorudzbineByKupac = async (token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -33,7 +33,7 @@ export const getKorpa = async (token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -45,7 +45,7 @@ export const getStavkePorudzbine = async (id, token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -67,7 +67,7 @@ export const createPorudzbina = async (newOrder, token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -79,7 +79,7 @@ export const addStavkaToPorudzbina = async (itemToAdd, token) => {
 
     return data
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -89,7 +89,7 @@ export const deletePorudzbina = async (id, token) => {
 
     await api.deletePorudzbina(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
 
@@ -99,6 +99,6 @@ export const deleteStavka = async (id, token) => {
 
     await api.deleteStavka(id, authConfig)
   } catch (error) {
-    return error.response.status
+    return error.response?.status || 500
   }
 }
