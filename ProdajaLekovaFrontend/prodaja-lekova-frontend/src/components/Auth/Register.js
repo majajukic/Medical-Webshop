@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { register } from '../../services/api'
+import { sanitizeFormData } from '../../utilities/sanitize'
 import {
   Avatar,
   Button,
@@ -46,7 +47,8 @@ const Register = () => {
     e.preventDefault()
 
     try {
-      await register(formData)
+      const sanitizedData = sanitizeFormData(formData)
+      await register(sanitizedData)
 
       toast.success('Vaš nalog je uspešno kreiran!')
 
