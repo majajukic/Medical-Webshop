@@ -10,11 +10,8 @@ import {
 const korpaReducer = (state, action) => {
   switch (action.type) {
     case GET_CART:
-      return {
-        ...state,
-        porudzbina: action.payload,
-      }
     case ADD_CART_ITEM:
+    case UPDATE_CART:
       return {
         ...state,
         porudzbina: action.payload,
@@ -36,11 +33,6 @@ const korpaReducer = (state, action) => {
         },
       }
     }
-    case UPDATE_CART:
-      return {
-        ...state,
-        porudzbina: action.payload,
-      }
     case UPDATE_TOTAL:
       return {
         ...state,

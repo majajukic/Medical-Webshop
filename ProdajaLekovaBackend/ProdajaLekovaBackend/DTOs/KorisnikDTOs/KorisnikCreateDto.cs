@@ -1,4 +1,5 @@
-﻿using ProdajaLekovaBackend.Models;
+﻿using Newtonsoft.Json;
+using ProdajaLekovaBackend.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -14,10 +15,12 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         public string? Prezime { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti email.")]
+        [JsonRequired]
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Obavezno je uneti lozinku.")]
+        [JsonRequired]
         public string Lozinka { get; set; } = null!;
 
         [StringLength(15, ErrorMessage = "Maximum 15 karaktera prekoračeno")]
