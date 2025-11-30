@@ -14,11 +14,13 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ILogger<KorisnikController> _logger;
 
-        public KorisnikController(IUnitOfWork unitOfWork, IMapper mapper)
+        public KorisnikController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<KorisnikController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _logger = logger;
         }
 
         /// <summary>
@@ -28,20 +30,15 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetKorisnici()
         {
-            try
-            {
-                var korisnici = await _unitOfWork.Korisnik.GetAllAsync(orderBy: q => q.OrderBy(x => x.Ime));
+            _logger.LogInformation("Fetching all users");
+            var korisnici = await _unitOfWork.Korisnik.GetAllAsync(orderBy: q => q.OrderBy(x => x.Ime));
 
-                if (korisnici == null) return NoContent();
+            if (korisnici == null) return NoContent();
 
-                var results = _mapper.Map<List<KorisnikDto>>(korisnici);
+            var results = _mapper.Map<List<KorisnikDto>>(korisnici);
+            _logger.LogInformation("Successfully fetched {Count} users", results.Count);
 
-                return Ok(results);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+            return Ok(results);
         }
 
         /// <summary>
@@ -51,20 +48,19 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetKorisnik")]
         public async Task<IActionResult> GetKorisnik(int id)
         {
-            try
+            _logger.LogInformation("Fetching user with ID: {KorisnikId}", id);
+            var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
+
+            if (korisnik == null)
             {
-                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
-
-                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
-
-                var result = _mapper.Map<KorisnikDto>(korisnik);
-
-                return Ok(result);
+                _logger.LogWarning("User with ID {KorisnikId} not found", id);
+                throw new KeyNotFoundException("Korisnik nije pronadjen.");
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+
+            var result = _mapper.Map<KorisnikDto>(korisnik);
+            _logger.LogInformation("Successfully fetched user with ID: {KorisnikId}", id);
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -74,22 +70,21 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("profil")]
         public async Task<IActionResult> GetProfileDetails()
         {
-            try
+            var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
+            _logger.LogInformation("Fetching profile details for user ID: {KorisnikId}", korisnikId);
+
+            var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikId);
+
+            if (korisnik == null)
             {
-                var korisnikId = int.Parse(User.FindFirst("Id")?.Value);
-
-                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikId);
-
-                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
-
-                var result = _mapper.Map<KorisnikDto>(korisnik);
-
-                return Ok(result);
+                _logger.LogWarning("User with ID {KorisnikId} not found", korisnikId);
+                throw new KeyNotFoundException("Korisnik nije pronadjen.");
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+
+            var result = _mapper.Map<KorisnikDto>(korisnik);
+            _logger.LogInformation("Successfully fetched profile for user ID: {KorisnikId}", korisnikId);
+
+            return Ok(result);
         }
 
         /// <summary>
@@ -99,29 +94,26 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateKorisnik([FromBody] KorisnikCreateDto korisnikDTO)
         {
+            _logger.LogInformation("Creating new user with email: {Email}", korisnikDTO.Email);
+            var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
 
-            try
+            if (existingKorisnik != null)
             {
-                var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
-
-                if (existingKorisnik != null) return BadRequest("Korisnik sa datom mejl adresom vec postoji u bazi");
-
-                var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
-
-                var korisnik = _mapper.Map<Korisnik>(korisnikDTO);
-
-                korisnik.Lozinka = passwordHash;
-
-                await _unitOfWork.Korisnik.CreateAsync(korisnik);
-
-                await _unitOfWork.Save();
-
-                return CreatedAtRoute("GetKorisnik", new { id = korisnik.KorisnikId }, korisnik);
+                _logger.LogWarning("User with email {Email} already exists", korisnikDTO.Email);
+                throw new ArgumentException("Korisnik sa datom mejl adresom vec postoji u bazi");
             }
-            catch (Exception)
-            {
-                return StatusCode(500, "Serverska greska.");
-            }
+
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
+
+            var korisnik = _mapper.Map<Korisnik>(korisnikDTO);
+            korisnik.Lozinka = passwordHash;
+
+            await _unitOfWork.Korisnik.CreateAsync(korisnik);
+            await _unitOfWork.Save();
+
+            _logger.LogInformation("Successfully created user with ID: {KorisnikId}", korisnik.KorisnikId);
+
+            return CreatedAtRoute("GetKorisnik", new { id = korisnik.KorisnikId }, korisnik);
         }
 
         /// <summary>
@@ -131,42 +123,41 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateKorisnik([FromBody] KorisnikUpdateDto korisnikDTO)
         {
+            var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
+            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            try
+            _logger.LogInformation("User {CurrentUserId} attempting to update user {TargetUserId}", currentUserId, korisnikDTO.KorisnikId);
+
+            if (currentUserRole == "Kupac" && currentUserId != korisnikDTO.KorisnikId)
             {
-                var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
-                var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-                if (currentUserRole == "Kupac" && currentUserId != korisnikDTO.KorisnikId)
-                {
-                    return Forbid("Mozete azurirati samo svoj nalog.");
-                }
-
-                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikDTO.KorisnikId);
-
-                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
-
-                if (!BCrypt.Net.BCrypt.Verify(korisnikDTO.Lozinka, korisnik.Lozinka))
-                {
-                    korisnikDTO.Lozinka = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
-                }
-                else
-                {
-                    korisnikDTO.Lozinka = korisnik.Lozinka;
-                }
-
-                _mapper.Map(korisnikDTO, korisnik);
-
-                _unitOfWork.Korisnik.UpdateAsync(korisnik);
-
-                await _unitOfWork.Save();
-
-                return Ok("Uspesna izmena");
+                _logger.LogWarning("User {CurrentUserId} attempted to update another user's account", currentUserId);
+                throw new UnauthorizedAccessException("Mozete azurirati samo svoj nalog.");
             }
-            catch (Exception)
+
+            var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == korisnikDTO.KorisnikId);
+
+            if (korisnik == null)
             {
-                return StatusCode(500, "Serverska greska.");
+                _logger.LogWarning("User with ID {KorisnikId} not found for update", korisnikDTO.KorisnikId);
+                throw new KeyNotFoundException("Korisnik nije pronadjen.");
             }
+
+            if (!BCrypt.Net.BCrypt.Verify(korisnikDTO.Lozinka, korisnik.Lozinka))
+            {
+                korisnikDTO.Lozinka = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
+            }
+            else
+            {
+                korisnikDTO.Lozinka = korisnik.Lozinka;
+            }
+
+            _mapper.Map(korisnikDTO, korisnik);
+            _unitOfWork.Korisnik.UpdateAsync(korisnik);
+            await _unitOfWork.Save();
+
+            _logger.LogInformation("Successfully updated user with ID: {KorisnikId}", korisnikDTO.KorisnikId);
+
+            return Ok("Uspesna izmena");
         }
 
         /// <summary>
@@ -176,30 +167,31 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteKorisnik(int id)
         {
-            try
+            var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
+            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            _logger.LogInformation("User {CurrentUserId} attempting to delete user {TargetUserId}", currentUserId, id);
+
+            if (currentUserRole == "Kupac" && currentUserId != id)
             {
-                var currentUserId = int.Parse(User.FindFirst("Id")?.Value);
-                var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
-
-                if (currentUserRole == "Kupac" && currentUserId != id)
-                {
-                    return Forbid("Mozete obrisati samo svoj nalog.");
-                }
-
-                var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
-
-                if (korisnik == null) return NotFound("Korisnik nije pronadjen.");
-
-                await _unitOfWork.Korisnik.DeleteAsync(id);
-
-                await _unitOfWork.Save();
-
-                return NoContent();
+                _logger.LogWarning("User {CurrentUserId} attempted to delete another user's account", currentUserId);
+                throw new UnauthorizedAccessException("Mozete obrisati samo svoj nalog.");
             }
-            catch (Exception)
+
+            var korisnik = await _unitOfWork.Korisnik.GetAsync(q => q.KorisnikId == id);
+
+            if (korisnik == null)
             {
-                return StatusCode(500, "Serverska greska.");
+                _logger.LogWarning("User with ID {KorisnikId} not found for deletion", id);
+                throw new KeyNotFoundException("Korisnik nije pronadjen.");
             }
+
+            await _unitOfWork.Korisnik.DeleteAsync(id);
+            await _unitOfWork.Save();
+
+            _logger.LogInformation("Successfully deleted user with ID: {KorisnikId}", id);
+
+            return NoContent();
         }
     }
 }

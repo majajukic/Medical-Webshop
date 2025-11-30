@@ -13,8 +13,16 @@ using System.Text;
 using ProdajaLekovaBackend.Services;
 using Microsoft.OpenApi.Models;
 using Stripe;
+using Serilog;
+using ProdajaLekovaBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 //DbContext
 builder.Services.AddDbContext<ApotekaDbContext>(options =>
@@ -172,11 +180,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/ProdajaLekovaOpenApiSpecification/swagger.json", "ProdajaLekovaBackend");
-        c.RoutePrefix = String.Empty;
+        c.RoutePrefix = string.Empty;
     });
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+app.UseSerilogRequestLogging();
 
 app.UseCors();
 
@@ -186,4 +198,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+
+await app.RunAsync();
+
