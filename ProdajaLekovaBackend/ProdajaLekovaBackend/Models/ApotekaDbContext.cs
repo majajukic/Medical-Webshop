@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using ProdajaLekovaBackend.Constants;
 
 namespace ProdajaLekovaBackend.Models
 {
@@ -49,11 +48,11 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.ApotekaId).HasColumnName("apotekaId");
 
                 entity.Property(e => e.CenaBezPopusta)
-                    .HasColumnType("numeric(10, 2)")
+                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
                     .HasColumnName("cenaBezPopusta");
 
                 entity.Property(e => e.CenaSaPopustom)
-                    .HasColumnType("numeric(10, 2)")
+                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
                     .HasColumnName("cenaSaPopustom");
 
                 entity.Property(e => e.PopustUprocentima)
@@ -152,7 +151,7 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.PlacenaPorudzbina).HasColumnName("placenaPorudzbina");
 
                 entity.Property(e => e.UkupanIznos)
-                    .HasColumnType("numeric(10, 2)")
+                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
                     .HasColumnName("ukupanIznos");
 
                 entity.Property(e => e.UplataId)
@@ -199,7 +198,7 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.ApotekaProizvodId).HasColumnName("apotekaProizvodId");
 
                 entity.Property(e => e.Cena)
-                    .HasColumnType("numeric(10, 2)")
+                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
                     .HasColumnName("cena");
 
                 entity.Property(e => e.Kolicina).HasColumnName("kolicina");

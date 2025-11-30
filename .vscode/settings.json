@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "claude_code_refactor",
+        "projectKey": "majajukic_Medical-Webshop"
+    }
+}

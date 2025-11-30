@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProdajaLekovaBackend.Constants;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
@@ -10,7 +11,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/korisnik")]
     [ApiController]
-    public class KorisnikController : Controller
+    public class KorisnikController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -54,7 +55,7 @@ namespace ProdajaLekovaBackend.Controllers
             if (korisnik == null)
             {
                 _logger.LogWarning("User with ID {KorisnikId} not found", id);
-                throw new KeyNotFoundException("Korisnik nije pronadjen.");
+                throw new KeyNotFoundException(ErrorMessages.KorisnikNotFound);
             }
 
             var result = _mapper.Map<KorisnikDto>(korisnik);
@@ -78,7 +79,7 @@ namespace ProdajaLekovaBackend.Controllers
             if (korisnik == null)
             {
                 _logger.LogWarning("User with ID {KorisnikId} not found", korisnikId);
-                throw new KeyNotFoundException("Korisnik nije pronadjen.");
+                throw new KeyNotFoundException(ErrorMessages.KorisnikNotFound);
             }
 
             var result = _mapper.Map<KorisnikDto>(korisnik);
@@ -139,7 +140,7 @@ namespace ProdajaLekovaBackend.Controllers
             if (korisnik == null)
             {
                 _logger.LogWarning("User with ID {KorisnikId} not found for update", korisnikDTO.KorisnikId);
-                throw new KeyNotFoundException("Korisnik nije pronadjen.");
+                throw new KeyNotFoundException(ErrorMessages.KorisnikNotFound);
             }
 
             if (!BCrypt.Net.BCrypt.Verify(korisnikDTO.Lozinka, korisnik.Lozinka))
@@ -183,7 +184,7 @@ namespace ProdajaLekovaBackend.Controllers
             if (korisnik == null)
             {
                 _logger.LogWarning("User with ID {KorisnikId} not found for deletion", id);
-                throw new KeyNotFoundException("Korisnik nije pronadjen.");
+                throw new KeyNotFoundException(ErrorMessages.KorisnikNotFound);
             }
 
             await _unitOfWork.Korisnik.DeleteAsync(id);

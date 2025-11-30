@@ -25,7 +25,7 @@ export const useTableActions = () => {
     if (window.confirm('Da li ste sigurni da želite da obrišete ovu stavku?')) {
       try {
         await deleteFunction(id)
-        onSuccess && onSuccess(id)
+        onSuccess?.(id)
       } catch (error) {
         console.error('Error deleting item:', error)
       }

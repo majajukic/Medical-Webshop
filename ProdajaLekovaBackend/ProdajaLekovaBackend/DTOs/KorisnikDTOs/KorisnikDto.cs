@@ -13,7 +13,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         public string? Ulica { get; set; }
         public string? Broj { get; set; }
         public string? Mesto { get; set; }
-        public TipKorisnikaEnum TipKorisnika { get; set; }
+        public TipKorisnika TipKorisnika { get; set; }
 
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ProdajaLekovaBackend.Models
 {
-    public enum TipKorisnikaEnum
+    public enum TipKorisnika
     {
         Admin = 0,
         Kupac = 1

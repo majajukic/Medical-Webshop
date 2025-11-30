@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using ProdajaLekovaBackend.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
@@ -43,7 +41,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
                   new[] { "KorisnikCreateDTO" });
             }
 
-            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
+            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$", RegexOptions.None, TimeSpan.FromMilliseconds(250)))
             {
                 yield return new ValidationResult(
                   "Lozinka mora sadrzati i brojeve i karaktere.",

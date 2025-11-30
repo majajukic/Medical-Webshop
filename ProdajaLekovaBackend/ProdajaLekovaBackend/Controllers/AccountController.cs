@@ -8,7 +8,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController : Controller
+    public class AccountController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthManager _authManager;
@@ -50,7 +50,7 @@ namespace ProdajaLekovaBackend.Controllers
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
             korisnik.Lozinka = passwordHash;
-            korisnik.TipKorisnika = (TipKorisnikaEnum)1;
+            korisnik.TipKorisnika = (TipKorisnika)1;
 
             await _unitOfWork.Korisnik.CreateAsync(korisnik);
             await _unitOfWork.Save();

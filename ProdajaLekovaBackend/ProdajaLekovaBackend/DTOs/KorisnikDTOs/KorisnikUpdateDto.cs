@@ -34,7 +34,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string? Mesto { get; set; }
 
-        public TipKorisnikaEnum? TipKorisnika { get; set; }
+        public TipKorisnika? TipKorisnika { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -47,7 +47,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
                   new[] { "KorisnikdpdateDTO" });
             }
 
-            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
+            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$", RegexOptions.None, TimeSpan.FromMilliseconds(250)))
             {
                 yield return new ValidationResult(
                   "Lozinka mora sadrzati i brojeve i karaktere.",
