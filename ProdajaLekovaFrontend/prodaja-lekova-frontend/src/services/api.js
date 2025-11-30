@@ -1,59 +1,4 @@
-import axios from 'axios'
-
-const BASE_URL = axios.create({ baseURL: 'https://localhost:7156' })
-
-// Global request interceptor
-BASE_URL.interceptors.request.use(
-  (config) => {
-    return config
-  },
-  (error) => {
-    console.error('Request error:', error)
-    return Promise.reject(error)
-  }
-)
-
-// Global response interceptor for error handling
-BASE_URL.interceptors.response.use(
-  (response) => {
-    return response
-  },
-  (error) => {
-    if (error.response) {
-      const status = error.response.status
-      const message = error.response.data?.detail || error.response.data?.title || 'Internal server error'
-
-      switch (status) {
-        case 400:
-          console.error('Bad request:', message)
-          break
-        case 401:
-          console.error('Unauthorized.')
-          break
-        case 403:
-          console.error('Forbidded access:', message)
-          break
-        case 404:
-          console.error('Resource not found:', message)
-          break
-        case 409:
-          console.error('Conflict:', message)
-          break
-        case 500:
-        default:
-          console.error('Internal server error:', message)
-          break
-      }
-    } else if (error.request) {
-      // Request made but no response received (network error)
-      console.error('Network error. Please check your internet connection.')
-    } else {
-      console.error('Error:', error.message)
-    }
-
-    return Promise.reject(error)
-  }
-)
+import BASE_URL from '../config/axiosConfig'
 
 export const login = (formData) => BASE_URL.post('/api/account/login', formData)
 export const register = (formData) => BASE_URL.post('/api/account/registracija', formData)
@@ -101,4 +46,3 @@ export const createPorudzbina = (newOrder, authConfig) => BASE_URL.post(`/api/po
 export const addStavkaToPorudzbina = (itemToAdd, authConfig) => BASE_URL.post(`/api/stavkaPorudzbine`, itemToAdd, authConfig)
 export const deletePorudzbina = (id, authConfig) => BASE_URL.delete(`/api/porudzbina/${id}`, authConfig)
 export const deleteStavka = (id, authConfig) => BASE_URL.delete(`/api/stavkaPorudzbine/${id}`, authConfig)
-
