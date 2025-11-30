@@ -1,6 +1,5 @@
 ﻿using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.DTOs.StavkaPorudzbineDTOs;
-using ProdajaLekovaBackend.Models;
 
 namespace ProdajaLekovaBackend.DTOs.PorudzbinaDTOs
 {

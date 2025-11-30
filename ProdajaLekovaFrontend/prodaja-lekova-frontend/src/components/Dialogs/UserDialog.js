@@ -75,56 +75,79 @@ const UserDialog = ({
     resetForm()
   }
 
+  const getDialogTitle = () => {
+    if (isEdit) return 'Izmeni korisnika'
+    if (isEditProfile) return 'Izmeni profil'
+    return 'Dodaj novog korisnika'
+  }
+
+  const refreshUserData = async () => {
+    try {
+      const response = await getKorisnici(state.token)
+      onEdit(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const refreshProfileData = async () => {
+    try {
+      const response = await getProfil(state.token)
+      onProfileEdit(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleUpdateSuccess = async () => {
+    handleClose()
+    if (isEdit) {
+      await refreshUserData()
+      toast.success('Korisnik uspešno ažuriran!')
+    } else {
+      await refreshProfileData()
+      toast.success('Profil uspešno ažuriran!')
+    }
+  }
+
+  const handleUpdate = async () => {
+    try {
+      const response = await updateKorisnik(state.token, formData)
+      if (response.status === 200) {
+        await handleUpdateSuccess()
+      } else if (response === 422) {
+        toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Greška pri ažuriranju korisnika.')
+    }
+  }
+
+  const handleCreate = async () => {
+    try {
+      const response = await createKorisnik(state.token, formData)
+
+      if (response === 422) {
+        toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
+      } else if (response === 400) {
+        toast.error('Korisnik sa datom mejl adresom vec postoji u bazi.')
+      } else {
+        onAddNew(response.data)
+        handleClose()
+        toast.success('Korisnik uspešno kreiran!')
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error('Greška pri kreiranju korisnika.')
+    }
+  }
+
   const handleSubmit = async () => {
     if (isEdit || isEditProfile) {
-      try {
-        const response = await updateKorisnik(state.token, formData)
-        if (response.status === 200) {
-          handleClose()
-
-          if (isEdit) {
-            getKorisnici(state.token)
-              .then((response) => {
-                onEdit(response.data)
-              })
-              .catch((error) => {
-                console.error(error)
-              })
-            toast.success('Korisnik uspešno ažuriran!')
-          } else {
-            getProfil(state.token)
-              .then((response) => {
-                onProfileEdit(response.data)
-              })
-              .catch((error) => {
-                console.error(error)
-              })
-            toast.success('Profil uspešno ažuriran!')
-          }
-        } else if (response === 422) {
-          toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
-        }
-      } catch (error) {
-        console.error(error)
-        toast.error('Greška pri ažuriranju korisnika.')
-      }
+      await handleUpdate()
     } else {
-      try {
-        const response = await createKorisnik(state.token, formData)
-
-        if (response === 422) {
-          toast.error('Lozinka mora imati minimum 8 karaktera - slova i brojeve.')
-        } else if (response === 400) {
-          toast.error('Korisnik sa datom mejl adresom vec postoji u bazi.')
-        } else {
-          onAddNew(response.data)
-          handleClose()
-          toast.success('Korisnik uspešno kreiran!')
-        }
-      } catch (error) {
-        console.error(error)
-        toast.error('Greška pri kreiranju korisnika.')
-      }
+      await handleCreate()
     }
   }
 
@@ -132,13 +155,7 @@ const UserDialog = ({
     <BaseDialog
       open={dialogOpen}
       onClose={handleClose}
-      title={
-        isEdit
-          ? 'Izmeni korisnika'
-          : isEditProfile
-            ? 'Izmeni profil'
-            : 'Dodaj novog korisnika'
-      }
+      title={getDialogTitle()}
       onSubmit={handleSubmit}
       submitLabel={isEdit || isEditProfile ? 'Sačuvaj' : 'Kreiraj'}
       cancelLabel="Odustani"
