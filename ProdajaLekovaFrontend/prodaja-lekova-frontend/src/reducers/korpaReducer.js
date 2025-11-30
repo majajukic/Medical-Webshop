@@ -24,7 +24,7 @@ const korpaReducer = (state, action) => {
         ...state,
         porudzbina: state.initialState,
       }
-    case REMOVE_ITEM:
+    case REMOVE_ITEM: {
       const updatedItems = state.porudzbina.stavkaPorudzbine.filter(
         (item) => item.stavkaId !== action.payload,
       )
@@ -35,6 +35,7 @@ const korpaReducer = (state, action) => {
           stavkaPorudzbine: updatedItems,
         },
       }
+    }
     case UPDATE_CART:
       return {
         ...state,

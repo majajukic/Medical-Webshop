@@ -8,7 +8,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController : Controller
+    public class AccountController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthManager _authManager;

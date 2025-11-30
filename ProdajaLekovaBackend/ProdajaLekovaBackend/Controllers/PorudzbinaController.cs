@@ -13,7 +13,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/porudzbina")]
     [ApiController]
-    public class PorudzbinaController : Controller
+    public class PorudzbinaController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

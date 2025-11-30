@@ -12,7 +12,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/checkout")]
     [ApiController]
-    public class CheckoutController : Controller
+    public class CheckoutController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
@@ -55,6 +55,11 @@ namespace ProdajaLekovaBackend.Controllers
 
             var orderId = checkoutDto.PorudzbinaId;
 
+            var frontendSettings = _configuration.GetSection("Frontend");
+            var frontendBaseUrl = frontendSettings.GetValue<string>("BaseUrl");
+            var successPath = frontendSettings.GetValue<string>("PaymentSuccessUrl");
+            var cancelPath = frontendSettings.GetValue<string>("PaymentCancelUrl");
+
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string>
@@ -70,8 +75,8 @@ namespace ProdajaLekovaBackend.Controllers
                     }
                 },
                 Mode = "payment",
-                SuccessUrl = "http://localhost:3000/placanjeUspesno",
-                CancelUrl = "http://localhost:3000/placanjeOtkazano",
+                SuccessUrl = $"{frontendBaseUrl}{successPath}",
+                CancelUrl = $"{frontendBaseUrl}{cancelPath}",
                 Metadata = new Dictionary<string, string>
                 {
                     { "totalAmount", totalAmountInEUR.ToString() },
@@ -91,6 +96,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             var stripeSettings = _configuration.GetSection("Stripe");
 
+            // Required: Raw request body is needed for Stripe signature verification
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
             try
             {
