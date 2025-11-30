@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useContext } from 'react'
+import { createContext, useReducer, useContext, useMemo } from 'react'
 import paginationReducer from '../reducers/PaginationReducer'
 
 const PaginationContext = createContext()
@@ -12,8 +12,10 @@ const initialState = {
 export const PaginationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(paginationReducer, initialState)
 
+  const value = useMemo(() => ({ state, dispatch }), [state])
+
   return (
-    <PaginationContext.Provider value={{ state, dispatch }}>
+    <PaginationContext.Provider value={value}>
       {children}
     </PaginationContext.Provider>
   )

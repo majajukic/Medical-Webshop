@@ -22,7 +22,7 @@ namespace ProdajaLekovaBackend.Models
         public string? Broj { get; set; }
         public string? Mesto { get; set; }
 
-        public TipKorisnikaEnum TipKorisnika { get; set; } 
+        public TipKorisnika TipKorisnika { get; set; } 
         public virtual ICollection<Porudzbina> Porudzbina { get; set; }
     }
 }

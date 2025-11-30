@@ -6,7 +6,7 @@ export const useDialogForm = (initialState, itemToEdit, setIsEdit) => {
   useEffect(() => {
     if (itemToEdit) {
       setFormData(itemToEdit)
-      setIsEdit && setIsEdit(true)
+      setIsEdit?.(true)
     } else {
       setFormData(initialState)
     }

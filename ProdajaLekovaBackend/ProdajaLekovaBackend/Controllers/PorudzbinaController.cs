@@ -11,7 +11,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/porudzbina")]
     [ApiController]
-    public class PorudzbinaController : Controller
+    public class PorudzbinaController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -33,7 +33,7 @@ namespace ProdajaLekovaBackend.Controllers
         {
             _logger.LogInformation("Fetching all paid porudzbine");
 
-            var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.PlacenaPorudzbina == true,
+            var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.PlacenaPorudzbina,
                 include: q => q.Include(x => x.Korisnik),
                 orderBy: q => q.OrderByDescending(x => x.DatumKreiranja));
 
@@ -56,7 +56,7 @@ namespace ProdajaLekovaBackend.Controllers
 
             _logger.LogInformation("Fetching porudzbine for kupac: {KorisnikId}", korisnikId);
 
-            var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.KorisnikId == korisnikId && q.PlacenaPorudzbina == true);
+            var porudzbine = await _unitOfWork.Porudzbina.GetAllAsync(q => q.KorisnikId == korisnikId && q.PlacenaPorudzbina);
 
             if (porudzbine == null) return NoContent();
 
@@ -77,7 +77,7 @@ namespace ProdajaLekovaBackend.Controllers
 
             _logger.LogInformation("Fetching korpa for kupac: {KorisnikId}", korisnikId);
 
-            var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PlacenaPorudzbina == false && q.Korisnik.KorisnikId == korisnikId,
+            var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => !q.PlacenaPorudzbina && q.Korisnik.KorisnikId == korisnikId,
                 include: q => q.Include(x => x.StavkaPorudzbine).ThenInclude(y => y.ApotekaProizvod).ThenInclude(z => z.Proizvod.TipProizvoda));
 
             if (porudzbina == null) return NoContent();
