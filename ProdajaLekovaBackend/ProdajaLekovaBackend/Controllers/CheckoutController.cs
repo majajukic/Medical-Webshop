@@ -117,14 +117,14 @@ namespace ProdajaLekovaBackend.Controllers
 
                 if (orderId != null)
                 {
-                    _logger.LogInformation("Updating order payment status for order: {OrderId}, Session: {SessionId}", orderId, session?.Id);
+                    _logger.LogInformation("Updating order payment status for order: {OrderId}, Session: {SessionId}", orderId, session.Id);
 
                     var porudzbinaUpdateDto = new PorudzbinaUpdateDto
                     {
                         PorudzbinaId = int.Parse(orderId),
                         DatumPlacanja = DateTime.Now,
                         PlacenaPorudzbina = true,
-                        UplataId = session?.Id
+                        UplataId = session.Id
 
                     };
 

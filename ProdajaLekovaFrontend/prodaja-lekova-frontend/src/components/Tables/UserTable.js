@@ -47,13 +47,14 @@ const UserTable = () => {
       })
   }, [state.token])
 
-  const onDelete = (user) => {
-    handleDelete(user.korisnikId, (id) =>
-      deleteKorisnik(id, state.token).then(() => {
-        setKorisnici(korisnici.filter((korisnik) => korisnik.korisnikId !== id))
-        toast.success('Korisnik uspešno obrisan!')
-      })
-    )
+  const onDelete = async (user) => {
+    const deleteAction = async (id) => {
+      await deleteKorisnik(id, state.token)
+      setKorisnici(korisnici.filter((korisnik) => korisnik.korisnikId !== id))
+      toast.success('Korisnik uspešno obrisan!')
+    }
+
+    handleDelete(user.korisnikId, deleteAction)
   }
 
   const handleAddNewKorisnik = (newKorisnik) => {

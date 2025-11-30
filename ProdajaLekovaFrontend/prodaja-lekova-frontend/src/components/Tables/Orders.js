@@ -167,27 +167,26 @@ const Orders = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {stavke &&
-                              stavke.map((stavka) => (
-                                <TableRow key={stavka.stavkaId}>
-                                  <TableCell>
-                                    {
-                                      stavka.apotekaProizvod.proizvod
-                                        .nazivProizvoda
-                                    }
-                                  </TableCell>
-                                  <TableCell>
-                                    {
-                                      stavka.apotekaProizvod.proizvod
-                                        .tipProizvoda.nazivTipaProizvoda
-                                    }
-                                  </TableCell>
-                                  <TableCell>{stavka.kolicina}</TableCell>
-                                  <TableCell>
-                                    {stavka.apotekaProizvod.cenaSaPopustom}
-                                  </TableCell>
-                                </TableRow>
-                              ))}
+                            {stavke?.map((stavka) => (
+                              <TableRow key={stavka.stavkaId}>
+                                <TableCell>
+                                  {
+                                    stavka.apotekaProizvod.proizvod
+                                      .nazivProizvoda
+                                  }
+                                </TableCell>
+                                <TableCell>
+                                  {
+                                    stavka.apotekaProizvod.proizvod
+                                      .tipProizvoda.nazivTipaProizvoda
+                                  }
+                                </TableCell>
+                                <TableCell>{stavka.kolicina}</TableCell>
+                                <TableCell>
+                                  {stavka.apotekaProizvod.cenaSaPopustom}
+                                </TableCell>
+                              </TableRow>
+                            ))}
                           </TableBody>
                         </Table>
                       </AccordionDetails>

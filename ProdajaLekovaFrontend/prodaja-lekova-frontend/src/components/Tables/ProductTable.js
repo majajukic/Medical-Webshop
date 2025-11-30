@@ -45,13 +45,14 @@ const ProductTable = () => {
       })
   }, [])
 
-  const onDelete = (product) => {
-    handleDelete(product.proizvodId, (id) =>
-      deleteProizvod(id, state.token).then(() => {
-        setProizvodi(proizvodi.filter((proizvod) => proizvod.proizvodId !== id))
-        toast.success('Proizvod uspešno obrisan!')
-      })
-    )
+  const onDelete = async (product) => {
+    const deleteAction = async (id) => {
+      await deleteProizvod(id, state.token)
+      setProizvodi(proizvodi.filter((proizvod) => proizvod.proizvodId !== id))
+      toast.success('Proizvod uspešno obrisan!')
+    }
+
+    handleDelete(product.proizvodId, deleteAction)
   }
 
   const handleAddNewProizvod = (newProizvod) => {
