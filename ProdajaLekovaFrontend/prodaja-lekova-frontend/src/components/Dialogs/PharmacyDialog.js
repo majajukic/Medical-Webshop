@@ -39,30 +39,16 @@ const PharmacyDialog = ({
 
   const handleSubmit = async () => {
     if (isEdit) {
-      const response = await updateApoteka(state.token, formData)
-      if (response.status === 200) {
-        handleClose()
-        getApoteke()
-          .then((response) => {
-            dispatch({ type: GET_PHARMACIES, payload: response.data })
-          })
-          .catch((error) => {
-            console.error(error)
-          })
-        toast.success('Apoteka uspešno ažurirana!')
-      } else if (response === 400) {
-        toast.error('Apoteka sa ovim nazivom već postoji u bazi.')
-      }
+      await updateApoteka(state.token, formData)
+      handleClose()
+      const apoteke = await getApoteke()
+      dispatch({ type: GET_PHARMACIES, payload: apoteke.data })
+      toast.success('Apoteka uspešno ažurirana!')
     } else {
       const response = await createApoteka(state.token, formData)
-
-      if (response === 400) {
-        toast.error('Apoteka sa ovim nazivom već postoji u bazi.')
-      } else {
-        dispatch({ type: CREATE_PHARMACY, payload: response.data })
-        handleClose()
-        toast.success('Apoteka uspešno kreirana!')
-      }
+      dispatch({ type: CREATE_PHARMACY, payload: response.data })
+      handleClose()
+      toast.success('Apoteka uspešno kreirana!')
     }
   }
 

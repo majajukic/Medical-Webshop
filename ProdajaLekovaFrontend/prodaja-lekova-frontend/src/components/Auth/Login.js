@@ -18,7 +18,6 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
-import { toast } from 'react-toastify'
 
 const initialState = {
   email: '',
@@ -45,13 +44,8 @@ const Login = () => {
     const sanitizedData = sanitizeFormData(formData)
     const response = await login(sanitizedData)
 
-    if (response === 400) {
-      toast.error('Nalog ne postoji ili su kredencijali pogrešni.')
-    } else {
-      dispatch({ type: LOGIN, payload: response.data })
-
-      navigate('/')
-    }
+    dispatch({ type: LOGIN, payload: response.data })
+    navigate('/')
   }
 
   return (
