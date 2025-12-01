@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useCallback, useState } from 'react'
+import { Fragment, useEffect, useCallback } from 'react'
 import ProductCard from './ProductCard'
 import ProductCategories from './ProductCategories'
 import ProductSorting from './ProductSorting'
