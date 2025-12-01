@@ -234,10 +234,6 @@ namespace ProdajaLekovaBackend.Models
                     .HasMaxLength(20)
                     .HasColumnName("nazivTipaProizvoda");
             });
-
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }
