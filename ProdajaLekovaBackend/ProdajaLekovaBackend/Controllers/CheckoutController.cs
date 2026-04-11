@@ -88,7 +88,7 @@ namespace ProdajaLekovaBackend.Controllers
             var service = new SessionService();
             Session session = service.Create(options);
 
-            return Json(new { sessionId = session.Id, publishKey = stripeSettings.GetSection("PublishKey").Value });
+            return Ok(new { sessionId = session.Id, publishKey = stripeSettings.GetSection("PublishKey").Value });
         }
 
         [HttpPost("webhook")]
