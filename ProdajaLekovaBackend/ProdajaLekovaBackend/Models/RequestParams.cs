@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace ProdajaLekovaBackend.Models
+﻿namespace ProdajaLekovaBackend.Models
 {
     public class RequestParams
     {
@@ -9,7 +7,6 @@ namespace ProdajaLekovaBackend.Models
 
         private int _pageSize = 9;//default page size
 
-        [JsonRequired]
         public int PageSize
         {
             get 

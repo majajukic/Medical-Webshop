@@ -1,4 +1,4 @@
-import { createContext, useReducer, useContext, useMemo } from 'react'
+import React, { createContext, useReducer, useContext } from 'react'
 import apotekaReducer from '../reducers/apotekaReducer'
 
 const initialState = {
@@ -10,10 +10,8 @@ const ApotekaContext = createContext()
 export const ApotekaProvider = ({ children }) => {
   const [state, dispatch] = useReducer(apotekaReducer, initialState)
 
-  const value = useMemo(() => ({ state, dispatch }), [state])
-
   return (
-    <ApotekaContext.Provider value={value}>
+    <ApotekaContext.Provider value={{ state, dispatch }}>
       {children}
     </ApotekaContext.Provider>
   )
