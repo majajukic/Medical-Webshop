@@ -19,8 +19,8 @@ import {
   Link,
   Box,
   Badge,
+  useTheme,
 } from '@mui/material'
-import { useTheme } from '@mui/material'
 import { Link as RouteLink, useNavigate } from 'react-router-dom'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'

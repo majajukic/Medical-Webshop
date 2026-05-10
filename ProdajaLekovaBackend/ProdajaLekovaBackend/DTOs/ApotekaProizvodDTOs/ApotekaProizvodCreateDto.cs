@@ -1,22 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs
 {
     public class ApotekaProizvodCreateDto : IValidatableObject
     {
         [Required(ErrorMessage = "Obavezno je uneti id proizvoda.")]
+        [JsonRequired]
         public int ProizvodId { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti id apoteke.")]
+        [JsonRequired]
         public int ApotekaId { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti stanje zaliha.")]
+        [JsonRequired]
         public int StanjeZaliha { get; set; }
         public string? Slika { get; set; }
         public decimal? PopustUprocentima { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti cenu proizvoda.")]
+        [JsonRequired]
         public decimal CenaBezPopusta { get; set; }
 
         public decimal? CenaSaPopustom { get; set; }

@@ -1,4 +1,5 @@
-﻿using ProdajaLekovaBackend.Models;
+﻿using Newtonsoft.Json;
+using ProdajaLekovaBackend.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -7,6 +8,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
     public class KorisnikUpdateDto : IValidatableObject
     {
         [Required(ErrorMessage = "Obavezno je uneti id korisnika.")]
+        [JsonRequired]
         public int KorisnikId { get; set; }
 
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
@@ -16,9 +18,11 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
         public string? Prezime { get; set; }
 
         [Required(ErrorMessage = "Obavezno je uneti lozinku.")]
+        [JsonRequired]
         public string Lozinka { get; set; } = null!;
 
         [Required(ErrorMessage = "Obavezno je uneti email.")]
+        [JsonRequired]
         [StringLength(35, ErrorMessage = "Maximum 35 karaktera prekoračeno")]
         public string Email { get; set; } = null!;
 
@@ -47,7 +51,7 @@ namespace ProdajaLekovaBackend.DTOs.KorisnikDTOs
                   new[] { "KorisnikdpdateDTO" });
             }
 
-            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$"))
+            if (!Regex.IsMatch(Lozinka, @"^(?=.*[A-Za-z])(?=.*\d).+$", RegexOptions.None, TimeSpan.FromMilliseconds(250)))
             {
                 yield return new ValidationResult(
                   "Lozinka mora sadrzati i brojeve i karaktere.",
