@@ -5,7 +5,6 @@ import { Link as RouteLink, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { login } from '../../services/authService'
 import { LOGIN } from '../../constants/actionTypes'
-import { sanitizeFormData } from '../../utilities/sanitize'
 import {
   Avatar,
   Button,
@@ -18,6 +17,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material'
+import { toast } from 'react-toastify'
 
 const initialState = {
   email: '',
@@ -41,11 +41,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const sanitizedData = sanitizeFormData(formData)
-    const response = await login(sanitizedData)
+    const response = await login(formData)
 
-    dispatch({ type: LOGIN, payload: response.data })
-    navigate('/')
+    if (response === 400) {
+      toast.error('Nalog ne postoji ili su kredencijali pogrešni.')
+    } else {
+      dispatch({ type: LOGIN, payload: response.data })
+
+      navigate('/')
+    }
   }
 
   return (

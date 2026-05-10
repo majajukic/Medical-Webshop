@@ -12,13 +12,11 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthManager _authManager;
-        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IUnitOfWork unitOfWork, IAuthManager authManager, ILogger<AccountController> logger)
+        public AccountController(IUnitOfWork unitOfWork, IAuthManager authManager)
         {
-            _unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork; 
             _authManager = authManager;
-            _logger = logger;
         }
 
         /// <summary>
@@ -28,36 +26,43 @@ namespace ProdajaLekovaBackend.Controllers
         [Route("registracija")]
         public async Task<IActionResult> Register([FromBody] KorisnikRegisterDto korisnikDTO)
         {
-            _logger.LogInformation("New user registration attempt for email: {Email}", korisnikDTO.Email);
-            var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
-
-            if (existingKorisnik != null)
+            try
             {
-                _logger.LogWarning("Registration failed: Email {Email} already exists", korisnikDTO.Email);
-                throw new ArgumentException("Email addresa vec postoji u bazi.");
+                var existingKorisnik = await _unitOfWork.Korisnik.GetAsync(q => q.Email == korisnikDTO.Email);
+
+                if (existingKorisnik != null)
+                {
+                    return BadRequest("Email addresa vec postoji u bazi.");
+                }
+
+                var korisnik = new Korisnik
+                {
+                    Email = korisnikDTO.Email,
+                    Ime = korisnikDTO.Ime,
+                    Prezime = korisnikDTO.Prezime,
+                    BrojTelefona = korisnikDTO.BrojTelefona,
+                    Ulica = korisnikDTO.Ulica,
+                    Broj = korisnikDTO.Broj,
+                    Mesto = korisnikDTO.Mesto,
+                };
+
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
+
+                korisnik.Lozinka = passwordHash;
+
+                korisnik.TipKorisnika = (TipKorisnikaEnum)1;
+
+                await _unitOfWork.Korisnik.CreateAsync(korisnik);
+
+                await _unitOfWork.Save();
+
+                return Ok(new { message = "Registracija uspesna!" });
+
             }
-
-            var korisnik = new Korisnik
+            catch (Exception)
             {
-                Email = korisnikDTO.Email,
-                Ime = korisnikDTO.Ime,
-                Prezime = korisnikDTO.Prezime,
-                BrojTelefona = korisnikDTO.BrojTelefona,
-                Ulica = korisnikDTO.Ulica,
-                Broj = korisnikDTO.Broj,
-                Mesto = korisnikDTO.Mesto,
-            };
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(korisnikDTO.Lozinka);
-            korisnik.Lozinka = passwordHash;
-            korisnik.TipKorisnika = (TipKorisnikaEnum)1;
-
-            await _unitOfWork.Korisnik.CreateAsync(korisnik);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully registered user with email: {Email}", korisnikDTO.Email);
-
-            return Ok(new { message = "Registracija uspesna!" });
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -67,17 +72,16 @@ namespace ProdajaLekovaBackend.Controllers
         [Route("login")]
         public async Task<IActionResult> Login([FromBody] KorisnikLoginDto korisnikDTO)
         {
-            _logger.LogInformation("Login attempt for email: {Email}", korisnikDTO.Email);
-
-            if (!await _authManager.ValidateKorisnik(korisnikDTO))
+            try
             {
-                _logger.LogWarning("Login failed for email: {Email}", korisnikDTO.Email);
-                throw new ArgumentException("Nalog ne postoji ili su kredencijali pogresni.");
+                if (!await _authManager.ValidateKorisnik(korisnikDTO)) return BadRequest("Nalog ne postoji ili su kredencijali pogresni.");
+
+                return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) });
             }
-
-            _logger.LogInformation("Successful login for email: {Email}", korisnikDTO.Email);
-
-            return Ok(new { Token = await _authManager.CreateToken(korisnikDTO) });
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }   
     }
 }

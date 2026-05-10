@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { TextField, Select, MenuItem } from '@mui/material'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useApoteka } from '../../context/ApotekaContext'
 import { useProizvod } from '../../context/ProizvodContext'
@@ -7,18 +6,28 @@ import {
   getProizvodi,
   addProizvodToApoteka,
   updateProizvodInApoteka,
-  getProizvodByApoteka,
-  getProizvodiByApoteka,
 } from '../../services/proizvodService'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  TextField,
+  Select,
+  MenuItem,
+  Box,
+} from '@mui/material'
 import {
   ADD_PRODUCT_TO_PHARMACY,
   GET_PRODUCTS_BY_PHARMACY,
 } from '../../constants/actionTypes'
+import {
+  getProizvodByApoteka,
+  getProizvodiByApoteka,
+} from '../../services/proizvodService'
 import { useNavigate } from 'react-router-dom'
 import { usePagination } from '../../context/PaginationContext'
 import { toast } from 'react-toastify'
-import BaseDialog from './BaseDialog'
-import { useDialogForm } from '../../hooks/useDialogForm'
 
 const initialState = {
   apotekaProizvodId: null,
@@ -37,6 +46,7 @@ const ProductPharmacyDialog = ({
   isEdit,
   setIsEdit,
 }) => {
+  const [input, setInput] = useState(initialState)
   const [proizvodi, setProizvodi] = useState([])
   const { state: apotekaState } = useApoteka()
   const { dispatch: proizvodiDispatch } = useProizvod()
@@ -44,8 +54,9 @@ const ProductPharmacyDialog = ({
   const { state } = useAuth()
   const navigate = useNavigate()
 
-  const productToEditMapped = productToEdit
-    ? {
+  useEffect(() => {
+    if (productToEdit) {
+      setInput({
         apotekaProizvodId: productToEdit.apotekaProizvodId,
         proizvodId: productToEdit.proizvod.proizvodId,
         apotekaId: productToEdit.apoteka.apotekaId,
@@ -53,11 +64,10 @@ const ProductPharmacyDialog = ({
         slika: productToEdit.slika || '',
         popustUprocentima: productToEdit.popustUprocentima || '',
         cenaBezPopusta: productToEdit.cenaBezPopusta,
-      }
-    : null
-
-  const { formData, handleInputChange, handleSelectChange, resetForm } =
-    useDialogForm(initialState, productToEditMapped, setIsEdit)
+      })
+      setIsEdit(true)
+    }
+  }, [productToEdit])
 
   useEffect(() => {
     getProizvodi()
@@ -71,18 +81,31 @@ const ProductPharmacyDialog = ({
 
   const handleClose = () => {
     setDialogOpen(false)
-    setIsEdit(false)
-    resetForm()
+
+    if (isEdit) {
+      setIsEdit(false)
+    }
   }
 
-  const handleSubmit = async () => {
+  const handleInputChange = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value })
+  }
+
+  const handleSelectChange = (e) => {
+    setInput({ ...input, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
     if (isEdit) {
       try {
-        const response = await updateProizvodInApoteka(state.token, formData)
+        const response = await updateProizvodInApoteka(state.token, input)
 
         if (response.status === 200) {
+          setInput(initialState)
           handleClose()
-          getProizvodiByApoteka(formData.apotekaId, paginationState.currentPage)
+          getProizvodiByApoteka(input.apotekaId, paginationState.currentPage)
             .then((response) => {
               proizvodiDispatch({
                 type: GET_PRODUCTS_BY_PHARMACY,
@@ -92,18 +115,16 @@ const ProductPharmacyDialog = ({
             .catch((error) => {
               console.error(error)
             })
-          navigate(`/apoteka/${formData.apotekaId}`)
-          toast.success('Proizvod u apoteci uspešno ažuriran!')
+          navigate(`/apoteka/${input.apotekaId}`)
         } else if (response === 422) {
           toast.error('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
         }
       } catch (error) {
-        console.error(error)
-        toast.error('Greška pri ažuriranju proizvoda u apoteci.')
+        console.log(error)
       }
     } else {
       try {
-        const response = await addProizvodToApoteka(state.token, formData)
+        const response = await addProizvodToApoteka(state.token, input)
 
         if (response === 422) {
           toast.error('Vrednost stanja zaliha, popusta i cene ne sme biti 0')
@@ -117,117 +138,119 @@ const ProductPharmacyDialog = ({
             payload: addedProduct.data,
           })
 
+          setInput(initialState)
+
           handleClose()
 
-          toast.success(
-            'Proizvod uspesno dodat u apoteku ' +
-              addedProduct.data.apoteka.nazivApoteke,
-          )
+          toast.success("Proizvod uspesno dodat u apoteku " + addedProduct.data.apoteka.nazivApoteke)
 
           navigate(`/apoteka/${addedProduct.data.apoteka.apotekaId}`)
         }
       } catch (error) {
-        console.error(error)
-        toast.error('Greška pri dodavanju proizvoda u apoteku.')
+        console.log(error)
       }
     }
   }
 
   return (
-    <BaseDialog
-      open={dialogOpen}
-      onClose={handleClose}
-      title={
-        isEdit
-          ? 'Izmeni proizvod u apoteci'
-          : 'Dodaj proizvod u apoteku'
-      }
-      onSubmit={handleSubmit}
-      submitLabel={isEdit ? 'Sačuvaj' : 'Kreiraj'}
-      cancelLabel="Odustani"
-    >
-      <TextField
-        autoFocus
-        margin="dense"
-        id="stock"
-        label="Stanje zaliha"
-        name="stanjeZaliha"
-        type="text"
-        fullWidth
-        required
-        value={formData.stanjeZaliha}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px' }}
-      />
-      <TextField
-        margin="dense"
-        id="image"
-        label="Slika proizvoda (URL)"
-        name="slika"
-        type="text"
-        fullWidth
-        value={formData.slika}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px' }}
-      />
-      <TextField
-        margin="dense"
-        id="discount"
-        label="Popust (u procentima)"
-        name="popustUprocentima"
-        type="text"
-        fullWidth
-        value={formData.popustUprocentima}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px' }}
-      />
-      <TextField
-        margin="dense"
-        id="price"
-        label="Cena bez popusta"
-        name="cenaBezPopusta"
-        type="text"
-        fullWidth
-        required
-        value={formData.cenaBezPopusta}
-        onChange={handleInputChange}
-        sx={{ marginBottom: '20px' }}
-      />
-      <Select
-        labelId="Proizvodi"
-        id="products"
-        name="proizvodId"
-        value={formData.proizvodId}
-        onChange={handleSelectChange('proizvodId')}
-        sx={{ marginBottom: '20px' }}
-        fullWidth
-        required
-      >
-        <MenuItem value={0}>Izaberite proizvod</MenuItem>
-        {proizvodi.map((proizvod) => (
-          <MenuItem key={proizvod.proizvodId} value={proizvod.proizvodId}>
-            {proizvod.nazivProizvoda}
-          </MenuItem>
-        ))}
-      </Select>
-      <Select
-        labelId="Apoteka"
-        id="pharmacies"
-        name="apotekaId"
-        value={formData.apotekaId}
-        onChange={handleSelectChange('apotekaId')}
-        sx={{ marginBottom: '20px' }}
-        fullWidth
-        required
-      >
-        <MenuItem value={0}>Izaberite apoteku</MenuItem>
-        {apotekaState.apoteke.map((apoteka) => (
-          <MenuItem key={apoteka.apotekaId} value={apoteka.apotekaId}>
-            {apoteka.nazivApoteke}
-          </MenuItem>
-        ))}
-      </Select>
-    </BaseDialog>
+    <Dialog open={dialogOpen} onClose={handleClose}>
+      <Box component="form" onSubmit={handleSubmit}>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="stock"
+            label="Stanje zaliha"
+            name="stanjeZaliha"
+            type="text"
+            fullWidth
+            required
+            value={input.stanjeZaliha}
+            onChange={handleInputChange}
+            sx={{ marginBottom: '20px' }}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="image"
+            label="Slika proizvoda (URL)"
+            name="slika"
+            type="text"
+            fullWidth
+            value={input.slika}
+            onChange={handleInputChange}
+            sx={{ marginBottom: '20px' }}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="discount"
+            label="Popust (u procentima)"
+            name="popustUprocentima"
+            type="text"
+            fullWidth
+            value={input.popustUprocentima}
+            onChange={handleInputChange}
+            sx={{ marginBottom: '20px' }}
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            id="price"
+            label="Cena bez popusta"
+            name="cenaBezPopusta"
+            type="text"
+            fullWidth
+            required
+            value={input.cenaBezPopusta}
+            onChange={handleInputChange}
+            sx={{ marginBottom: '20px' }}
+          />
+          <Select
+            labelId="Proizvodi"
+            id="products"
+            name="proizvodId"
+            value={input.proizvodId}
+            onChange={handleSelectChange}
+            sx={{ marginBottom: '20px' }}
+            fullWidth
+            required
+          >
+            <MenuItem value={0}>Izaberite proizvod</MenuItem>
+            {proizvodi.map((proizvod) => (
+              <MenuItem key={proizvod.proizvodId} value={proizvod.proizvodId}>
+                {proizvod.nazivProizvoda}
+              </MenuItem>
+            ))}
+          </Select>
+          <Select
+            labelId="Apoteka"
+            id="pharmacies"
+            name="apotekaId"
+            value={input.apotekaId}
+            onChange={handleSelectChange}
+            sx={{ marginBottom: '20px' }}
+            fullWidth
+            required
+          >
+            <MenuItem value={0}>Izaberite apoteku</MenuItem>
+            {apotekaState.apoteke.map((apoteka) => (
+              <MenuItem key={apoteka.apotekaId} value={apoteka.apotekaId}>
+                {apoteka.nazivApoteke}
+              </MenuItem>
+            ))}
+          </Select>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} variant="outlined">
+            Odustani
+          </Button>
+          <Button variant="contained" type="submit">
+            {isEdit ? 'Sačuvaj' : 'Kreiraj'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   )
 }
 

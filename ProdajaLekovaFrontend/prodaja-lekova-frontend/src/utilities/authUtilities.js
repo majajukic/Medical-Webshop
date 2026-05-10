@@ -1,7 +1,7 @@
 import jwt_decode from 'jwt-decode'
 
 export const getUserRole = () => {
-  const token = sessionStorage.getItem('token')
+  const token = localStorage.getItem('token')
   if (!token) {
     return null
   }

@@ -17,7 +17,6 @@ import { KorpaProvider } from './context/KorpaContext'
 import { PaginationProvider } from './context/PaginationContext'
 import PaymentCanceled from './components/Cart/PaymentCanceled'
 import PaymentSuccess from './components/Cart/PaymentSuccess'
-import ErrorBoundary from './components/ErrorBoundary'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -27,7 +26,6 @@ const App = () => {
   return (
     <Fragment>
       <ToastContainer />
-      <ErrorBoundary>
         <AuthProvider>
           <ProizvodProvider>
             <ApotekaProvider>
@@ -61,7 +59,6 @@ const App = () => {
               </ApotekaProvider>
           </ProizvodProvider>
         </AuthProvider>
-      </ErrorBoundary>
     </Fragment>
   )
 }
