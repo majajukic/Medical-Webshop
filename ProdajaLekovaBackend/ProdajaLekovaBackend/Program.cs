@@ -13,8 +13,16 @@ using System.Text;
 using ProdajaLekovaBackend.Services;
 using Microsoft.OpenApi.Models;
 using Stripe;
+using Serilog;
+using ProdajaLekovaBackend.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 //DbContext
 builder.Services.AddDbContext<ApotekaDbContext>(options =>
@@ -29,7 +37,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         var jwtSection = builder.Configuration.GetSection("Jwt");
         var issuer = jwtSection.GetValue<string>("Issuer");
         var audience = jwtSection.GetValue<string>("Audience");
-        var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine);
+        var key = Environment.GetEnvironmentVariable("KEY", EnvironmentVariableTarget.Machine)
+            ?? throw new InvalidOperationException("JWT signing key not configured. Set the 'KEY' environment variable.");
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -62,8 +71,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(builder =>
     {
         builder.WithOrigins("http://localhost:3000")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .WithHeaders("Content-Type", "Authorization")
+            .AllowCredentials();
     });
 });
 
@@ -170,11 +180,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/ProdajaLekovaOpenApiSpecification/swagger.json", "ProdajaLekovaBackend");
-        c.RoutePrefix = String.Empty;
+        c.RoutePrefix = string.Empty;
     });
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
+app.UseSerilogRequestLogging();
 
 app.UseCors();
 
@@ -184,4 +198,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+
+await app.RunAsync();
+

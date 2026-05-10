@@ -1,8 +1,8 @@
-import React, { createContext, useReducer, useContext } from 'react'
+import { createContext, useReducer, useContext } from 'react'
 import authReducer from '../reducers/authReducer'
 
 const initialState = {
-  token: localStorage.getItem('token') || null,
+  token: sessionStorage.getItem('token') || null,
 }
 
 const AuthContext = createContext()

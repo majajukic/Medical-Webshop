@@ -13,35 +13,11 @@ import {
 const proizvodReducer = (state, action) => {
   switch (action.type) {
     case GET_PRODUCTS:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_ASCENDING:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_DESCENDING:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_DISCOUNT:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_BY_SEARCH:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_BY_TYPE:
-      return {
-        ...state,
-        proizvodi: action.payload,
-      }
     case GET_PRODUCTS_BY_PHARMACY:
       return {
         ...state,

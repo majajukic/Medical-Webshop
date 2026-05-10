@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { register } from '../../services/api'
+import { sanitizeFormData } from '../../utilities/sanitize'
 import {
   Avatar,
   Button,
@@ -45,21 +46,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    try {
-      await register(formData)
+    const sanitizedData = sanitizeFormData(formData)
+    await register(sanitizedData)
 
-      toast.success('Vaš nalog je uspešno kreiran!')
-
-      navigate('/prijaviSe')
-    } catch (error) {
-      if (error.response.status === 400) {
-        toast.error('Korisnik sa datom mejl adresom već postoji u bazi.')
-      } else if (error.response.status === 422) {
-        toast.error(
-          'Lozinka mora imati minimum 8 karaktera - slova i brojeve.',
-        )
-      }
-    }
+    toast.success('Vaš nalog je uspešno kreiran!')
+    navigate('/prijaviSe')
   }
 
   return (
