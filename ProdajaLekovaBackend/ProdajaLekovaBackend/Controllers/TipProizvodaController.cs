@@ -15,13 +15,11 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<TipProizvodaController> _logger;
 
-        public TipProizvodaController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<TipProizvodaController> logger)
+        public TipProizvodaController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _logger = logger;
         }
 
         /// <summary>
@@ -31,15 +29,20 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetTipoviProizvoda()
         {
-            _logger.LogInformation("Fetching all product types");
-            var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivTipaProizvoda));
+            try
+            {
+                var tipoviProizvoda = await _unitOfWork.TipProizvoda.GetAllAsync(orderBy: q => q.OrderBy(x => x.NazivTipaProizvoda));
 
-            if (tipoviProizvoda == null) return NoContent();
+                if (tipoviProizvoda == null) return NoContent();
 
-            var results = _mapper.Map<List<TipProizvodaDto>>(tipoviProizvoda);
-            _logger.LogInformation("Successfully fetched {Count} product types", results.Count);
+                var results = _mapper.Map<List<TipProizvodaDto>>(tipoviProizvoda);
 
-            return Ok(results);
+                return Ok(results);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -49,19 +52,20 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetTipProizvoda")]
         public async Task<IActionResult> GetTipProizvoda(int id)
         {
-            _logger.LogInformation("Fetching product type with ID: {TipProizvodaId}", id);
-            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == id);
-
-            if (tipProizvoda == null)
+            try
             {
-                _logger.LogWarning("Product type with ID {TipProizvodaId} not found", id);
-                throw new KeyNotFoundException("Tip proizvoda nije pronadjen.");
+                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == id);
+
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+
+                var result = _mapper.Map<TipProizvodaDto>(tipProizvoda);
+
+                return Ok(result);
             }
-
-            var result = _mapper.Map<TipProizvodaDto>(tipProizvoda);
-            _logger.LogInformation("Successfully fetched product type with ID: {TipProizvodaId}", id);
-
-            return Ok(result);
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -71,23 +75,25 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTipProizvoda([FromBody] TipProizvodaCreateDto tipProizvodaDTO)
         {
-            _logger.LogInformation("Creating new product type: {NazivTipaProizvoda}", tipProizvodaDTO.NazivTipaProizvoda);
-            var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
 
-            if (existingTip != null)
+            try
             {
-                _logger.LogWarning("Product type with name {NazivTipaProizvoda} already exists", tipProizvodaDTO.NazivTipaProizvoda);
-                throw new ArgumentException("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+
+                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+
+                var tipProizvoda = _mapper.Map<TipProizvoda>(tipProizvodaDTO);
+
+                await _unitOfWork.TipProizvoda.CreateAsync(tipProizvoda);
+
+                await _unitOfWork.Save();
+
+                return CreatedAtRoute("GetTipProizvoda", new { id = tipProizvoda.TipProizvodaId }, tipProizvoda);
             }
-
-            var tipProizvoda = _mapper.Map<TipProizvoda>(tipProizvodaDTO);
-
-            await _unitOfWork.TipProizvoda.CreateAsync(tipProizvoda);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully created product type with ID: {TipProizvodaId}", tipProizvoda.TipProizvodaId);
-
-            return CreatedAtRoute("GetTipProizvoda", new { id = tipProizvoda.TipProizvodaId }, tipProizvoda);
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -97,30 +103,30 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateTipProizvoda([FromBody] TipProizvodaUpdateDto tipProizvodaDTO)
         {
-            _logger.LogInformation("Updating product type with ID: {TipProizvodaId}", tipProizvodaDTO.TipProizvodaId);
-            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
 
-            if (tipProizvoda == null)
+            try
             {
-                _logger.LogWarning("Product type with ID {TipProizvodaId} not found for update", tipProizvodaDTO.TipProizvodaId);
-                throw new KeyNotFoundException("Tip proizvoda nije pronadjen.");
+
+                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId == tipProizvodaDTO.TipProizvodaId);
+
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+
+                var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
+
+                if (existingTip != null) return BadRequest("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+
+                _mapper.Map(tipProizvodaDTO, tipProizvoda);
+
+                _unitOfWork.TipProizvoda.UpdateAsync(tipProizvoda);
+
+                await _unitOfWork.Save();
+
+                return Ok("Uspesna izmena");
             }
-
-            var existingTip = await _unitOfWork.TipProizvoda.GetAsync(q => q.NazivTipaProizvoda == tipProizvodaDTO.NazivTipaProizvoda);
-
-            if (existingTip != null)
+            catch (Exception)
             {
-                _logger.LogWarning("Product type with name {NazivTipaProizvoda} already exists", tipProizvodaDTO.NazivTipaProizvoda);
-                throw new ArgumentException("Tip proizvoda sa datim nazivom vec postoji u bazi.");
+                return StatusCode(500, "Serverska greska.");
             }
-
-            _mapper.Map(tipProizvodaDTO, tipProizvoda);
-            _unitOfWork.TipProizvoda.UpdateAsync(tipProizvoda);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully updated product type with ID: {TipProizvodaId}", tipProizvodaDTO.TipProizvodaId);
-
-            return Ok("Uspesna izmena");
         }
 
         /// <summary>
@@ -130,21 +136,22 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteTipProizvoda(int id)
         {
-            _logger.LogInformation("Deleting product type with ID: {TipProizvodaId}", id);
-            var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId  == id);
-
-            if (tipProizvoda == null)
+            try
             {
-                _logger.LogWarning("Product type with ID {TipProizvodaId} not found for deletion", id);
-                throw new KeyNotFoundException("Tip proizvoda nije pronadjen.");
+                var tipProizvoda = await _unitOfWork.TipProizvoda.GetAsync(q => q.TipProizvodaId  == id);
+
+                if (tipProizvoda == null) return NotFound("Tip proizvoda nije pronadjen.");
+
+                await _unitOfWork.TipProizvoda.DeleteAsync(id);
+
+                await _unitOfWork.Save();
+
+                return NoContent();
             }
-
-            await _unitOfWork.TipProizvoda.DeleteAsync(id);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully deleted product type with ID: {TipProizvodaId}", id);
-
-            return NoContent();
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
     }
 }

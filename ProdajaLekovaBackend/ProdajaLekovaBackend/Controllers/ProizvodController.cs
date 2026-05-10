@@ -14,13 +14,11 @@ namespace ProdajaLekovaBackend.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<ProizvodController> _logger;
 
-        public ProizvodController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ProizvodController> logger)
+        public ProizvodController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _logger = logger;
         }
 
         /// <summary>
@@ -30,16 +28,21 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProizvodi()
         {
-            _logger.LogInformation("Fetching all products");
-            var proizvodi = await _unitOfWork.Proizvod.GetAllAsync(include: q => q.Include(x => x.TipProizvoda),
-                orderBy: q => q.OrderBy(x => x.NazivProizvoda));
+            try
+            {
+                var proizvodi = await _unitOfWork.Proizvod.GetAllAsync(include: q => q.Include(x => x.TipProizvoda), 
+                    orderBy: q => q.OrderBy(x => x.NazivProizvoda));
 
-            if (proizvodi == null) return NoContent();
+                if (proizvodi == null) return NoContent();
 
-            var results = _mapper.Map<List<ProizvodDto>>(proizvodi);
-            _logger.LogInformation("Successfully fetched {Count} products", results.Count);
+                var results = _mapper.Map<List<ProizvodDto>>(proizvodi);
 
-            return Ok(results);
+                return Ok(results);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -49,63 +52,74 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpGet("{id:int}", Name = "GetProizvod")]
         public async Task<IActionResult> GetProizvod(int id)
         {
-            _logger.LogInformation("Fetching product with ID: {ProizvodId}", id);
-            var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id,
-                include: q => q.Include(x => x.TipProizvoda));
-
-            if (proizvod == null)
+            try
             {
-                _logger.LogWarning("Product with ID {ProizvodId} not found", id);
-                throw new KeyNotFoundException("Proizvod nije pronadjen.");
+                var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id, 
+                    include: q => q.Include(x => x.TipProizvoda));
+
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen.");
+
+                var result = _mapper.Map<ProizvodDto>(proizvod);
+
+                return Ok(result);
             }
-
-            var result = _mapper.Map<ProizvodDto>(proizvod);
-            _logger.LogInformation("Successfully fetched product with ID: {ProizvodId}", id);
-
-            return Ok(result);
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
-        /// Kreiranje proizvoda.
+        /// Kreiranje proizvoda. 
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateProizvod([FromBody] ProizvodCreateDto proizvodDTO)
         {
-            _logger.LogInformation("Creating new product: {NazivProizvoda}", proizvodDTO.NazivProizvoda);
-            var proizvod = _mapper.Map<Proizvod>(proizvodDTO);
+            try
+            { 
 
-            await _unitOfWork.Proizvod.CreateAsync(proizvod);
-            await _unitOfWork.Save();
+                var proizvod = _mapper.Map<Proizvod>(proizvodDTO);
 
-            _logger.LogInformation("Successfully created product with ID: {ProizvodId}", proizvod.ProizvodId);
+                await _unitOfWork.Proizvod.CreateAsync(proizvod);
 
-            return CreatedAtRoute("GetProizvod", new { id = proizvod.ProizvodId }, proizvod);
+                await _unitOfWork.Save();
+
+                return CreatedAtRoute("GetProizvod", new { id = proizvod.ProizvodId }, proizvod);
+ 
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
-        /// Azuriranje naziva proizvod, tipa i proizvodjaca za sve apoteke na osnovu id-ja.
+        /// Azuriranje naziva proizvod, tipa i proizvodjaca za sve apoteke na osnovu id-ja. 
         /// </summary>
         [Authorize(Roles = "Admin")]
         [HttpPut]
         public async Task<IActionResult> UpdateProizvod([FromBody] ProizvodUpdateDto proizvodDTO)
         {
-            _logger.LogInformation("Updating product with ID: {ProizvodId}", proizvodDTO.ProizvodId);
-            var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == proizvodDTO.ProizvodId);
 
-            if (proizvod == null)
+            try
             {
-                _logger.LogWarning("Product with ID {ProizvodId} not found for update", proizvodDTO.ProizvodId);
-                throw new KeyNotFoundException("Proizvod nije pronadjen");
+                var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == proizvodDTO.ProizvodId);
+
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen");
+
+                _mapper.Map(proizvodDTO, proizvod);
+
+                _unitOfWork.Proizvod.UpdateAsync(proizvod);
+
+                await _unitOfWork.Save();
+
+                return Ok("Uspesna izmena.");
             }
-
-            _mapper.Map(proizvodDTO, proizvod);
-            _unitOfWork.Proizvod.UpdateAsync(proizvod);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully updated product with ID: {ProizvodId}", proizvodDTO.ProizvodId);
-
-            return Ok("Uspesna izmena.");
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
 
         /// <summary>
@@ -115,21 +129,22 @@ namespace ProdajaLekovaBackend.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteProizvod(int id)
         {
-            _logger.LogInformation("Deleting product with ID: {ProizvodId}", id);
-            var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id);
-
-            if (proizvod == null)
+            try
             {
-                _logger.LogWarning("Product with ID {ProizvodId} not found for deletion", id);
-                throw new KeyNotFoundException("Proizvod nije pronadjen.");
+                var proizvod = await _unitOfWork.Proizvod.GetAsync(q => q.ProizvodId == id);
+
+                if (proizvod == null) return NotFound("Proizvod nije pronadjen.");
+
+                await _unitOfWork.Proizvod.DeleteAsync(id);
+
+                await _unitOfWork.Save();
+
+                return NoContent();
             }
-
-            await _unitOfWork.Proizvod.DeleteAsync(id);
-            await _unitOfWork.Save();
-
-            _logger.LogInformation("Successfully deleted product with ID: {ProizvodId}", id);
-
-            return NoContent();
+            catch (Exception)
+            {
+                return StatusCode(500, "Serverska greska.");
+            }
         }
     }
 }

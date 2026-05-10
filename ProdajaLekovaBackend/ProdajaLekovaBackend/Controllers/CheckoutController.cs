@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProdajaLekovaBackend.DTOs.CheckoutDTO;
 using ProdajaLekovaBackend.DTOs.PorudzbinaDTOs;
+using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
 using Stripe;
 using Stripe.Checkout;
@@ -16,22 +17,18 @@ namespace ProdajaLekovaBackend.Controllers
         private readonly IConfiguration _configuration;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<CheckoutController> _logger;
 
-        public CheckoutController(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper, ILogger<CheckoutController> logger)
+        public CheckoutController(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _logger = logger;
         }
 
         [AllowAnonymous]
         [HttpPost("checkoutSession")]
         public ActionResult CreateSession([FromBody] CheckoutDto checkoutDto)
         {
-            _logger.LogInformation("Creating Stripe checkout session for order: {PorudzbinaId}, Amount: {UkupanIznos}", checkoutDto.PorudzbinaId, checkoutDto.UkupanIznos);
-
             var stripeSettings = _configuration.GetSection("Stripe");
             decimal conversionRate = 118;
 
@@ -86,74 +83,70 @@ namespace ProdajaLekovaBackend.Controllers
             var service = new SessionService();
             Session session = service.Create(options);
 
-            _logger.LogInformation("Successfully created Stripe checkout session: {SessionId} for order: {PorudzbinaId}", session.Id, orderId);
             return Json(new { sessionId = session.Id, publishKey = stripeSettings.GetSection("PublishKey").Value });
         }
 
         [HttpPost("webhook")]
         public async Task<IActionResult> ChargeWebhook()
         {
-            _logger.LogInformation("Received Stripe webhook");
-
             var stripeSettings = _configuration.GetSection("Stripe");
 
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-
-            var stripeEvent = EventUtility.ConstructEvent(json,
-                Request.Headers["Stripe-Signature"], stripeSettings.GetSection("WebhookKey").Value);
-
-            if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+            try
             {
-                _logger.LogInformation("Processing checkout session completed event");
-                var session = stripeEvent.Data.Object as Session;
+                var stripeEvent = EventUtility.ConstructEvent(json,
+                    Request.Headers["Stripe-Signature"], stripeSettings.GetSection("WebhookKey").Value);
 
-                var orderId = session?.Metadata.GetValueOrDefault("orderId");
-
-                if (orderId != null)
+                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
-                    _logger.LogInformation("Updating order payment status for order: {OrderId}, Session: {SessionId}", orderId, session?.Id);
+                    var session = stripeEvent.Data.Object as Session;
 
-                    var porudzbinaUpdateDto = new PorudzbinaUpdateDto
+                    var orderId = session?.Metadata.GetValueOrDefault("orderId");
+
+                    if(orderId != null)
                     {
-                        PorudzbinaId = int.Parse(orderId),
-                        DatumPlacanja = DateTime.Now,
-                        PlacenaPorudzbina = true,
-                        UplataId = session?.Id
 
-                    };
+                        var porudzbinaUpdateDto = new PorudzbinaUpdateDto
+                        {
+                            PorudzbinaId = int.Parse(orderId),
+                            DatumPlacanja = DateTime.Now,
+                            PlacenaPorudzbina = true,
+                            UplataId = session?.Id
 
-                    var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaUpdateDto.PorudzbinaId);
+                        };
 
-                    if (porudzbina == null)
+                        var porudzbina = await _unitOfWork.Porudzbina.GetAsync(q => q.PorudzbinaId == porudzbinaUpdateDto.PorudzbinaId);
+
+                        if (porudzbina == null) return NotFound("Porudzbina nije pronadjena.");
+
+                        _mapper.Map(porudzbinaUpdateDto, porudzbina);
+
+                        _unitOfWork.Porudzbina.UpdateAsync(porudzbina);
+
+                        await _unitOfWork.Save();
+                    }
+                    else
                     {
-                        _logger.LogWarning("Order {OrderId} not found for payment update", orderId);
-                        return NotFound("Porudzbina nije pronadjena.");
+                        Console.WriteLine("No order ID.");
                     }
 
-                    _mapper.Map(porudzbinaUpdateDto, porudzbina);
-
-                    _unitOfWork.Porudzbina.UpdateAsync(porudzbina);
-
-                    await _unitOfWork.Save();
-
-                    _logger.LogInformation("Successfully updated payment status for order: {OrderId}", orderId);
+                }
+                else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
+                {
+                    Console.WriteLine("payment failed", stripeEvent.Type);
                 }
                 else
                 {
-                    _logger.LogWarning("Checkout session completed but no order ID found in metadata");
+                    Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
                 }
 
+                return Ok();
             }
-            else if (stripeEvent.Type == Events.PaymentIntentPaymentFailed)
+            catch (StripeException e)
             {
-                _logger.LogWarning("Payment failed for event type: {EventType}", stripeEvent.Type);
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest();
             }
-            else
-            {
-                _logger.LogInformation("Unhandled Stripe event type: {EventType}", stripeEvent.Type);
-            }
-
-            return Ok();
         }
 
     }
