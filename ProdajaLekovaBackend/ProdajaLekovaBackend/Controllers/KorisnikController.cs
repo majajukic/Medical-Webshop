@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProdajaLekovaBackend.Constants;
 using ProdajaLekovaBackend.DTOs.KorisnikDTOs;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Interfaces;
@@ -11,7 +10,7 @@ namespace ProdajaLekovaBackend.Controllers
 {
     [Route("api/korisnik")]
     [ApiController]
-    public class KorisnikController : ControllerBase
+    public class KorisnikController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

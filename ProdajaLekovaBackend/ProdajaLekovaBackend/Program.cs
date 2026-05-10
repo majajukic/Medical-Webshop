@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProdajaLekovaBackend.Configurations;
-using ProdajaLekovaBackend.Constants;
 using ProdajaLekovaBackend.Models;
 using ProdajaLekovaBackend.Repositories.Implementations;
 using ProdajaLekovaBackend.Repositories.Interfaces;
@@ -58,15 +57,13 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 
 //CORS policy
-var frontendUrl = builder.Configuration.GetSection("Frontend").GetValue<string>("BaseUrl");
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
         builder.WithOrigins("http://localhost:3000")
-            .WithMethods("GET", "POST", "PUT", "DELETE")
-            .WithHeaders("Content-Type", "Authorization")
-            .AllowCredentials();
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
@@ -116,15 +113,15 @@ builder.Services.AddEndpointsApiExplorer();
 //Swagger configuration with JWT
 builder.Services.AddSwaggerGen(setupAction =>
 {
-    setupAction.AddSecurityDefinition(AuthenticationSchemes.Bearer, new OpenApiSecurityScheme
+    setupAction.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = @"JWT autorizacija pomocu Bearer sheme.
+        Description = @"JWT autorizacija pomocu Bearer sheme. 
                         Unesite 'Bearer' [razmak] i potom token.
                         Primer: 'Bearer 12345abcdef'",
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.ApiKey,
-        Scheme = AuthenticationSchemes.Bearer
+        Scheme = "Bearer"
     });
 
     setupAction.AddSecurityRequirement(new OpenApiSecurityRequirement()
@@ -135,10 +132,10 @@ builder.Services.AddSwaggerGen(setupAction =>
                 Reference = new OpenApiReference()
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = AuthenticationSchemes.Bearer
+                    Id = "Bearer"
                 },
                 Scheme = "0auth2",
-                Name = AuthenticationSchemes.Bearer,
+                Name = "Bearer",
                 In = ParameterLocation.Header
             },
             new List<string>()
@@ -151,10 +148,11 @@ builder.Services.AddSwaggerGen(setupAction =>
                 Title = "Prodaja lekova - Web shop",
                 Version = "1",
                 Description = "Pomoću ovog API-ja mogu se vrsiti sve navedene CRUD operacije vezane za entitete u okviru web shop-a koji se bavi prodajom lekova, vitamina, suplemenata, kozmetike i medicinske opreme.",
-                Contact = new OpenApiContact
+                Contact = new Microsoft.OpenApi.Models.OpenApiContact
                 {
                     Name = "Maja Jukić",
                     Email = "mjukic2000@gmail.com",
+                    Url = new Uri("https://github.com/majajukic")
                 }
             });
 

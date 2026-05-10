@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ProdajaLekovaBackend.Constants;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProdajaLekovaBackend.Models
 {
@@ -48,11 +49,11 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.ApotekaId).HasColumnName("apotekaId");
 
                 entity.Property(e => e.CenaBezPopusta)
-                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
+                    .HasColumnType("numeric(10, 2)")
                     .HasColumnName("cenaBezPopusta");
 
                 entity.Property(e => e.CenaSaPopustom)
-                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
+                    .HasColumnType("numeric(10, 2)")
                     .HasColumnName("cenaSaPopustom");
 
                 entity.Property(e => e.PopustUprocentima)
@@ -151,7 +152,7 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.PlacenaPorudzbina).HasColumnName("placenaPorudzbina");
 
                 entity.Property(e => e.UkupanIznos)
-                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
+                    .HasColumnType("numeric(10, 2)")
                     .HasColumnName("ukupanIznos");
 
                 entity.Property(e => e.UplataId)
@@ -198,7 +199,7 @@ namespace ProdajaLekovaBackend.Models
                 entity.Property(e => e.ApotekaProizvodId).HasColumnName("apotekaProizvodId");
 
                 entity.Property(e => e.Cena)
-                    .HasColumnType(DatabaseColumnTypes.DecimalPrecision)
+                    .HasColumnType("numeric(10, 2)")
                     .HasColumnName("cena");
 
                 entity.Property(e => e.Kolicina).HasColumnName("kolicina");
@@ -234,6 +235,10 @@ namespace ProdajaLekovaBackend.Models
                     .HasMaxLength(20)
                     .HasColumnName("nazivTipaProizvoda");
             });
+
+            OnModelCreatingPartial(modelBuilder);
         }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

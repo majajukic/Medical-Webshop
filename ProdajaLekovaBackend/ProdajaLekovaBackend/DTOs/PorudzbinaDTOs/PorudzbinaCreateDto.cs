@@ -1,15 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ProdajaLekovaBackend.DTOs.PorudzbinaDTOs
 {
     public class PorudzbinaCreateDto
     {
-        [JsonRequired]
-        public string BrojPorudzbine { get; set; }
-        [JsonRequired]
+        public string BrojPorudzbine { get; set; } = null!;
         public DateTime DatumKreiranja { get; set; }
         public decimal? UkupanIznos { get; set; }
-        [JsonRequired]
         public bool PlacenaPorudzbina { get; set; }
         public DateTime? DatumPlacanja { get; set; }
         public string? UplataId { get; set; }

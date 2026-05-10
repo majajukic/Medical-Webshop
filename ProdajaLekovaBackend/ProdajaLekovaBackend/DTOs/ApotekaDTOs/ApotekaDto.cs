@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using ProdajaLekovaBackend.DTOs.ApotekaProizvodDTOs;
+using ProdajaLekovaBackend.Models;
 
 namespace ProdajaLekovaBackend.DTOs.ApotekaDTOs
 {
     public class ApotekaDto
     {
-        [JsonRequired]
         public int ApotekaId { get; set; }
         public string NazivApoteke { get; set; } = null!;
     }
